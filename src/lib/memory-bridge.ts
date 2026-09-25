@@ -1,9 +1,9 @@
 /**
  * INT-1 bridge: vault / Context Service ↔ packages/context-store (ADR-002).
  *
- * Canonical retrieval path for memories is ADR-002 (retrieve/assemble).
- * Vault SQLite remains the control-plane entity store; structured memories
- * are dual-written into the context-store index and linked by vault ref.
+ * One storage path: vault and ADR-002 share `context-vault.sqlite` via
+ * `bindSharedDb`. Canonical retrieval is ADR-002 retrieve/assemble.
+ * Control-plane entities dual-write into memories and link by vault ref.
  */
 import {
   archiveMemory,
@@ -18,7 +18,6 @@ import {
   listProjects as listStoreProjects,
   projectScope,
   requiresConfirmation,
-  resetDbForTests as resetStoreDbForTests,
   retrieveMemories,
   slugify,
   updateMemory,
@@ -43,14 +42,19 @@ import type {
 let storeInstance: ContextStore | null = null;
 
 export function getMemoryStore(): ContextStore {
+  // Ensure vault DB (and shared ADR schema) is open before first store use.
+  getDb();
   if (!storeInstance) storeInstance = createContextStore();
   return storeInstance;
 }
 
-/** Test helper — reset ADR-002 store DB alongside vault DB. */
-export function resetMemoryStoreForTests(tempPath: string) {
+/**
+ * Test helper — reuse the vault test DB (one storage path).
+ * Call after `resetDbForTests` so bindSharedDb already attached ADR schema.
+ */
+export function resetMemoryStoreForTests(_tempPath?: string) {
   storeInstance = null;
-  resetStoreDbForTests(tempPath);
+  getDb();
   storeInstance = createContextStore();
   return storeInstance;
 }

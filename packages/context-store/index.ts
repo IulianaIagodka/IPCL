@@ -1,7 +1,15 @@
 export type * from "./types.js";
 export { createContextStore, ContextStore } from "./store.js";
 export type { ImportResult } from "./store.js";
-export { getDb, resetDbForTests, closeDb, getDataDir } from "./db.js";
+export {
+  getDb,
+  resetDbForTests,
+  closeDb,
+  getDataDir,
+  getDbPath,
+  bindSharedDb,
+  ensureAdrSchema,
+} from "./db.js";
 export { embed, cosineSimilarity, tokenize } from "./embed.js";
 export { projectScope, estimateTokens, slugify } from "./id.js";
 export { extractMemoriesFromText } from "./extract.js";

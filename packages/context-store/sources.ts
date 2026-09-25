@@ -33,7 +33,7 @@ export function createSource(input: {
   };
 
   db.prepare(
-    `INSERT INTO sources (id, type, title, content, scope, object_key, created_at)
+    `INSERT INTO adr_sources (id, type, title, content, scope, object_key, created_at)
      VALUES (?, ?, ?, ?, ?, ?, ?)`
   ).run(
     source.id,
@@ -50,7 +50,7 @@ export function createSource(input: {
 
 export function getSource(id: string): Source | null {
   const row = getDb()
-    .prepare("SELECT * FROM sources WHERE id = ?")
+    .prepare("SELECT * FROM adr_sources WHERE id = ?")
     .get(id) as Record<string, unknown> | undefined;
   return row ? rowToSource(row) : null;
 }
@@ -59,10 +59,12 @@ export function listSources(options?: { scope?: Scope | null }): Source[] {
   const db = getDb();
   const rows = options?.scope
     ? (db
-        .prepare("SELECT * FROM sources WHERE scope = ? ORDER BY created_at DESC")
+        .prepare(
+          "SELECT * FROM adr_sources WHERE scope = ? ORDER BY created_at DESC"
+        )
         .all(options.scope) as Record<string, unknown>[])
     : (db
-        .prepare("SELECT * FROM sources ORDER BY created_at DESC")
+        .prepare("SELECT * FROM adr_sources ORDER BY created_at DESC")
         .all() as Record<string, unknown>[]);
   return rows.map(rowToSource);
 }

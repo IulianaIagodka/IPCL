@@ -13,18 +13,27 @@ const DATA_DIR = process.env.EIDOTHEA_DATA_DIR
         ? path.resolve(process.env.IPCL_DATA_DIR)
         : path.join(process.cwd(), "data");
 
-/** ADR-002 memory index — separate file until full schema merge. */
-const DB_PATH = path.join(DATA_DIR, "context-memories.sqlite");
+/**
+ * INT-1: one storage path with the vault control plane.
+ * ADR-002 tables that would collide with vault (`sources`, `projects`)
+ * use the `adr_` prefix inside the same SQLite file.
+ */
+const DB_PATH = path.join(DATA_DIR, "context-vault.sqlite");
 
 let dbInstance: Database.Database | null = null;
+/** True when this module opened the connection (vs bindSharedDb). */
+let ownsConnection = false;
 
-function ensureSchema(db: Database.Database) {
+/**
+ * ADR-002 schema co-located with the vault DB.
+ * Uses adr_sources / adr_projects to avoid colliding with vault tables.
+ */
+export function ensureAdrSchema(db: Database.Database) {
   db.exec(`
-    PRAGMA journal_mode = WAL;
     PRAGMA foreign_keys = ON;
 
     -- Layer 1: immutable raw sources (evidence)
-    CREATE TABLE IF NOT EXISTS sources (
+    CREATE TABLE IF NOT EXISTS adr_sources (
       id TEXT PRIMARY KEY,
       type TEXT NOT NULL,
       title TEXT NOT NULL DEFAULT '',
@@ -35,7 +44,7 @@ function ensureSchema(db: Database.Database) {
     );
 
     -- Projects are scope helpers (project/<slug>)
-    CREATE TABLE IF NOT EXISTS projects (
+    CREATE TABLE IF NOT EXISTS adr_projects (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       slug TEXT NOT NULL UNIQUE,
@@ -68,7 +77,7 @@ function ensureSchema(db: Database.Database) {
       source_id TEXT NOT NULL,
       PRIMARY KEY (memory_id, source_id),
       FOREIGN KEY (memory_id) REFERENCES memories(id) ON DELETE CASCADE,
-      FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE CASCADE
+      FOREIGN KEY (source_id) REFERENCES adr_sources(id) ON DELETE CASCADE
     );
 
     -- Layer 3: semantic index (regenerable)
@@ -84,38 +93,61 @@ function ensureSchema(db: Database.Database) {
       ON memories(scope, status);
     CREATE INDEX IF NOT EXISTS idx_memories_type_status
       ON memories(type, status);
-    CREATE INDEX IF NOT EXISTS idx_sources_scope
-      ON sources(scope);
+    CREATE INDEX IF NOT EXISTS idx_adr_sources_scope
+      ON adr_sources(scope);
   `);
+}
+
+/**
+ * Attach to the vault's open SQLite connection (one storage path).
+ * Does not take ownership — vault closes the handle.
+ */
+export function bindSharedDb(db: Database.Database): void {
+  if (dbInstance && ownsConnection && dbInstance !== db) {
+    dbInstance.close();
+  }
+  dbInstance = db;
+  ownsConnection = false;
+  ensureAdrSchema(db);
 }
 
 export function getDb(): Database.Database {
   if (dbInstance) return dbInstance;
   fs.mkdirSync(DATA_DIR, { recursive: true });
   dbInstance = new Database(DB_PATH);
-  ensureSchema(dbInstance);
+  ownsConnection = true;
+  dbInstance.exec("PRAGMA journal_mode = WAL;");
+  ensureAdrSchema(dbInstance);
   return dbInstance;
 }
 
 export function resetDbForTests(tempPath: string): Database.Database {
-  if (dbInstance) {
+  if (dbInstance && ownsConnection) {
     dbInstance.close();
-    dbInstance = null;
   }
+  dbInstance = null;
+  ownsConnection = false;
   fs.mkdirSync(path.dirname(tempPath), { recursive: true });
   if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
   dbInstance = new Database(tempPath);
-  ensureSchema(dbInstance);
+  ownsConnection = true;
+  dbInstance.exec("PRAGMA journal_mode = WAL;");
+  ensureAdrSchema(dbInstance);
   return dbInstance;
 }
 
 export function closeDb(): void {
-  if (dbInstance) {
+  if (dbInstance && ownsConnection) {
     dbInstance.close();
-    dbInstance = null;
   }
+  dbInstance = null;
+  ownsConnection = false;
 }
 
 export function getDataDir(): string {
   return DATA_DIR;
+}
+
+export function getDbPath(): string {
+  return DB_PATH;
 }

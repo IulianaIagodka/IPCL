@@ -37,7 +37,7 @@ process.env.IPCL_MASTER_KEY =
   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 resetMasterKeyCache();
 resetDbForTests(path.join(tempDir, "test.sqlite"));
-resetMemoryStoreForTests(path.join(tempDir, "memories-test.sqlite"));
+resetMemoryStoreForTests();
 const { user } = ensureTestOwner();
 setFallbackOwnerId(user.id);
 
@@ -352,4 +352,21 @@ test("INT-1 search and preview go through ADR-002 retrieve/assemble", () => {
   });
   assert.ok(preview.fragments.length > 0);
   assert.ok(preview.estimatedTokens > 0);
+});
+
+test("INT-1 uses one SQLite storage path for vault + ADR-002", async () => {
+  const { getDb } = await import("../src/lib/db");
+  const { getDb: getAdrDb } = await import("../packages/context-store/db.ts");
+  const vault = getDb();
+  const adr = getAdrDb();
+  assert.equal(vault, adr, "vault and context-store must share one connection");
+  const tables = vault
+    .prepare("SELECT name FROM sqlite_master WHERE type='table'")
+    .all() as { name: string }[];
+  const names = new Set(tables.map((t) => t.name));
+  assert.ok(names.has("context_items"), "vault control-plane tables present");
+  assert.ok(names.has("memories"), "ADR-002 memories table present");
+  assert.ok(names.has("adr_sources"), "ADR-002 sources use adr_ prefix");
+  assert.ok(names.has("adr_projects"), "ADR-002 projects use adr_ prefix");
+  assert.ok(names.has("adr_memory_links"), "vault↔memory link table present");
 });

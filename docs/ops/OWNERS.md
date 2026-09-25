@@ -10,7 +10,7 @@
 | ADR-003 security | — | main via #6/#11 | MERGED | **Done** |
 | ADR-004 control plane | — | main via #11 | MERGED | **Done** |
 | ADR-005 product UX | — | main history | CLOSED #5 | **Done** |
-| **INT-1 wire context-store** | Context store wiring `…4e11` | `cursor/int1-wire-context-store-4e11` | this PR | **Done** |
+| **INT-1 wire context-store** | Context store wiring `…4e11` | `cursor/int1-wire-context-store-4e11` | [#12](https://github.com/IulianaIagodka/IPCL/pull/12) | **Owner — one storage path** |
 | Brand / naming | — | main (Eidothea) | merged | **Done** |
 | Daily plan / backlog | Щоденне планування `…70c7` | `cursor/ops-backlog-process-70c7` | #8 | ops |
 

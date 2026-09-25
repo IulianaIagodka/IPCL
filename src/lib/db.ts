@@ -1,6 +1,7 @@
 import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
+import { bindSharedDb } from "../../packages/context-store/db.js";
 
 const DATA_DIR = process.env.EIDOTHEA_DATA_DIR
   ? path.resolve(process.env.EIDOTHEA_DATA_DIR)
@@ -254,6 +255,8 @@ export function getDb(): Database.Database {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   dbInstance = new Database(DB_PATH);
   ensureSchema(dbInstance);
+  // INT-1: one SQLite file — ADR-002 schema shares this connection.
+  bindSharedDb(dbInstance);
   return dbInstance;
 }
 
@@ -266,6 +269,7 @@ export function resetDbForTests(tempPath: string) {
   if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
   dbInstance = new Database(tempPath);
   ensureSchema(dbInstance);
+  bindSharedDb(dbInstance);
   return dbInstance;
 }
 
