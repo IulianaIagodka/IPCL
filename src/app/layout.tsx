@@ -6,9 +6,13 @@ import { BrandMark } from "@/components/ContextFlow";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "IPCL — Context Vault",
+  metadataBase: new URL("https://eidothea.app"),
+  title: "Eidothea — Stop explaining yourself.",
   description:
-    "Stop explaining yourself. Your context follows you across AI. One memory. Every AI.",
+    "Eidothea. Stop explaining yourself. One memory. Every AI.",
+  alternates: {
+    canonical: "/",
+  },
 };
 
 const NAV = [
@@ -40,8 +44,8 @@ export default function RootLayout({
             <Link href="/" className="brand">
               <BrandMark />
               <span className="brand-text">
-                IPCL
-                <small>Context Vault</small>
+                Eidothea
+                <small>One memory. Every AI</small>
               </span>
             </Link>
             <nav className="nav-links" aria-label="Primary">

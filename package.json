@@ -1,5 +1,5 @@
 {
-  "name": "ipcl",
+  "name": "eidothea",
   "version": "0.1.0",
   "private": true,
   "description": "Independent Portable Context Layer — Context Vault UI (ADR-005) + structured memory (ADR-002)",

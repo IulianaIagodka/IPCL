@@ -930,7 +930,7 @@ export function buildExportText(options?: {
     (f) => `### ${f.title} (${f.kind})\n${f.content}`
   );
   const text = [
-    "# Context Vault export",
+    "# Eidothea export",
     "Only the fragments below are intended for sharing with an AI provider.",
     "",
     ...sections,

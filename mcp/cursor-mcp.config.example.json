@@ -1,11 +1,11 @@
 {
   "mcpServers": {
-    "ipcl-context-vault": {
+    "eidothea": {
       "command": "npx",
       "args": ["tsx", "mcp/server.ts"],
       "cwd": "${workspaceFolder}",
       "env": {
-        "IPCL_DATA_DIR": "${workspaceFolder}/data"
+        "EIDOTHEA_DATA_DIR": "${workspaceFolder}/data"
       }
     }
   }

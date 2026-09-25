@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * IPCL Context Vault MCP server
+ * Eidothea MCP server
  *
  * Tools (ADR-001):
  *   get_profile, get_project, search_context, get_decisions,
@@ -20,13 +20,13 @@ import {
 } from "../src/lib/vault";
 
 const server = new McpServer({
-  name: "ipcl-context-vault",
+  name: "eidothea",
   version: "0.1.0",
 });
 
 server.tool(
   "get_profile",
-  "Return the user's long-lived profile from the Context Vault.",
+  "Return the user's long-lived profile from Eidothea.",
   {},
   async () => {
     const profile = getProfile();
@@ -144,6 +144,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error("IPCL MCP server failed:", error);
+  console.error("Eidothea MCP server failed:", error);
   process.exit(1);
 });

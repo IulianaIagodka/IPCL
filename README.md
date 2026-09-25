@@ -1,11 +1,13 @@
-# IPCL — Independent Portable Context Layer
+# Eidothea
 
-**Stop explaining yourself.**  
-**Your context follows you across AI.**
+**https://eidothea.app**
 
-*One memory. Every AI.*
+**Stop explaining yourself.**
 
-IPCL is a vendor-independent **Context Vault**: you keep profile, projects, decisions, preferences, and knowledge in one place, then make only the relevant fragments available to ChatGPT, Claude, Cursor, Codex, Gemini, or any other AI client.
+*One memory. Every AI.*  
+Your context follows you across AI.
+
+Eidothea is a vendor-independent context layer: you keep profile, projects, decisions, preferences, and knowledge in one place, then make only the relevant fragments available to ChatGPT, Claude, Cursor, Codex, Gemini, or any other AI client.
 
 ## Architecture
 
@@ -63,6 +65,32 @@ store.importSource({
 });
 ```
 
+## Deploy on Fly.io
+
+Cheapest path for the full app (Next.js + SQLite on a persistent volume).
+
+1. Install the Fly CLI and sign in: https://fly.io/docs/hands-on/install-flyctl/
+2. From this repo:
+
+```bash
+fly auth login
+fly apps create eidothea   # pick another name if taken
+fly deploy
+fly certs add eidothea.app
+fly certs add www.eidothea.app   # optional
+```
+
+3. In Cloudflare DNS for `eidothea.app`:
+
+| Type | Name | Target | Proxy |
+|------|------|--------|-------|
+| CNAME | `@` | `eidothea.fly.dev` | DNS only (grey cloud) while cert issues, then can proxy |
+| CNAME | `www` | `eidothea.fly.dev` | same |
+
+Fly serves HTTPS. SQLite lives on the `eidothea_data` volume at `/data`.
+
+Config files: `Dockerfile`, `fly.toml`.
+
 ## MCP (Cursor / Claude Desktop)
 
 Example config is in `mcp/cursor-mcp.config.example.json`:
@@ -70,12 +98,12 @@ Example config is in `mcp/cursor-mcp.config.example.json`:
 ```json
 {
   "mcpServers": {
-    "ipcl-context-vault": {
+    "eidothea": {
       "command": "npx",
       "args": ["tsx", "mcp/server.ts"],
-      "cwd": "/absolute/path/to/IPCL",
+      "cwd": "/absolute/path/to/Eidothea",
       "env": {
-        "IPCL_DATA_DIR": "/absolute/path/to/IPCL/data"
+        "EIDOTHEA_DATA_DIR": "/absolute/path/to/Eidothea/data"
       }
     }
   }

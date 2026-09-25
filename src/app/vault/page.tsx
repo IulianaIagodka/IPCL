@@ -45,8 +45,8 @@ export default function VaultPage() {
   return (
     <div className="shell section stack">
       <div className="fade-up">
-        <p className="eyebrow">Your context</p>
-        <h2 className="page-title">What your AI knows</h2>
+        <p className="eyebrow">Eidothea</p>
+        <h2 className="page-title">One memory. Every AI.</h2>
         <p className="muted" style={{ maxWidth: "38rem", lineHeight: 1.55 }}>
           Orientation and trust — not analytics. See memories, active
           integrations, and anything that needs attention.
