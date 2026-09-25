@@ -1,10 +1,23 @@
 import { getDb } from "./db";
+import { encryptString, decryptString, isEncrypted } from "./crypto";
 import { createId, nowIso } from "./id";
 import { buildFtsQuery, estimateTokens, semanticScore } from "./search";
 import { extractContextFromText } from "./extract";
+import { recordAudit } from "./audit";
+import {
+  assertScope,
+  assertWrite,
+  classificationAllowed,
+  projectAllowed,
+  scopesForTool,
+  type Principal,
+} from "./policy";
+import { getPrincipal, requireOwnerId, requirePrincipal } from "./request-context";
 import type {
+  CandidateMemory,
   ContextItem,
   ContextKind,
+  DataClassification,
   Decision,
   ExtractionResult,
   Preference,
@@ -26,9 +39,27 @@ function parseJsonArray(value: string | null | undefined): string[] {
   }
 }
 
+function asClassification(value: unknown): DataClassification {
+  const v = String(value || "NORMAL").toUpperCase();
+  if (v === "SENSITIVE" || v === "RESTRICTED") return v;
+  return "NORMAL";
+}
+
+function storeContent(content: string, classification: DataClassification): string {
+  if (classification === "RESTRICTED") return encryptString(content);
+  return content;
+}
+
+function loadContent(content: string, forExport: boolean): string {
+  if (!isEncrypted(content)) return content;
+  if (forExport) return "[RESTRICTED — excluded from export]";
+  return decryptString(content);
+}
+
 function rowToProfile(row: Record<string, unknown>): Profile {
   return {
     id: String(row.id),
+    ownerId: String(row.owner_id ?? ""),
     displayName: String(row.display_name ?? ""),
     role: String(row.role ?? ""),
     expertise: parseJsonArray(String(row.expertise ?? "[]")),
@@ -42,6 +73,7 @@ function rowToProfile(row: Record<string, unknown>): Profile {
 function rowToProject(row: Record<string, unknown>): Project {
   return {
     id: String(row.id),
+    ownerId: String(row.owner_id ?? ""),
     name: String(row.name),
     description: String(row.description ?? ""),
     technologyStack: parseJsonArray(String(row.technology_stack ?? "[]")),
@@ -56,8 +88,10 @@ function rowToProject(row: Record<string, unknown>): Project {
 function rowToPreference(row: Record<string, unknown>): Preference {
   return {
     id: String(row.id),
-    content: String(row.content),
+    ownerId: String(row.owner_id ?? ""),
+    content: loadContent(String(row.content), false),
     tags: parseJsonArray(String(row.tags ?? "[]")),
+    classification: asClassification(row.classification),
     createdAt: String(row.created_at),
     updatedAt: String(row.updated_at),
   };
@@ -66,34 +100,53 @@ function rowToPreference(row: Record<string, unknown>): Preference {
 function rowToDecision(row: Record<string, unknown>): Decision {
   return {
     id: String(row.id),
+    ownerId: String(row.owner_id ?? ""),
     projectId: row.project_id ? String(row.project_id) : null,
-    content: String(row.content),
+    content: loadContent(String(row.content), false),
     rationale: String(row.rationale ?? ""),
+    classification: asClassification(row.classification),
     createdAt: String(row.created_at),
     updatedAt: String(row.updated_at),
   };
 }
 
 function rowToSource(row: Record<string, unknown>): Source {
+  const classification = asClassification(row.classification);
   return {
     id: String(row.id),
+    ownerId: String(row.owner_id ?? ""),
     projectId: row.project_id ? String(row.project_id) : null,
     type: String(row.type) as SourceType,
     title: String(row.title ?? ""),
-    content: String(row.content),
+    content: loadContent(String(row.content), classification === "RESTRICTED"),
+    classification,
     createdAt: String(row.created_at),
   };
 }
 
-function rowToContextItem(row: Record<string, unknown>): ContextItem {
+function rowToContextItem(
+  row: Record<string, unknown>,
+  options?: { forRetrieval?: boolean }
+): ContextItem {
+  const classification = asClassification(row.classification);
+  const forRetrieval = options?.forRetrieval === true;
+  let content = String(row.content);
+  if (isEncrypted(content)) {
+    content =
+      forRetrieval || classification === "RESTRICTED"
+        ? "[RESTRICTED]"
+        : decryptString(content);
+  }
   return {
     id: String(row.id),
+    ownerId: String(row.owner_id ?? ""),
     kind: String(row.kind) as ContextKind,
     projectId: row.project_id ? String(row.project_id) : null,
     sourceId: row.source_id ? String(row.source_id) : null,
     title: String(row.title ?? ""),
-    content: String(row.content),
+    content,
     tags: parseJsonArray(String(row.tags ?? "[]")),
+    classification,
     createdAt: String(row.created_at),
     updatedAt: String(row.updated_at),
   };
@@ -102,10 +155,15 @@ function rowToContextItem(row: Record<string, unknown>): ContextItem {
 function upsertFts(item: ContextItem) {
   const db = getDb();
   db.prepare("DELETE FROM context_fts WHERE item_id = ?").run(item.id);
+  // RESTRICTED memories are never indexed for semantic/keyword retrieval.
+  if (item.classification === "RESTRICTED") return;
+  const plain = isEncrypted(item.content)
+    ? "[RESTRICTED]"
+    : item.content;
   db.prepare(
     `INSERT INTO context_fts (item_id, title, content, tags, kind)
      VALUES (?, ?, ?, ?, ?)`
-  ).run(item.id, item.title, item.content, item.tags.join(" "), item.kind);
+  ).run(item.id, item.title, plain, item.tags.join(" "), item.kind);
 }
 
 function removeFts(id: string) {
@@ -119,33 +177,41 @@ function insertContextItem(input: {
   title: string;
   content: string;
   tags?: string[];
+  classification?: DataClassification;
 }): ContextItem {
   const db = getDb();
+  const ownerId = requireOwnerId();
   const now = nowIso();
+  const classification = input.classification ?? "NORMAL";
+  const stored = storeContent(input.content, classification);
   const item: ContextItem = {
     id: createId("ctx"),
+    ownerId,
     kind: input.kind,
     projectId: input.projectId ?? null,
     sourceId: input.sourceId ?? null,
     title: input.title,
     content: input.content,
     tags: input.tags ?? [],
+    classification,
     createdAt: now,
     updatedAt: now,
   };
 
   db.prepare(
     `INSERT INTO context_items
-      (id, kind, project_id, source_id, title, content, tags, embedding, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`
+      (id, owner_id, kind, project_id, source_id, title, content, tags, classification, embedding, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`
   ).run(
     item.id,
+    item.ownerId,
     item.kind,
     item.projectId,
     item.sourceId,
     item.title,
-    item.content,
+    stored,
     JSON.stringify(item.tags),
+    item.classification,
     item.createdAt,
     item.updatedAt
   );
@@ -154,16 +220,18 @@ function insertContextItem(input: {
 }
 
 export function getProfile(): Profile {
+  const ownerId = requireOwnerId();
   const db = getDb();
-  const row = db.prepare("SELECT * FROM profile LIMIT 1").get() as
-    | Record<string, unknown>
-    | undefined;
+  const row = db
+    .prepare("SELECT * FROM profile WHERE owner_id = ? LIMIT 1")
+    .get(ownerId) as Record<string, unknown> | undefined;
 
   if (row) return rowToProfile(row);
 
   const now = nowIso();
   const profile: Profile = {
     id: createId("profile"),
+    ownerId,
     displayName: "",
     role: "",
     expertise: [],
@@ -175,10 +243,11 @@ export function getProfile(): Profile {
 
   db.prepare(
     `INSERT INTO profile
-      (id, display_name, role, expertise, communication_preferences, recurring_instructions, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      (id, owner_id, display_name, role, expertise, communication_preferences, recurring_instructions, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(
     profile.id,
+    profile.ownerId,
     profile.displayName,
     profile.role,
     JSON.stringify(profile.expertise),
@@ -225,7 +294,7 @@ export function updateProfile(
         communication_preferences = ?,
         recurring_instructions = ?,
         updated_at = ?
-       WHERE id = ?`
+       WHERE id = ? AND owner_id = ?`
     )
     .run(
       next.displayName,
@@ -234,7 +303,8 @@ export function updateProfile(
       next.communicationPreferences,
       next.recurringInstructions,
       next.updatedAt,
-      next.id
+      next.id,
+      next.ownerId
     );
 
   syncProfileContextItem(next);
@@ -244,8 +314,10 @@ export function updateProfile(
 function syncProfileContextItem(profile: Profile) {
   const db = getDb();
   const existing = db
-    .prepare("SELECT id FROM context_items WHERE kind = 'profile' LIMIT 1")
-    .get() as { id: string } | undefined;
+    .prepare(
+      "SELECT id FROM context_items WHERE kind = 'profile' AND owner_id = ? LIMIT 1"
+    )
+    .get(profile.ownerId) as { id: string } | undefined;
 
   const content = [
     profile.displayName && `Name: ${profile.displayName}`,
@@ -270,16 +342,18 @@ function syncProfileContextItem(profile: Profile) {
   const now = nowIso();
   if (existing) {
     db.prepare(
-      `UPDATE context_items SET title = ?, content = ?, tags = ?, updated_at = ? WHERE id = ?`
+      `UPDATE context_items SET title = ?, content = ?, tags = ?, classification = 'NORMAL', updated_at = ? WHERE id = ?`
     ).run("User profile", content, JSON.stringify(["profile"]), now, existing.id);
     upsertFts({
       id: existing.id,
+      ownerId: profile.ownerId,
       kind: "profile",
       projectId: null,
       sourceId: null,
       title: "User profile",
       content,
       tags: ["profile"],
+      classification: "NORMAL",
       createdAt: now,
       updatedAt: now,
     });
@@ -289,21 +363,27 @@ function syncProfileContextItem(profile: Profile) {
       title: "User profile",
       content,
       tags: ["profile"],
+      classification: "NORMAL",
     });
   }
 }
 
 export function listProjects(): Project[] {
+  const ownerId = requireOwnerId();
   const rows = getDb()
-    .prepare("SELECT * FROM projects ORDER BY updated_at DESC")
-    .all() as Record<string, unknown>[];
+    .prepare(
+      "SELECT * FROM projects WHERE owner_id = ? ORDER BY updated_at DESC"
+    )
+    .all(ownerId) as Record<string, unknown>[];
   return rows.map(rowToProject);
 }
 
 export function getProject(projectId: string): Project | null {
+  const principal = requirePrincipal();
+  if (!projectAllowed(principal, projectId)) return null;
   const row = getDb()
-    .prepare("SELECT * FROM projects WHERE id = ?")
-    .get(projectId) as Record<string, unknown> | undefined;
+    .prepare("SELECT * FROM projects WHERE id = ? AND owner_id = ?")
+    .get(projectId, principal.userId) as Record<string, unknown> | undefined;
   return row ? rowToProject(row) : null;
 }
 
@@ -315,9 +395,11 @@ export function createProject(input: {
   architecture?: string;
   constraints?: string;
 }): Project {
+  const ownerId = requireOwnerId();
   const now = nowIso();
   const project: Project = {
     id: createId("proj"),
+    ownerId,
     name: input.name.trim(),
     description: input.description?.trim() ?? "",
     technologyStack: input.technologyStack ?? [],
@@ -331,11 +413,12 @@ export function createProject(input: {
   getDb()
     .prepare(
       `INSERT INTO projects
-        (id, name, description, technology_stack, target_users, architecture, constraints, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        (id, owner_id, name, description, technology_stack, target_users, architecture, constraints, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .run(
       project.id,
+      project.ownerId,
       project.name,
       project.description,
       JSON.stringify(project.technologyStack),
@@ -383,7 +466,7 @@ export function updateProject(
       `UPDATE projects SET
         name = ?, description = ?, technology_stack = ?, target_users = ?,
         architecture = ?, constraints = ?, updated_at = ?
-       WHERE id = ?`
+       WHERE id = ? AND owner_id = ?`
     )
     .run(
       next.name,
@@ -393,7 +476,8 @@ export function updateProject(
       next.architecture,
       next.constraints,
       next.updatedAt,
-      next.id
+      next.id,
+      next.ownerId
     );
 
   syncProjectContextItem(next);
@@ -401,7 +485,10 @@ export function updateProject(
 }
 
 export function deleteProject(projectId: string): boolean {
-  const result = getDb().prepare("DELETE FROM projects WHERE id = ?").run(projectId);
+  const ownerId = requireOwnerId();
+  const result = getDb()
+    .prepare("DELETE FROM projects WHERE id = ? AND owner_id = ?")
+    .run(projectId, ownerId);
   return result.changes > 0;
 }
 
@@ -409,9 +496,9 @@ function syncProjectContextItem(project: Project) {
   const db = getDb();
   const existing = db
     .prepare(
-      "SELECT id FROM context_items WHERE kind = 'project' AND project_id = ? LIMIT 1"
+      "SELECT id FROM context_items WHERE kind = 'project' AND project_id = ? AND owner_id = ? LIMIT 1"
     )
-    .get(project.id) as { id: string } | undefined;
+    .get(project.id, project.ownerId) as { id: string } | undefined;
 
   const content = [
     `Project: ${project.name}`,
@@ -438,12 +525,14 @@ function syncProjectContextItem(project: Project) {
     );
     upsertFts({
       id: existing.id,
+      ownerId: project.ownerId,
       kind: "project",
       projectId: project.id,
       sourceId: null,
       title: project.name,
       content,
       tags: ["project", project.name.toLowerCase()],
+      classification: "NORMAL",
       createdAt: now,
       updatedAt: now,
     });
@@ -459,31 +548,47 @@ function syncProjectContextItem(project: Project) {
 }
 
 export function listPreferences(): Preference[] {
+  const principal = requirePrincipal();
+  assertScope(principal, "preferences:read");
   const rows = getDb()
-    .prepare("SELECT * FROM preferences ORDER BY updated_at DESC")
-    .all() as Record<string, unknown>[];
-  return rows.map(rowToPreference);
+    .prepare(
+      "SELECT * FROM preferences WHERE owner_id = ? ORDER BY updated_at DESC"
+    )
+    .all(principal.userId) as Record<string, unknown>[];
+  return rows
+    .map(rowToPreference)
+    .filter((p) => classificationAllowed(principal, p.classification))
+    .filter((p) => p.classification !== "RESTRICTED" || principal.kind === "user");
 }
 
-export function createPreference(content: string, tags: string[] = []): Preference {
+export function createPreference(
+  content: string,
+  tags: string[] = [],
+  classification: DataClassification = "NORMAL"
+): Preference {
+  const ownerId = requireOwnerId();
   const now = nowIso();
   const preference: Preference = {
     id: createId("pref"),
+    ownerId,
     content: content.trim(),
     tags,
+    classification,
     createdAt: now,
     updatedAt: now,
   };
 
   getDb()
     .prepare(
-      `INSERT INTO preferences (id, content, tags, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?)`
+      `INSERT INTO preferences (id, owner_id, content, tags, classification, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
     )
     .run(
       preference.id,
-      preference.content,
+      preference.ownerId,
+      storeContent(preference.content, classification),
       JSON.stringify(preference.tags),
+      preference.classification,
       preference.createdAt,
       preference.updatedAt
     );
@@ -493,69 +598,93 @@ export function createPreference(content: string, tags: string[] = []): Preferen
     title: "Preference",
     content: preference.content,
     tags: ["preference", ...tags],
+    classification,
   });
 
   return preference;
 }
 
 export function deletePreference(id: string): boolean {
+  const ownerId = requireOwnerId();
   const pref = getDb()
-    .prepare("SELECT content FROM preferences WHERE id = ?")
-    .get(id) as { content: string } | undefined;
+    .prepare("SELECT content FROM preferences WHERE id = ? AND owner_id = ?")
+    .get(id, ownerId) as { content: string } | undefined;
   if (!pref) return false;
 
-  getDb().prepare("DELETE FROM preferences WHERE id = ?").run(id);
-  const items = getDb()
+  getDb()
+    .prepare("DELETE FROM preferences WHERE id = ? AND owner_id = ?")
+    .run(id, ownerId);
+  const mirrored = getDb()
     .prepare(
-      "SELECT id FROM context_items WHERE kind = 'preference' AND content = ?"
+      "SELECT id, content FROM context_items WHERE kind = 'preference' AND owner_id = ?"
     )
-    .all(pref.content) as { id: string }[];
-  for (const item of items) {
-    getDb().prepare("DELETE FROM context_items WHERE id = ?").run(item.id);
-    removeFts(item.id);
+    .all(ownerId) as { id: string; content: string }[];
+  for (const item of mirrored) {
+    const plain = isEncrypted(item.content)
+      ? decryptString(item.content)
+      : item.content;
+    if (plain === (isEncrypted(pref.content) ? decryptString(pref.content) : pref.content)) {
+      getDb().prepare("DELETE FROM context_items WHERE id = ?").run(item.id);
+      removeFts(item.id);
+    }
   }
   return true;
 }
 
 export function listDecisions(projectId?: string | null): Decision[] {
+  const principal = requirePrincipal();
+  assertScope(principal, "decisions:read", projectId);
   const db = getDb();
   const rows = projectId
     ? (db
         .prepare(
-          "SELECT * FROM decisions WHERE project_id = ? ORDER BY updated_at DESC"
+          "SELECT * FROM decisions WHERE owner_id = ? AND project_id = ? ORDER BY updated_at DESC"
         )
-        .all(projectId) as Record<string, unknown>[])
+        .all(principal.userId, projectId) as Record<string, unknown>[])
     : (db
-        .prepare("SELECT * FROM decisions ORDER BY updated_at DESC")
-        .all() as Record<string, unknown>[]);
-  return rows.map(rowToDecision);
+        .prepare(
+          "SELECT * FROM decisions WHERE owner_id = ? ORDER BY updated_at DESC"
+        )
+        .all(principal.userId) as Record<string, unknown>[]);
+  return rows
+    .map(rowToDecision)
+    .filter((d) => projectAllowed(principal, d.projectId))
+    .filter((d) => classificationAllowed(principal, d.classification))
+    .filter((d) => d.classification !== "RESTRICTED" || principal.kind === "user");
 }
 
 export function createDecision(input: {
   projectId?: string | null;
   content: string;
   rationale?: string;
+  classification?: DataClassification;
 }): Decision {
+  const ownerId = requireOwnerId();
   const now = nowIso();
+  const classification = input.classification ?? "NORMAL";
   const decision: Decision = {
     id: createId("dec"),
+    ownerId,
     projectId: input.projectId ?? null,
     content: input.content.trim(),
     rationale: input.rationale?.trim() ?? "",
+    classification,
     createdAt: now,
     updatedAt: now,
   };
 
   getDb()
     .prepare(
-      `INSERT INTO decisions (id, project_id, content, rationale, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?)`
+      `INSERT INTO decisions (id, owner_id, project_id, content, rationale, classification, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .run(
       decision.id,
+      decision.ownerId,
       decision.projectId,
-      decision.content,
+      storeContent(decision.content, classification),
       decision.rationale,
+      decision.classification,
       decision.createdAt,
       decision.updatedAt
     );
@@ -568,25 +697,35 @@ export function createDecision(input: {
       ? `${decision.content}\nRationale: ${decision.rationale}`
       : decision.content,
     tags: ["decision"],
+    classification,
   });
 
   return decision;
 }
 
 export function deleteDecision(id: string): boolean {
+  const ownerId = requireOwnerId();
   const decision = getDb()
-    .prepare("SELECT content FROM decisions WHERE id = ?")
-    .get(id) as { content: string } | undefined;
+    .prepare("SELECT content FROM decisions WHERE id = ? AND owner_id = ?")
+    .get(id, ownerId) as { content: string } | undefined;
   if (!decision) return false;
 
-  getDb().prepare("DELETE FROM decisions WHERE id = ?").run(id);
+  getDb()
+    .prepare("DELETE FROM decisions WHERE id = ? AND owner_id = ?")
+    .run(id, ownerId);
   const items = getDb()
     .prepare(
-      "SELECT id, content FROM context_items WHERE kind = 'decision'"
+      "SELECT id, content FROM context_items WHERE kind = 'decision' AND owner_id = ?"
     )
-    .all() as { id: string; content: string }[];
+    .all(ownerId) as { id: string; content: string }[];
+  const target = isEncrypted(decision.content)
+    ? decryptString(decision.content)
+    : decision.content;
   for (const item of items) {
-    if (item.content.startsWith(decision.content)) {
+    const plain = isEncrypted(item.content)
+      ? decryptString(item.content)
+      : item.content;
+    if (plain.startsWith(target)) {
       getDb().prepare("DELETE FROM context_items WHERE id = ?").run(item.id);
       removeFts(item.id);
     }
@@ -595,16 +734,19 @@ export function deleteDecision(id: string): boolean {
 }
 
 export function listSources(projectId?: string | null): Source[] {
+  const ownerId = requireOwnerId();
   const db = getDb();
   const rows = projectId
     ? (db
         .prepare(
-          "SELECT * FROM sources WHERE project_id = ? ORDER BY created_at DESC"
+          "SELECT * FROM sources WHERE owner_id = ? AND project_id = ? ORDER BY created_at DESC"
         )
-        .all(projectId) as Record<string, unknown>[])
+        .all(ownerId, projectId) as Record<string, unknown>[])
     : (db
-        .prepare("SELECT * FROM sources ORDER BY created_at DESC")
-        .all() as Record<string, unknown>[]);
+        .prepare(
+          "SELECT * FROM sources WHERE owner_id = ? ORDER BY created_at DESC"
+        )
+        .all(ownerId) as Record<string, unknown>[]);
   return rows.map(rowToSource);
 }
 
@@ -613,27 +755,34 @@ export function createSource(input: {
   title?: string;
   content: string;
   projectId?: string | null;
+  classification?: DataClassification;
 }): Source {
+  const ownerId = requireOwnerId();
+  const classification = input.classification ?? "NORMAL";
   const source: Source = {
     id: createId("src"),
+    ownerId,
     projectId: input.projectId ?? null,
     type: input.type,
     title: input.title?.trim() || `${input.type} import`,
     content: input.content,
+    classification,
     createdAt: nowIso(),
   };
 
   getDb()
     .prepare(
-      `INSERT INTO sources (id, project_id, type, title, content, created_at)
-       VALUES (?, ?, ?, ?, ?, ?)`
+      `INSERT INTO sources (id, owner_id, project_id, type, title, content, classification, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .run(
       source.id,
+      source.ownerId,
       source.projectId,
       source.type,
       source.title,
-      source.content,
+      storeContent(source.content, classification),
+      source.classification,
       source.createdAt
     );
 
@@ -643,10 +792,12 @@ export function createSource(input: {
 export function listContextItems(filters?: {
   projectId?: string | null;
   kind?: ContextKind;
+  includeRestricted?: boolean;
 }): ContextItem[] {
+  const principal = requirePrincipal();
   const db = getDb();
-  let sql = "SELECT * FROM context_items WHERE 1=1";
-  const params: string[] = [];
+  let sql = "SELECT * FROM context_items WHERE owner_id = ?";
+  const params: (string | number)[] = [principal.userId];
   if (filters?.projectId) {
     sql += " AND project_id = ?";
     params.push(filters.projectId);
@@ -655,28 +806,76 @@ export function listContextItems(filters?: {
     sql += " AND kind = ?";
     params.push(filters.kind);
   }
+  if (!filters?.includeRestricted) {
+    sql += " AND classification != 'RESTRICTED'";
+  }
   sql += " ORDER BY updated_at DESC";
   const rows = db.prepare(sql).all(...params) as Record<string, unknown>[];
-  return rows.map(rowToContextItem);
+  return rows
+    .map((row) => rowToContextItem(row, { forRetrieval: true }))
+    .filter((item) => projectAllowed(principal, item.projectId))
+    .filter((item) => classificationAllowed(principal, item.classification));
 }
 
-export function saveContext(content: string, options?: {
-  projectId?: string | null;
-  title?: string;
-  kind?: ContextKind;
-  tags?: string[];
-}): ContextItem {
+export function saveContext(
+  content: string,
+  options?: {
+    projectId?: string | null;
+    title?: string;
+    kind?: ContextKind;
+    tags?: string[];
+    classification?: DataClassification;
+  }
+): ContextItem {
   return insertContextItem({
     kind: options?.kind ?? "knowledge",
     projectId: options?.projectId,
     title: options?.title ?? "Saved context",
     content: content.trim(),
     tags: options?.tags ?? ["knowledge"],
+    classification: options?.classification ?? "NORMAL",
   });
 }
 
+export function updateContextClassification(
+  id: string,
+  classification: DataClassification
+): ContextItem | null {
+  const ownerId = requireOwnerId();
+  const row = getDb()
+    .prepare("SELECT * FROM context_items WHERE id = ? AND owner_id = ?")
+    .get(id, ownerId) as Record<string, unknown> | undefined;
+  if (!row) return null;
+
+  const current = rowToContextItem(row, { forRetrieval: false });
+  const plain = isEncrypted(String(row.content))
+    ? decryptString(String(row.content))
+    : String(row.content);
+  const stored = storeContent(plain, classification);
+  const now = nowIso();
+
+  getDb()
+    .prepare(
+      `UPDATE context_items SET content = ?, classification = ?, updated_at = ?
+       WHERE id = ? AND owner_id = ?`
+    )
+    .run(stored, classification, now, id, ownerId);
+
+  const next: ContextItem = {
+    ...current,
+    content: plain,
+    classification,
+    updatedAt: now,
+  };
+  upsertFts(next);
+  return next;
+}
+
 export function deleteContextItem(id: string): boolean {
-  const result = getDb().prepare("DELETE FROM context_items WHERE id = ?").run(id);
+  const ownerId = requireOwnerId();
+  const result = getDb()
+    .prepare("DELETE FROM context_items WHERE id = ? AND owner_id = ?")
+    .run(id, ownerId);
   if (result.changes > 0) removeFts(id);
   return result.changes > 0;
 }
@@ -685,6 +884,9 @@ export function searchContext(
   query: string,
   options?: { projectId?: string | null; limit?: number }
 ): SearchHit[] {
+  const principal = requirePrincipal();
+  assertScope(principal, "context:search", options?.projectId);
+
   const db = getDb();
   const limit = options?.limit ?? 10;
   const ftsQuery = buildFtsQuery(query);
@@ -710,7 +912,6 @@ export function searchContext(
 
   const ftsScore = new Map<string, number>();
   for (const row of ftsRows) {
-    // bm25 returns lower (more negative) for better matches in SQLite.
     ftsScore.set(row.item_id, 1 / (1 + Math.abs(row.rank)));
   }
 
@@ -725,10 +926,27 @@ export function searchContext(
     return { item, score, matchedOn };
   });
 
-  return hits
+  const filtered = hits
     .filter((h) => h.score > 0.02 || h.matchedOn.includes("keyword"))
+    .filter((h) => h.item.classification !== "RESTRICTED")
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
+
+  const includedSensitive = filtered.some(
+    (h) => h.item.classification === "SENSITIVE"
+  );
+
+  recordAudit({
+    action: includedSensitive ? "sensitive_context_accessed" : "context_search",
+    principal,
+    scope: options?.projectId ? `project/${options.projectId}` : "global",
+    memoryIds: filtered.map((h) => h.item.id),
+    memoryCount: filtered.length,
+    includedSensitive,
+    metadata: { resultCount: filtered.length },
+  });
+
+  return filtered;
 }
 
 export async function importAndExtract(input: {
@@ -738,6 +956,7 @@ export async function importAndExtract(input: {
   projectId?: string | null;
   applyExtraction?: boolean;
   useLlm?: boolean;
+  classification?: DataClassification;
 }): Promise<{
   source: Source;
   extraction: ExtractionResult;
@@ -748,11 +967,13 @@ export async function importAndExtract(input: {
     profile: Profile | null;
   };
 }> {
+  const classification = input.classification ?? "NORMAL";
   const source = createSource({
     type: input.type,
     title: input.title,
     content: input.content,
     projectId: input.projectId,
+    classification,
   });
 
   const extraction = await extractContextFromText(input.content, {
@@ -772,11 +993,15 @@ export async function importAndExtract(input: {
       created.profile = updateProfile(extraction.profileUpdates);
     }
     for (const pref of extraction.preferences) {
-      created.preferences.push(createPreference(pref));
+      created.preferences.push(createPreference(pref, [], classification));
     }
     for (const decision of extraction.decisions) {
       created.decisions.push(
-        createDecision({ projectId: input.projectId, content: decision })
+        createDecision({
+          projectId: input.projectId,
+          content: decision,
+          classification,
+        })
       );
     }
     for (const knowledge of extraction.knowledge) {
@@ -788,6 +1013,7 @@ export async function importAndExtract(input: {
           title: knowledge.title,
           content: knowledge.content,
           tags: knowledge.tags,
+          classification,
         })
       );
     }
@@ -800,6 +1026,7 @@ export async function importAndExtract(input: {
           title: input.title || "Note",
           content: note,
           tags: ["note"],
+          classification,
         })
       );
     }
@@ -812,6 +1039,7 @@ export async function importAndExtract(input: {
         title: source.title,
         content: source.content,
         tags: ["imported", input.type],
+        classification,
       })
     );
   }
@@ -826,13 +1054,35 @@ export function buildExportText(options?: {
   includePreferences?: boolean;
   includeDecisions?: boolean;
   searchLimit?: number;
-}): { text: string; fragments: PreviewPayload["fragments"]; estimatedTokens: number } {
+  allowSensitive?: boolean;
+}): {
+  text: string;
+  fragments: PreviewPayload["fragments"];
+  estimatedTokens: number;
+  includesSensitive: boolean;
+} {
+  const principal = requirePrincipal();
   const includeProfile = options?.includeProfile !== false;
   const includePreferences = options?.includePreferences !== false;
   const includeDecisions = options?.includeDecisions !== false;
   const fragments: PreviewPayload["fragments"] = [];
+  let includesSensitive = false;
 
-  if (includeProfile) {
+  const pushFragment = (
+    fragment: PreviewPayload["fragments"][number]
+  ) => {
+    if (fragment.classification === "RESTRICTED") return;
+    if (
+      fragment.classification === "SENSITIVE" &&
+      options?.allowSensitive === false
+    ) {
+      return;
+    }
+    if (fragment.classification === "SENSITIVE") includesSensitive = true;
+    fragments.push(fragment);
+  };
+
+  if (includeProfile && (principal.kind === "user" || principal.scopes.includes("profile:read"))) {
     const profile = getProfile();
     const parts = [
       profile.displayName && `Name: ${profile.displayName}`,
@@ -844,22 +1094,24 @@ export function buildExportText(options?: {
         `Recurring instructions: ${profile.recurringInstructions}`,
     ].filter(Boolean);
     if (parts.length) {
-      fragments.push({
+      pushFragment({
         kind: "profile",
         title: "Profile",
         content: parts.join("\n"),
         source: "vault:profile",
+        classification: "NORMAL",
       });
     }
   }
 
   if (includePreferences) {
     for (const pref of listPreferences()) {
-      fragments.push({
+      pushFragment({
         kind: "preference",
         title: "Preference",
         content: pref.content,
         source: `vault:preference:${pref.id}`,
+        classification: pref.classification,
       });
     }
   }
@@ -867,13 +1119,14 @@ export function buildExportText(options?: {
   if (includeDecisions) {
     const decisions = listDecisions(options?.projectId);
     for (const decision of decisions) {
-      fragments.push({
+      pushFragment({
         kind: "decision",
         title: "Decision",
         content: decision.rationale
           ? `${decision.content}\nRationale: ${decision.rationale}`
           : decision.content,
         source: `vault:decision:${decision.id}`,
+        classification: decision.classification,
       });
     }
   }
@@ -881,7 +1134,7 @@ export function buildExportText(options?: {
   if (options?.projectId) {
     const project = getProject(options.projectId);
     if (project) {
-      fragments.push({
+      pushFragment({
         kind: "project",
         title: project.name,
         content: [
@@ -895,6 +1148,7 @@ export function buildExportText(options?: {
           .filter(Boolean)
           .join("\n"),
         source: `vault:project:${project.id}`,
+        classification: "NORMAL",
       });
     }
   }
@@ -908,21 +1162,24 @@ export function buildExportText(options?: {
       if (["profile", "preference", "decision", "project"].includes(hit.item.kind)) {
         continue;
       }
-      fragments.push({
+      pushFragment({
         kind: hit.item.kind,
         title: hit.item.title || hit.item.kind,
         content: hit.item.content,
         source: `vault:item:${hit.item.id}`,
+        classification: hit.item.classification,
       });
     }
   }
 
   const sections = fragments.map(
-    (f) => `### ${f.title} (${f.kind})\n${f.content}`
+    (f) =>
+      `### ${f.title} (${f.kind}${f.classification !== "NORMAL" ? `, ${f.classification}` : ""})\n${f.content}`
   );
   const text = [
     "# Context Vault export",
     "Only the fragments below are intended for sharing with an AI provider.",
+    "Secrets and RESTRICTED memories are never included.",
     "",
     ...sections,
   ].join("\n");
@@ -931,6 +1188,7 @@ export function buildExportText(options?: {
     text,
     fragments,
     estimatedTokens: estimateTokens(text),
+    includesSensitive,
   };
 }
 
@@ -942,13 +1200,33 @@ export function buildPreview(input: {
   includePreferences?: boolean;
   includeDecisions?: boolean;
   includeSearchHits?: boolean;
+  allowSensitive?: boolean;
+  acknowledgeSensitive?: boolean;
 }): PreviewPayload {
+  const principal = requirePrincipal();
   const exported = buildExportText({
     projectId: input.projectId,
     query: input.includeSearchHits === false ? null : input.query,
     includeProfile: input.includeProfile,
     includePreferences: input.includePreferences,
     includeDecisions: input.includeDecisions,
+    allowSensitive: input.allowSensitive !== false,
+  });
+
+  const requiresSensitiveAck =
+    exported.includesSensitive && !input.acknowledgeSensitive;
+
+  recordAudit({
+    action: "context_preview",
+    principal,
+    scope: input.projectId ? `project/${input.projectId}` : "global",
+    memoryCount: exported.fragments.length,
+    includedSensitive: exported.includesSensitive,
+    destination: input.destination,
+    metadata: {
+      fragmentCount: exported.fragments.length,
+      acknowledged: Boolean(input.acknowledgeSensitive),
+    },
   });
 
   return {
@@ -961,27 +1239,178 @@ export function buildPreview(input: {
     includeSearchHits: input.includeSearchHits !== false,
     fragments: exported.fragments,
     estimatedTokens: exported.estimatedTokens,
-    exportText: exported.text,
+    exportText: requiresSensitiveAck
+      ? "# Sensitive context included\nAcknowledge sensitive sharing before export is available."
+      : exported.text,
+    includesSensitive: exported.includesSensitive,
+    requiresSensitiveAck,
   };
 }
 
+/** MCP write path: create candidate memory pending user approval (ADR-003). */
+export function proposeCandidateMemory(input: {
+  kind: CandidateMemory["kind"];
+  content: string;
+  title?: string;
+  projectId?: string | null;
+  rationale?: string;
+  classification?: DataClassification;
+}): CandidateMemory {
+  const principal = requirePrincipal();
+  assertWrite(principal);
+  if (input.kind === "decision") {
+    assertScope(principal, "memory:create", input.projectId);
+  } else {
+    assertScope(principal, "context:write", input.projectId);
+  }
+
+  const candidate: CandidateMemory = {
+    id: createId("cand"),
+    ownerId: principal.userId,
+    integrationId: principal.kind === "integration" ? principal.integrationId : null,
+    kind: input.kind,
+    projectId: input.projectId ?? null,
+    title: input.title?.trim() || input.kind,
+    content: input.content.trim(),
+    rationale: input.rationale?.trim() ?? "",
+    classification: input.classification ?? "NORMAL",
+    status: "pending",
+    createdAt: nowIso(),
+    resolvedAt: null,
+  };
+
+  getDb()
+    .prepare(
+      `INSERT INTO candidate_memories
+        (id, owner_id, integration_id, kind, project_id, title, content, rationale, classification, status, created_at, resolved_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, NULL)`
+    )
+    .run(
+      candidate.id,
+      candidate.ownerId,
+      candidate.integrationId,
+      candidate.kind,
+      candidate.projectId,
+      candidate.title,
+      candidate.content,
+      candidate.rationale,
+      candidate.classification,
+      candidate.createdAt
+    );
+
+  recordAudit({
+    action: "candidate_memory_created",
+    principal,
+    scope: candidate.projectId ? `project/${candidate.projectId}` : "global",
+    metadata: { candidateId: candidate.id, kind: candidate.kind },
+  });
+
+  return candidate;
+}
+
+export function listCandidateMemories(
+  status: CandidateMemory["status"] = "pending"
+): CandidateMemory[] {
+  const ownerId = requireOwnerId();
+  const rows = getDb()
+    .prepare(
+      `SELECT * FROM candidate_memories WHERE owner_id = ? AND status = ? ORDER BY created_at DESC`
+    )
+    .all(ownerId, status) as Record<string, unknown>[];
+  return rows.map((row) => ({
+    id: String(row.id),
+    ownerId: String(row.owner_id),
+    integrationId: row.integration_id ? String(row.integration_id) : null,
+    kind: String(row.kind) as CandidateMemory["kind"],
+    projectId: row.project_id ? String(row.project_id) : null,
+    title: String(row.title ?? ""),
+    content: String(row.content),
+    rationale: String(row.rationale ?? ""),
+    classification: asClassification(row.classification),
+    status: String(row.status) as CandidateMemory["status"],
+    createdAt: String(row.created_at),
+    resolvedAt: row.resolved_at ? String(row.resolved_at) : null,
+  }));
+}
+
+export function resolveCandidateMemory(
+  id: string,
+  decision: "approved" | "rejected"
+): CandidateMemory | null {
+  const ownerId = requireOwnerId();
+  const rows = listCandidateMemories("pending");
+  const candidate = rows.find((c) => c.id === id);
+  if (!candidate) return null;
+
+  const resolvedAt = nowIso();
+  getDb()
+    .prepare(
+      `UPDATE candidate_memories SET status = ?, resolved_at = ? WHERE id = ? AND owner_id = ?`
+    )
+    .run(decision, resolvedAt, id, ownerId);
+
+  if (decision === "approved") {
+    if (candidate.kind === "decision") {
+      createDecision({
+        projectId: candidate.projectId,
+        content: candidate.content,
+        rationale: candidate.rationale,
+        classification: candidate.classification,
+      });
+    } else if (candidate.kind === "preference") {
+      createPreference(candidate.content, [], candidate.classification);
+    } else {
+      saveContext(candidate.content, {
+        projectId: candidate.projectId,
+        title: candidate.title,
+        kind: candidate.kind === "note" ? "note" : "knowledge",
+        classification: candidate.classification,
+      });
+    }
+  }
+
+  recordAudit({
+    action:
+      decision === "approved"
+        ? "candidate_memory_approved"
+        : "candidate_memory_rejected",
+    principal: getPrincipal(),
+    metadata: { candidateId: id },
+  });
+
+  return { ...candidate, status: decision, resolvedAt };
+}
+
 export function wipeAllContext(): void {
+  const ownerId = requireOwnerId();
+  const principal = getPrincipal();
   const db = getDb();
   db.exec(`
     DELETE FROM context_fts;
-    DELETE FROM context_items;
-    DELETE FROM sources;
-    DELETE FROM decisions;
-    DELETE FROM preferences;
-    DELETE FROM projects;
-    DELETE FROM profile;
   `);
+  db.prepare("DELETE FROM context_items WHERE owner_id = ?").run(ownerId);
+  db.prepare("DELETE FROM sources WHERE owner_id = ?").run(ownerId);
+  db.prepare("DELETE FROM decisions WHERE owner_id = ?").run(ownerId);
+  db.prepare("DELETE FROM preferences WHERE owner_id = ?").run(ownerId);
+  db.prepare("DELETE FROM projects WHERE owner_id = ?").run(ownerId);
+  db.prepare("DELETE FROM profile WHERE owner_id = ?").run(ownerId);
+  db.prepare("DELETE FROM candidate_memories WHERE owner_id = ?").run(ownerId);
+  recordAudit({
+    action: "vault_wiped",
+    principal,
+    metadata: { ownerId },
+  });
 }
 
 export function getVaultStats() {
+  const ownerId = requireOwnerId();
   const db = getDb();
   const count = (table: string) =>
-    (db.prepare(`SELECT COUNT(*) AS c FROM ${table}`).get() as { c: number }).c;
+    (
+      db
+        .prepare(`SELECT COUNT(*) AS c FROM ${table} WHERE owner_id = ?`)
+        .get(ownerId) as { c: number }
+    ).c;
 
   return {
     projects: count("projects"),
@@ -989,8 +1418,26 @@ export function getVaultStats() {
     decisions: count("decisions"),
     sources: count("sources"),
     contextItems: count("context_items"),
+    pendingCandidates: (
+      db
+        .prepare(
+          `SELECT COUNT(*) AS c FROM candidate_memories WHERE owner_id = ? AND status = 'pending'`
+        )
+        .get(ownerId) as { c: number }
+    ).c,
     hasProfile: Boolean(
       getProfile().displayName || getProfile().role || getProfile().expertise.length
     ),
   };
+}
+
+export function principalCanUseTool(
+  principal: Principal,
+  tool: string,
+  projectId?: string | null
+) {
+  for (const scope of scopesForTool(tool, projectId)) {
+    assertScope(principal, scope, projectId);
+  }
+  if (tool.startsWith("save_")) assertWrite(principal);
 }

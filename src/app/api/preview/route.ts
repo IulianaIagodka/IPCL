@@ -1,10 +1,11 @@
 import { buildPreview } from "@/lib/vault";
-import { jsonError, jsonOk, readJson } from "@/lib/http";
+import { readJson, withAuth } from "@/lib/http";
+import { recordAudit } from "@/lib/audit";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  try {
+  return withAuth(request, async (principal) => {
     const body = await readJson<{
       destination?: string;
       query?: string | null;
@@ -13,20 +14,30 @@ export async function POST(request: Request) {
       includePreferences?: boolean;
       includeDecisions?: boolean;
       includeSearchHits?: boolean;
+      acknowledgeSensitive?: boolean;
     }>(request);
 
-    return jsonOk(
-      buildPreview({
-        destination: body.destination || "clipboard / manual paste",
-        query: body.query,
-        projectId: body.projectId,
-        includeProfile: body.includeProfile,
-        includePreferences: body.includePreferences,
-        includeDecisions: body.includeDecisions,
-        includeSearchHits: body.includeSearchHits,
-      })
-    );
-  } catch (error) {
-    return jsonError(error instanceof Error ? error.message : "Invalid request");
-  }
+    const preview = buildPreview({
+      destination: body.destination || "clipboard / manual paste",
+      query: body.query,
+      projectId: body.projectId,
+      includeProfile: body.includeProfile,
+      includePreferences: body.includePreferences,
+      includeDecisions: body.includeDecisions,
+      includeSearchHits: body.includeSearchHits,
+      acknowledgeSensitive: body.acknowledgeSensitive,
+    });
+
+    if (body.acknowledgeSensitive && preview.includesSensitive) {
+      recordAudit({
+        action: "bulk_export",
+        principal,
+        includedSensitive: true,
+        destination: preview.destination,
+        memoryCount: preview.fragments.length,
+      });
+    }
+
+    return preview;
+  });
 }

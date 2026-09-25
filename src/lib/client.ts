@@ -8,6 +8,7 @@ export async function api<T>(
 ): Promise<T> {
   const res = await fetch(path, {
     ...init,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(init?.headers || {}),
@@ -15,6 +16,11 @@ export async function api<T>(
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
+    if (res.status === 401 && typeof window !== "undefined") {
+      if (!window.location.pathname.startsWith("/vault/login")) {
+        window.location.href = "/vault/login";
+      }
+    }
     throw new Error(body.error || `Request failed (${res.status})`);
   }
   return res.json() as Promise<T>;

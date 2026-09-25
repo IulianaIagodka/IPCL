@@ -48,6 +48,7 @@ export default function RootLayout({
               <Link href="/vault/import">Import</Link>
               <Link href="/vault/search">Search</Link>
               <Link href="/vault/preview">Preview</Link>
+              <Link href="/vault/security">Security</Link>
             </nav>
           </div>
         </header>

@@ -71,6 +71,9 @@ export default function VaultPage() {
               <Link className="btn btn-ghost" href="/vault/preview">
                 Preview & export
               </Link>
+              <Link className="btn btn-ghost" href="/vault/security">
+                Security & integrations
+              </Link>
             </div>
           </div>
         </div>

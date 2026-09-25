@@ -16,6 +16,7 @@ export default function PreviewPage() {
   const [preview, setPreview] = useState<PreviewPayload | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [acknowledgeSensitive, setAcknowledgeSensitive] = useState(false);
 
   useEffect(() => {
     void api<Project[]>("/api/projects").then(setProjects);
@@ -36,6 +37,7 @@ export default function PreviewPage() {
           includePreferences,
           includeDecisions,
           includeSearchHits,
+          acknowledgeSensitive,
         }),
       });
       setPreview(payload);
@@ -45,7 +47,7 @@ export default function PreviewPage() {
   }
 
   async function copyExport() {
-    if (!preview) return;
+    if (!preview || preview.requiresSensitiveAck) return;
     await navigator.clipboard.writeText(preview.exportText);
     setCopied(true);
   }
@@ -137,6 +139,27 @@ export default function PreviewPage() {
             <p className="muted" style={{ margin: 0 }}>
               Fragments: <strong>{preview.fragments.length}</strong>
             </p>
+            {preview.includesSensitive && (
+              <div className="stack" style={{ gap: "0.5rem" }}>
+                <p style={{ color: "#8a2f2f", margin: 0 }}>
+                  This share includes SENSITIVE context leaving the vault.
+                </p>
+                <Toggle
+                  label="I acknowledge sensitive context will be sent to an external AI"
+                  checked={acknowledgeSensitive}
+                  onChange={setAcknowledgeSensitive}
+                />
+                {preview.requiresSensitiveAck && (
+                  <button
+                    className="btn btn-ghost"
+                    type="button"
+                    onClick={() => void onPreview({ preventDefault() {} } as FormEvent)}
+                  >
+                    Rebuild export with acknowledgment
+                  </button>
+                )}
+              </div>
+            )}
             <div>
               {preview.fragments.map((fragment, index) => (
                 <div key={`${fragment.source}-${index}`} className="list-row">
@@ -144,6 +167,9 @@ export default function PreviewPage() {
                     <strong>
                       {fragment.title}{" "}
                       <span className="pill">{fragment.kind}</span>
+                      {fragment.classification !== "NORMAL" && (
+                        <span className="pill">{fragment.classification}</span>
+                      )}
                     </strong>
                     <p className="muted" style={{ margin: "0.35rem 0 0", whiteSpace: "pre-wrap" }}>
                       {fragment.content}
@@ -165,7 +191,12 @@ export default function PreviewPage() {
               value={preview.exportText}
             />
             <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-              <button className="btn btn-primary" type="button" onClick={() => void copyExport()}>
+              <button
+                className="btn btn-primary"
+                type="button"
+                onClick={() => void copyExport()}
+                disabled={Boolean(preview.requiresSensitiveAck)}
+              >
                 {copied ? "Copied" : "Copy for AI"}
               </button>
               <a
