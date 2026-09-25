@@ -20,6 +20,7 @@ const NAV = [
   { href: "/vault/context", label: "Context" },
   { href: "/vault/projects", label: "Projects" },
   { href: "/vault/integrations", label: "Integrations" },
+  { href: "/vault/security", label: "Security" },
   { href: "/vault/activity", label: "Activity" },
   { href: "/vault/settings", label: "Settings" },
 ];

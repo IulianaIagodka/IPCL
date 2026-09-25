@@ -28,7 +28,6 @@ import type {
   Source,
   SourceType,
 } from "./types";
-import { recordActivity } from "./integrations";
 
 function parseJsonArray(value: string | null | undefined): string[] {
   if (!value) return [];
@@ -1254,20 +1253,6 @@ export function buildPreview(input: {
     includesSensitive: exported.includesSensitive,
     requiresSensitiveAck,
   };
-
-  const project = input.projectId ? getProject(input.projectId) : null;
-  const decisionCount = exported.fragments.filter((f) => f.kind === "decision").length;
-  recordActivity({
-    kind: "share",
-    summary: `${input.destination} preview · ${exported.fragments.length} memories`,
-    detail: [
-      project ? `Project: ${project.name}` : "Scope: global / selected",
-      decisionCount ? `${decisionCount} decisions` : null,
-      `${exported.estimatedTokens} estimated tokens`,
-    ]
-      .filter(Boolean)
-      .join(" · "),
-  });
 
   return payload;
 }
