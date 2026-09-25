@@ -1,16 +1,16 @@
-# ACTION REQUIRED
+# ACTION REQUIRED (orchestrator board)
 
-Оновлено: 2026-09-25 ~10:55 UTC / ~13:55 Europe/Kyiv
+Оновлено: 2026-09-25 ~11:00 UTC
 
-## #6 MERGED — ADR-003 on main
-`051174a` Merge ADR-003 security and privacy model into main.
+## Потрібно від людини (P0)
+1. **Review + merge [#11](https://github.com/IulianaIagodka/IPCL/pull/11)** — ADR-004 control plane на main (після #6). Tests 17/17.
+2. Після merge: **close #7 і #9** (obsolete).
 
-## #11 — ADR-004 onto post-#6 main (awaiting merge)
-Draft **[PR #11](https://github.com/IulianaIagodka/IPCL/pull/11)**
-- Re-merged main after #6
-- tests **17/17** · tsc clean · contains current main
+## Призначити пізніше (не стартувати зараз)
+- **INT-1** — wire `packages/context-store` → vault/Context Service · owner: TBD після #11
+- Pause/archive IDLE product-агентів на закритих темах (003, brand, 005, MVP)
 
-### Далі
-1. Review/merge **#11** → main
-2. Закрити застарілі #7 / #9
-3. **INT-1** wire `packages/context-store`
+## Оркестратор зараз
+- Anti-dup clear для нової product-роботи: **немає** (чекаємо merge #11)
+- RUNNING product agents: **немає** (лише цей ops)
+- Наступний публічний сигнал: daily 08:00 або подія по #11

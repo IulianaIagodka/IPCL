@@ -1,24 +1,22 @@
 # IPCL Backlog — 2026-09-25
 
-Оновлено: 2026-09-25 ~10:55 UTC / ~13:55 Europe/Kyiv
+Оновлено: 2026-09-25 ~11:00 UTC (orchestrator)
 
-## Merge queue
-1. Merge **[#11](https://github.com/IulianaIagodka/IPCL/pull/11)** — **ADR-004 only** leftover (ADR-003 already on main via #6) — tests **17/17**, tsc, `main ⊆ #11`
-2. Close obsolete #7 / #9
-3. **INT-1** wire `packages/context-store` → vault/Context Service
+## Merge queue (human)
+1. **[#11](https://github.com/IulianaIagodka/IPCL/pull/11)** ADR-004 → main (17/17, contains main)
+2. Close #7 / #9
 
-## Done recently
-- [x] #1 MVP merged
-- [x] #5 closed (UX in main history)
-- [x] #3 brand PR closed (Eidothea on main)
-- [x] **#6 ADR-003 merged** into main
-- [x] #11 rebased onto post-#6 main
+## Then
+3. **INT-1** (P1) — assign owner after #11; wire `packages/context-store`
+
+## Done
+- [x] #1 MVP · #5 UX · #3 brand closed · **#6 ADR-003** · #11 ready
 
 ## P0
-- [ ] Merge #11 (ADR-004 control plane)
+- [ ] Human merge #11
 
 ## P1
-- [ ] INT-1
+- [ ] INT-1 (blocked)
 
 ## P3
-- [ ] DOCS-1 · OPS daily 08:00
+- [ ] DOCS-1 · daily 08:00 ops

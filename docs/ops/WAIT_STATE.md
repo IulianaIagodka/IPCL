@@ -1,19 +1,21 @@
-# WAIT STATE — next progress gates
+# WAIT STATE — orchestrator gates
 
-Оновлено: 2026-09-25 ~10:55 UTC
+Оновлено: 2026-09-25 ~11:00 UTC
 
-## Цей goal ACTIVE навмисно
-Continuous ops (daily plan + backlog). **Не** UpdateGoal=complete, поки потрібні щоденні плани.
+## Режим: ОРКЕСТРАТОР
+Goal ACTIVE для daily plan + backlog. Product-код з цього агента — **стоп**, крім `docs/ops/`.
 
-## Наступні wake (діяти лише якщо):
-1. **Timer** `daily-plan-0800-kyiv` — 05:00 UTC / 08:00 Kyiv → надіслати план
-2. **PR event** #7/#8/#9/#11 → оновити backlog якщо delta
-3. **User** `pause ok` / `merge #11` / нова задача → пріоритет → backlog → виконання
-4. **Goal continue** без delta → лише tips+agents; **не** плодити docs
+## Wake → дія
+| Подія | Дія |
+|-------|-----|
+| 08:00 timer | План користувачу; sync docs лише при delta |
+| PR merge/close/sync (чужий) | Оновити BACKLOG/OWNERS; коротко якщо пріоритет змінився |
+| Власний sync #8/#11 | Ігнор |
+| Goal continue, tips ті самі | Тиша, 0 commits |
+| User `merge #11` | Тоді можна координувати merge path (не імплементувати нове) |
+| User нова задача | P0–P3 → BACKLOG → призначити/знайти owner |
 
-## Заблоковано ззовні
-- Merge **#11** — потрібен явний OK від owner
-- INT-1 — після merge #11
-
-## Вже виконано (не повторювати без delta)
-#6 ADR-003 merged · #11 rebased onto post-#6 main (`2a5278a`) · #3 closed
+## Зовнішні gates
+- **P0:** human merge [#11](https://github.com/IulianaIagodka/IPCL/pull/11)
+- Після #11: close #7/#9 → призначити owner на INT-1
+- Не стартувати INT-1 / brand / ADR-003 заново

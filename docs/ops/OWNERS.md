@@ -1,25 +1,24 @@
 # IPCL Owners registry (anti-dup)
 
-Оновлено: 2026-09-25 ~10:55 UTC  
-Правило: **одна тема = один owner-агент**.
+Оновлено: 2026-09-25 ~11:00 UTC  
+Правило: **одна тема = один owner**. Оркестратор (`…70c7`) не займає product-теми.
 
-| Тема | Owner agent | Branch | PR | Статус |
-|------|-------------|--------|-----|--------|
-| ADR-002 store | — | `main` | merged | **Done** |
-| Context Vault MVP | — | via #1 | [#1](https://github.com/IulianaIagodka/IPCL/pull/1) MERGED | **Done** |
-| ADR-003 security | Алр 003 `…c745` | merged | [#6](https://github.com/IulianaIagodka/IPCL/pull/6) **MERGED** | **Done on main** |
-| ADR-004 control plane | rebase branch / 004 IDLE | `cursor/rebase-adr-003-004-onto-main-70c7` | [#11](https://github.com/IulianaIagodka/IPCL/pull/11) DRAFT | **Ready to merge** (17/17) |
-| ADR-004 legacy stack | 004 `…063d` | `cursor/implement-adr-004-…` | [#7](https://github.com/IulianaIagodka/IPCL/pull/7) DRAFT | Obsolete → close after #11 |
-| ADR-005 product UX | — | main history | [#5](https://github.com/IulianaIagodka/IPCL/pull/5) CLOSED | **On main** |
-| Brand / naming | Context across AI | — | [#3](https://github.com/IulianaIagodka/IPCL/pull/3) CLOSED | Eidothea on main |
-| Daily plan / backlog | Щоденне планування `…70c7` | `cursor/ops-backlog-process-70c7` | [#8](https://github.com/IulianaIagodka/IPCL/pull/8) DRAFT | RUNNING (ops) |
-| main stability | Стабільність гілки main | `cursor/ci-main-green-3e8b` | — | IDLE — watch |
+| Тема | Owner | Branch / PR | Статус | Оркестратор-дія |
+|------|-------|-------------|--------|-----------------|
+| **Orchestration / backlog** | **Щоденне планування `bc-01a0d80c-…70c7`** | [#8](https://github.com/IulianaIagodka/IPCL/pull/8) | RUNNING | Це ми |
+| ADR-002 store | — | main | Done | — |
+| Vault MVP | — | [#1](https://github.com/IulianaIagodka/IPCL/pull/1) MERGED | Done | — |
+| ADR-003 security | Алр 003 `…c745` | [#6](https://github.com/IulianaIagodka/IPCL/pull/6) **MERGED** | Done | Archive/pause агент |
+| ADR-004 control plane | гілка rebase (готово) | [#11](https://github.com/IulianaIagodka/IPCL/pull/11) DRAFT | **Await human merge** | Не чіпати код; чекати OK |
+| ADR-004 legacy | 004 `…063d` IDLE | [#7](https://github.com/IulianaIagodka/IPCL/pull/7) | Obsolete | Рекомендація: close після #11 |
+| PORT / MVP into 004 | — | [#9](https://github.com/IulianaIagodka/IPCL/pull/9) | Superseded | Close після #11 |
+| ADR-005 UX | — | [#5](https://github.com/IulianaIagodka/IPCL/pull/5) CLOSED | On main | — |
+| Brand | Context across AI IDLE | [#3](https://github.com/IulianaIagodka/IPCL/pull/3) CLOSED | On main | Не стартувати |
+| main CI stability | Стабільність main IDLE | `ci-main-green-3e8b` | Watch | Не дублювати |
+| INT-1 wire store | **unassigned** | — | Blocked on #11 | Не стартувати до merge |
 
-## Overlapping
-| Агент | Чому | Дія |
-|-------|------|-----|
-| 004 IDLE original | Робота в #11 | Pause / close #7 after #11 |
-| Map/Extract/Summarize* | Research only | Не імплементувати |
+## Overlap / pause (не давати задач)
+Map*/Extract*/Summarize* (IDLE research), дубль Independent context layer, Адр 005 IDLE, brand IDLE, Алр 003 IDLE (done).
 
-## Перед новою роботою
+## Перед стартом нової теми
 1. Ця таблиця → 2. `list-cloud-agents` → 3. якщо owner є → лише BACKLOG.
