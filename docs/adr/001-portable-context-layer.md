@@ -37,7 +37,7 @@ We will build an independent context layer rather than attempting to synchronize
 The system will maintain its own canonical user context.
 
 ```
-                 Context Vault
+                 Memora
               ┌───────────────┐
               │ User profile  │
               │ Preferences   │
@@ -181,7 +181,7 @@ The product owns the context, not the conversation.
 
 AI providers remain responsible for generating responses.
 
-This product acts as the portable knowledge layer between the user and their AI tools.
+This product (**Memora**) acts as the portable knowledge layer between the user and their AI tools.
 
 ## Consequences
 

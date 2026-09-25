@@ -1,11 +1,11 @@
 {
   "mcpServers": {
-    "ipcl-context-vault": {
+    "memora": {
       "command": "npx",
       "args": ["tsx", "mcp/server.ts"],
       "cwd": "${workspaceFolder}",
       "env": {
-        "IPCL_DATA_DIR": "${workspaceFolder}/data"
+        "MEMORA_DATA_DIR": "${workspaceFolder}/data"
       }
     }
   }

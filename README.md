@@ -1,11 +1,11 @@
-# IPCL — Independent Portable Context Layer
+# Memora
 
 **Stop explaining yourself.**  
 **Your context follows you across AI.**
 
 *One memory. Every AI.*
 
-IPCL is a vendor-independent **Context Vault**: you keep profile, projects, decisions, preferences, and knowledge in one place, then make only the relevant fragments available to ChatGPT, Claude, Cursor, Codex, Gemini, or any other AI client.
+Memora is a vendor-independent context layer: you keep profile, projects, decisions, preferences, and knowledge in one place, then make only the relevant fragments available to ChatGPT, Claude, Cursor, Codex, Gemini, or any other AI client.
 
 Architecture decision: [docs/adr/001-portable-context-layer.md](docs/adr/001-portable-context-layer.md)
 
@@ -42,12 +42,12 @@ Example config is in `mcp/cursor-mcp.config.example.json`:
 ```json
 {
   "mcpServers": {
-    "ipcl-context-vault": {
+    "memora": {
       "command": "npx",
       "args": ["tsx", "mcp/server.ts"],
-      "cwd": "/absolute/path/to/IPCL",
+      "cwd": "/absolute/path/to/Memora",
       "env": {
-        "IPCL_DATA_DIR": "/absolute/path/to/IPCL/data"
+        "MEMORA_DATA_DIR": "/absolute/path/to/Memora/data"
       }
     }
   }

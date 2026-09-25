@@ -21,7 +21,7 @@ export default function VaultPage() {
   return (
     <div className="shell section stack">
       <div className="fade-up">
-        <p className="pill">Context Vault</p>
+        <p className="pill">Memora</p>
         <h2>One memory. Every AI.</h2>
         <p className="muted" style={{ maxWidth: "38rem", lineHeight: 1.55 }}>
           Your context follows you across AI. Maintain it once, retrieve only

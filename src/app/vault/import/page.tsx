@@ -65,7 +65,7 @@ export default function ImportPage() {
         <p className="pill">Import</p>
         <h2>Bring notes and conversations in</h2>
         <p className="muted">
-          Paste text once. IPCL extracts reusable profile updates, preferences,
+          Paste text once. Memora extracts reusable profile updates, preferences,
           decisions, and knowledge fragments.
         </p>
       </div>
