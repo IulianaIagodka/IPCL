@@ -774,7 +774,10 @@ export async function importAndExtract(input: {
 
   if (input.applyExtraction !== false) {
     if (Object.keys(extraction.profileUpdates).length) {
-      created.profile = updateProfile(extraction.profileUpdates);
+      created.profile = updateProfile({
+        ...extraction.profileUpdates,
+        mergeExpertise: true,
+      });
     }
     for (const pref of extraction.preferences) {
       created.preferences.push(createPreference(pref));
