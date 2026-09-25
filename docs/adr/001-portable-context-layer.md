@@ -37,7 +37,7 @@ We will build an independent context layer rather than attempting to synchronize
 The system will maintain its own canonical user context.
 
 ```
-                 Slid
+                 Eidothea
               ┌───────────────┐
               │ User profile  │
               │ Preferences   │
@@ -181,7 +181,7 @@ The product owns the context, not the conversation.
 
 AI providers remain responsible for generating responses.
 
-This product (**Slid**) acts as the portable knowledge layer between the user and their AI tools.
+This product (**Eidothea**) acts as the portable knowledge layer between the user and their AI tools.
 
 ## Consequences
 

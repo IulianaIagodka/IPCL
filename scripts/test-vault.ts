@@ -21,8 +21,8 @@ import {
 } from "../src/lib/vault";
 import { cosineSimilarity, semanticScore, tokenize } from "../src/lib/search";
 
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "slid-test-"));
-process.env.SLID_DATA_DIR = tempDir;
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "eidothea-test-"));
+process.env.EIDOTHEA_DATA_DIR = tempDir;
 resetDbForTests(path.join(tempDir, "test.sqlite"));
 
 test("tokenize and semantic similarity rank related text higher", () => {
@@ -129,5 +129,5 @@ test("preview shows exactly which fragments would be shared", () => {
   assert.equal(preview.destination, "Claude");
   assert.ok(preview.fragments.length > 0);
   assert.ok(preview.estimatedTokens > 0);
-  assert.ok(preview.exportText.includes("Slid export"));
+  assert.ok(preview.exportText.includes("Eidothea export"));
 });

@@ -1,11 +1,11 @@
 {
   "mcpServers": {
-    "slid": {
+    "eidothea": {
       "command": "npx",
       "args": ["tsx", "mcp/server.ts"],
       "cwd": "${workspaceFolder}",
       "env": {
-        "SLID_DATA_DIR": "${workspaceFolder}/data"
+        "EIDOTHEA_DATA_DIR": "${workspaceFolder}/data"
       }
     }
   }

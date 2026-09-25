@@ -1,11 +1,11 @@
-# Slid
+# Eidothea
 
 **Stop explaining yourself.**  
 **Your context follows you across AI.**
 
 *One memory. Every AI.*
 
-Slid is a vendor-independent context layer: you keep profile, projects, decisions, preferences, and knowledge in one place, then make only the relevant fragments available to ChatGPT, Claude, Cursor, Codex, Gemini, or any other AI client.
+Eidothea is a vendor-independent context layer: you keep profile, projects, decisions, preferences, and knowledge in one place, then make only the relevant fragments available to ChatGPT, Claude, Cursor, Codex, Gemini, or any other AI client.
 
 Architecture decision: [docs/adr/001-portable-context-layer.md](docs/adr/001-portable-context-layer.md)
 
@@ -42,12 +42,12 @@ Example config is in `mcp/cursor-mcp.config.example.json`:
 ```json
 {
   "mcpServers": {
-    "slid": {
+    "eidothea": {
       "command": "npx",
       "args": ["tsx", "mcp/server.ts"],
-      "cwd": "/absolute/path/to/Slid",
+      "cwd": "/absolute/path/to/Eidothea",
       "env": {
-        "SLID_DATA_DIR": "/absolute/path/to/Slid/data"
+        "EIDOTHEA_DATA_DIR": "/absolute/path/to/Eidothea/data"
       }
     }
   }
