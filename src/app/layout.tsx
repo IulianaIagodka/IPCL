@@ -59,6 +59,17 @@ export default function RootLayout({
           </div>
         </header>
         <main>{children}</main>
+        <footer className="site-footer">
+          <div className="shell site-footer-inner">
+            <p className="site-footer-brand">
+              © {new Date().getFullYear()} Eidothea
+            </p>
+            <nav className="site-footer-links" aria-label="Legal">
+              <Link href="/privacy">Privacy</Link>
+              <Link href="/copyright">Copyright</Link>
+            </nav>
+          </div>
+        </footer>
       </body>
     </html>
   );
