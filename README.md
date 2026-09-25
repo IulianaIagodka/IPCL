@@ -1,5 +1,7 @@
 # Eidothea
 
+**https://eidothea.app**
+
 **Stop explaining yourself.**
 
 *One memory. Every AI.*  

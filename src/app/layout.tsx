@@ -16,9 +16,13 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://eidothea.app"),
   title: "Eidothea — Stop explaining yourself.",
   description:
     "Eidothea. Stop explaining yourself. One memory. Every AI.",
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export default function RootLayout({
