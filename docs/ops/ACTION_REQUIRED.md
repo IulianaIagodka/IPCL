@@ -1,15 +1,15 @@
-# ACTION REQUIRED — P0 coordination
+# ACTION REQUIRED — після merge #1
 
-Оновлено: 2026-09-25 ~14:25 Europe/Kyiv
+Оновлено: 2026-09-25 ~14:40 Europe/Kyiv
 
-## PORT-1 — DONE (pending merge into #7)
-Cherry-pick унікальних комітів #1 → гілка `cursor/port-mvp-into-004-70c7` → draft **[PR #9](https://github.com/IulianaIagodka/IPCL/pull/9)** (base = ADR-004 branch).
-- tests 10/10 · tsc clean
+## Сталося
+- **#1 merged** → main має vault MVP + ADR-005 history + `packages/context-store`
+- **#5 closed** (без merge) — UX уже в main history
+- **#7** розійшовся з main: потрібен rebase ADR-003/004 на новий main
 
-### Далі
-1. Merge **#9** у гілку #7 (owner `004`) або скажи мені `merge #9`
-2. Merge **#7** (+#9) у main
-3. Закрити #1 і #6
-4. Rebase #5 → brand #3 → INT-1
+## Зроби / підтвердь
+1. Owner `004`: **rebase #7 onto main** (не мерджити #7 as-is)
+2. Після цього — INT-1 (wire context-store)
+3. Brand #3 тримати
 
-Не розвивати #1 окремо — фікси вже в #9.
+Напиши `rebase #7` — підготую гілку від main з cherry-pick ADR-003/004.

@@ -6,10 +6,10 @@
 | Тема | Owner agent | Branch | PR | Статус |
 |------|-------------|--------|-----|--------|
 | ADR-002 store (library) | — | `main` | merged | **Done** (`b463a07`) |
-| Context Vault MVP | Independent context layer `bc-01a0d7e9-…cc40` | `cursor/context-vault-mvp-cc40` | [#1](https://github.com/IulianaIagodka/IPCL/pull/1) DRAFT | **NOT fully superseded** — tip `253e56d`; PORT into #7 |
-| ADR-003 security | Алр 003 `bc-01a0d7fa-…c745` | `cursor/implement-adr-003-security-c745` | [#6](https://github.com/IulianaIagodka/IPCL/pull/6) DRAFT | **Superseded by #7** — close after merge |
-| ADR-004 control plane | 004 `bc-01a0d800-…063d` | `cursor/implement-adr-004-control-plane-063d` | [#7](https://github.com/IulianaIagodka/IPCL/pull/7) DRAFT | **Canonical merge target** |
-| ADR-005 product UX | Адр 005 `bc-01a0d7fc-…8895` | `cursor/implement-adr-005-8895` | [#5](https://github.com/IulianaIagodka/IPCL/pull/5) DRAFT | RUNNING |
+| Context Vault MVP | — | merged via #1 | [#1](https://github.com/IulianaIagodka/IPCL/pull/1) MERGED | **Done on main** |
+| ADR-003 security | 004 stack / `…c745` | in #7 only | [#6](https://github.com/IulianaIagodka/IPCL/pull/6) + [#7](https://github.com/IulianaIagodka/IPCL/pull/7) | **Rebase onto main** |
+| ADR-004 control plane | 004 `bc-01a0d800-…063d` | `cursor/implement-adr-004-…` | [#7](https://github.com/IulianaIagodka/IPCL/pull/7) DRAFT | **Rebase onto main** (diverged) |
+| ADR-005 product UX | — | in main history | [#5](https://github.com/IulianaIagodka/IPCL/pull/5) CLOSED | **Mostly on main**; PR closed |
 | Brand / naming | Context across AI `bc-01a0d7f6-…b722` | `cursor/brand-slogans-b722` | [#3](https://github.com/IulianaIagodka/IPCL/pull/3) DRAFT | P3 hold — tip **Eidothea** / eidothea.app + Fly.io (`64dd15c`) |
 | Daily plan / backlog | Щоденне планування `bc-01a0d80c-…70c7` | `cursor/ops-backlog-process-70c7` | [#8](https://github.com/IulianaIagodka/IPCL/pull/8) DRAFT | RUNNING (ops) |
 | main stability | Стабільність гілки main `bc-01a0d822-…3e8b` | — | — | RUNNING — watch; не дублювати INT-1/merge без OWNERS |
@@ -18,7 +18,7 @@
 
 | Агент | Чому конфлікт | Дія |
 |-------|---------------|-----|
-| Demo ADR-003 security UI | Дубль ADR-003 UI | Pause; review після #6 |
+| ADR-003 security | 004 stack / `…c745` | in #7 only | [#6](https://github.com/IulianaIagodka/IPCL/pull/6) + [#7](https://github.com/IulianaIagodka/IPCL/pull/7) | **Rebase onto main** |
 | Open landing and vault UI | Дубль MVP #1 | Pause |
 | Retest vault pages correctly | Дубль MVP #1 | Pause до merge/stable #1 |
 | Open control plane UI | Дубль ADR-004 #7 | Pause |

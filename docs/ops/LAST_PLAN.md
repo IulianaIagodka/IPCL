@@ -1,8 +1,10 @@
-# Last plan refresh — 2026-09-25 ~14:30 Kyiv
+# Last plan refresh — 2026-09-25 ~14:40 Kyiv
 
 ## Delta
-- #9 досі clean на tip #7 (`02b7035`); content MVP unique уже в port (різні SHA).
-- Новий агент: «Стабільність гілки main» — watch, не overlapping product ADR.
+- #1 **merged** into main (`709b9a2`)
+- #5 **closed** unmerged (content mostly already on main)
+- #7 diverged — next = rebase ADR-003/004 onto main
+- INT-1: package exists, not wired
 
 ## Фокус
-Merge #9 → #7 → main.
+Rebase #7 onto main. Не merge #7 as-is. #9 secondary.

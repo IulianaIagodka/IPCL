@@ -1,52 +1,39 @@
 # IPCL Backlog — 2026-09-25
 
-Оновлено: 2026-09-25 ~14:25 Europe/Kyiv  
-Див. також: `OWNERS.md`, `ACTION_REQUIRED.md`, `WAIT_STATE.md`
+Оновлено: 2026-09-25 ~14:40 Europe/Kyiv
 
-## Merge queue
+## Snapshot main (`709b9a2`)
+- ✅ MVP vault merged (#1)
+- ✅ ADR-005 UX commit in history (`be422cf`); PR #5 **closed without merge** (зміст уже в main іншим шляхом)
+- ✅ ADR-002 library → `packages/context-store/` (unify layout)
+- ❌ ADR-003 security impl (немає `api/auth`, тощо) — лишається в **#7**
+- ❌ ADR-004 Context Service — лишається в **#7**
+- ⚠️ INT-1: пакет є, але vault **ще не імпортує** context-store
 
-1. Merge **#9** (PORT-1) into ADR-004 branch / #7
-2. Merge **#7** (+#9) — re-tested 10/10 on port branch
-3. Close **#6** і **#1**
-4. Rebase **#5** → brand **#3** (Eidothea) → **INT-1**
+## Merge queue (оновлено)
+1. **Rebase/merge #7 onto main** — єдиний шлях для ADR-003+004 (роз’їхались з main)
+2. **#9** (PORT-1) — майже obsolete для main (фікси вже в main); корисний лише якщо #7 мержать без rebase на main
+3. Закрити застарілі чернетки після #7
+4. **INT-1** — підключити `packages/context-store` до vault/Context Service
+5. Brand #3 (Eidothea) — після стабільного #7 на main
 
-**Merge readiness #7 @ `02b7035`:** was 10/10 tests — invalid until PORT-1 done.
+## P0
+- [ ] **REBASE-7** Перенести ADR-003/004 з #7 на актуальний `main` (owner `004` або новий агент після anti-dup)
+- [x] **MVP #1** merged
+- [x] **COORD-5/PORT-1** для main — фікси вже в main; #9 опційний
 
-## P0 — координація
+## P1
+- [ ] **ADR-003+004** via rebased #7
+- [ ] **INT-1** wire `packages/context-store` → vault APIs (brief: `INT1_BRIEF.md`, оновити шляхи)
 
-- [x] **COORD-1** Demo ADR-003 UI stopped
-- [ ] **COORD-2** MVP agent (#1) знову пушить — pause; Retest якщо ще живий
-- [x] **COORD-3** Open control plane stopped
-- [ ] **COORD-4** Hold brand #3 (Eidothea + Fly.io `64dd15c`)
-- [ ] **COORD-5** ~~superseded~~ → **відкрито знову**: #1 має unique commits поза #7
-- [x] **PORT-1** PR [#9](https://github.com/IulianaIagodka/IPCL/pull/9) — cherry-pick у ADR-004; tests 10/10 (змерджити в #7)
-
-## P1 — в роботі (owners only)
-
-## P1 — в роботі (owners only)
-
-- [x] **ADR-003** PR [#6](https://github.com/IulianaIagodka/IPCL/pull/6) — superseded by #7 (не мерджити окремо)
-- [ ] **ADR-004** PR [#7](https://github.com/IulianaIagodka/IPCL/pull/7) @ `02b7035` — **канонічний merge target** (tests green)
-- [ ] **ADR-005** PR [#5](https://github.com/IulianaIagodka/IPCL/pull/5) @ `be422cf` — tests 4/4 local; **rebase після #7** (див. `MERGE_READINESS_PR5.md`)
-- [ ] **MVP** PR [#1](https://github.com/IulianaIagodka/IPCL/pull/1) @ `253e56d` — **unique commits**; port into #7 then close
-
-## P2 — після merge
-
-- [ ] **INT-1** Зв’язати ADR-002 library з vault/control-plane — brief готовий: [`INT1_BRIEF.md`](./INT1_BRIEF.md) (підвищити до P1 після merge #7)
-- [ ] **TEST-1** Vault retest після одного канонічного UI
-- [ ] **REBASE-5** ADR-005 на main після #7
+## P2
+- [ ] **TEST-1** Full vault+security+adr002 tests on unified main
+- [ ] Close/cleanup #5/#6/#9 as appropriate
 
 ## P3
-
-- [ ] **BRAND-1** PR [#3](https://github.com/IulianaIagodka/IPCL/pull/3) @ `64dd15c` — **Eidothea** / `eidothea.app` (зафіксувати після #5+#7, не під час rename churn)
-- [ ] **DOCS-1** Дублі ADR filename (`001-` vs `ADR-001-`)
-- [ ] **OPS-1** Daily 08:00 Kyiv (timer до 2026-10-02) + OWNERS anti-dup
-
-## Done
-
-- [x] ADR-002 на `main`
-- [x] PROCESS + BACKLOG + OWNERS + daily/renew timers
-- [x] Persist ops docs → PR [#8](https://github.com/IulianaIagodka/IPCL/pull/8)
+- [ ] **BRAND-1** #3 Eidothea + Fly.io
+- [ ] **DOCS-1** дубль `001-` vs `ADR-001-`
+- [ ] **OPS-1** daily 08:00
 
 ## Inbox
-Нова задача → P0–P3 тут → сверить `OWNERS.md` → TodoWrite → робота.
+Нова задача → P0–P3 → OWNERS anti-dup → виконання.
