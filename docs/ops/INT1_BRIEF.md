@@ -1,42 +1,44 @@
 # INT-1 brief — ADR-002 library ↔ vault/control-plane
 
-**Status:** IN PROGRESS → completing one storage path  
-**Priority:** P1  
-**Owner:** Context store wiring (`bc-01a0d840-…4e11`)  
-**Rule:** one PR · one agent · no brand/UI/ADR-003/004 side work  
-**PR:** https://github.com/IulianaIagodka/IPCL/pull/12
+Статус: **IN PROGRESS** — owner призначено.  
+Пріоритет: **P1**.  
+Owner: **Context store wiring** `bc-01a0d840-d424-7bac-96dd-84a4011a4e11`  
+(label від людини: `INT-1 wire context-store`)  
+URL: https://cursor.com/agents/bc-01a0d840-d424-7bac-96dd-84a4011a4e11  
 
-## Problem
+**Правило:** один PR · один агент · не дублювати. Brief нижче — для owner.
 
-Two parallel worlds after ADR-002 and ADR-003/004 on main:
+## Проблема
+Два паралельні світи:
 
-| World | Location | Canonical object | API |
-|------|----------|------------------|-----|
-| ADR-002 library | `packages/context-store` | Memory + Source + Project | `createContextStore()`, retrieve/assemble |
-| Vault / Context Service | `src/lib/vault.ts` + `src/service` | Context items + classification | HTTP `/api/*` + façade |
+| Світ | Де | Канонічний об’єкт | API |
+|------|-----|-------------------|-----|
+| ADR-002 library | `main` → `src/memories.ts`, `store.ts`, `retrieve.ts`, `assemble.ts` | **Memory** + Source + Project | `createContextStore()`, `assembleContext()` |
+| Vault / ADR-003/004 | **main** (через #6+#11) → `src/lib/vault.ts` + `src/service/context-service.ts` | Context items + classification + integrations | HTTP `/api/*` + Context Service façade |
 
-## Target
+`main` має vault + Context Service; ADR-002 лишається в `packages/context-store` і ще **не** підключений як єдиний storage path.
 
-**One storage + retrieval path:** Context Service / vault call ADR-002 primitives; UI/MCP stay behind façade (ADR-004).
+## Ціль INT-1
+Один storage+retrieval шлях: Context Service викликає ADR-002 primitives; UI/MCP лишаються за façade (ADR-004).
 
-## Implemented
+## Рекомендовані кроки (зараз)
+1. **Bring-up:** скопіювати/перенести ADR-002 modules з `main` у пакет (напр. `src/core/` або `packages/context-store`), без ламання Next aliases.
+2. **Adapter:** у `context-service` / `vault` замінити прямі writes на:
+   - import → `createSource` + `extractMemoriesFromText` + `createMemory`
+   - search → `retrieveMemories` (+ classification filter з ADR-003)
+   - preview/export → `assembleContext` у token budget
+3. **Conflicts:** підключити `detectConflicts` / `requiresConfirmation` до candidate flow (`/api/candidates`).
+4. **Security bridge:** RESTRICTED/SENSITIVE (vault policy) ↔ memory scope/metadata ADR-002.
+5. **Tests:** перенести `tests/adr-002.test.ts` + розширити `scripts/test-vault.ts` на hybrid path.
+6. **Do not:** паралельний другий SQLite schema назавжди — міграція або dual-read→single-write.
 
-- Adapter: dual-write vault → ADR-002 memories (`src/lib/memory-bridge.ts`)
-- `/api/search` → `retrieveMemories` + ADR-003 policy filters
-- `/api/preview` → `assembleContext` within token budget
-- Conflicts on candidate flow (`detectConflicts` / `requiresConfirmation`)
-- Classification bridge: `NORMAL|SENSITIVE|RESTRICTED` ↔ `normal|sensitive|restricted`
-- Link table `adr_memory_links` (vault ref ↔ memory id)
-- **One SQLite file:** `data/context-vault.sqlite` — vault + ADR-002 (`adr_sources`, `adr_projects`, `memories`, …) via `bindSharedDb`
+## Антидубль
+Не стартувати INT-1 поки:
+- #7 не змерджено (або явно assigned на гілку від #7 tip);
+- Open control plane / Demo 003 / Open landing ще пишуть у ті самі UI/API файли.
 
 ## Acceptance
-
-- [x] One DB path for memories (`context-vault.sqlite` shared connection)
-- [x] `/api/search` and `/api/preview` go through ADR-002 retrieve/assemble
-- [x] ADR-002 unit tests + vault tests green
-- [x] OWNERS updated: INT-1 owner
-
-## Do not
-
-- Parallel second SQLite file (`context-memories.sqlite` removed)
-- Brand / UI / ADR-003/004 feature work in this PR
+- [ ] One DB path for memories
+- [ ] `/api/search` і `/api/preview` йдуть через ADR-002 retrieve/assemble
+- [ ] ADR-002 unit tests + vault tests green
+- [ ] OWNERS оновлено: INT-1 owner + Done

@@ -1,21 +1,21 @@
-# Eidothea Owners registry (anti-dup)
+# IPCL Owners registry (anti-dup)
 
-Оновлено: 2026-09-25  
-Правило: **одна тема = один owner-агент**.
+Оновлено: 2026-09-25 ~11:53 UTC — INT-1 **MERGED**  
+Канон: **[RULES.md](./RULES.md)**.
 
-| Тема | Owner agent | Branch | PR | Статус |
-|------|-------------|--------|-----|--------|
-| ADR-002 store (library) | — | `main` | merged | **Done** |
-| Context Vault MVP | — | merged via #1 | MERGED | **Done** |
-| ADR-003 security | — | main via #6/#11 | MERGED | **Done** |
-| ADR-004 control plane | — | main via #11 | MERGED | **Done** |
-| ADR-005 product UX | — | main history | CLOSED #5 | **Done** |
-| **INT-1 wire context-store** | Context store wiring `…4e11` | `cursor/int1-wire-context-store-4e11` | [#12](https://github.com/IulianaIagodka/IPCL/pull/12) | **Owner — one storage path** |
-| Brand / naming | — | main (Eidothea) | merged | **Done** |
-| Daily plan / backlog | Щоденне планування `…70c7` | `cursor/ops-backlog-process-70c7` | #8 | ops |
+| Тема | Owner | PR / branch | Статус |
+|------|-------|-------------|--------|
+| Orchestration | ops `bc-01a0d80c-…70c7` | [#8](https://github.com/IulianaIagodka/IPCL/pull/8) | RUNNING |
+| ADR-002 | — | main | Done |
+| MVP | — | #1 MERGED | Done |
+| ADR-003 | — | #6 MERGED | Done |
+| ADR-004 | — | #11 MERGED | Done |
+| #7 / #9 | — | CLOSED | Cleared |
+| ADR-005 / brand | — | CLOSED | On main |
+| **INT-1** | Context store wiring `bc-01a0d840-…4e11` | [#12](https://github.com/IulianaIagodka/IPCL/pull/12) CLOSED · main `@7da1b79` | **MERGED — archive owner** |
 
-## Перевірка перед стартом нової роботи
-
-1. Відкрити цю таблицю.
-2. `list-cloud-agents` — чи є RUNNING/IDLE по тій темі.
-3. Якщо тема вже має owner → нова задача лише в BACKLOG, не новий агент.
+## Post-merge INT-1
+- Merged to `main` at `7da1b79` (human OK `merge #12`)
+- Рекомендація: **archive** Context store wiring (`bc-01a0d840-d424-7bac-96dd-84a4011a4e11`)
+- Brief: [INT1_BRIEF.md](./INT1_BRIEF.md)
+- Не стартувати другий wiring-агент

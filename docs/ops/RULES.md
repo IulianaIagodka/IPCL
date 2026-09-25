@@ -27,8 +27,8 @@
 2. MVP vault stable на `main`
 3. **ADR-003** → merge
 4. **ADR-004** → merge (**DONE** #11 → `bbd3eba`)
-5. **INT-1** (wire `packages/context-store`) — **ready to assign** (після close #7/#9 бажано)
-6. ADR-005 / brand / polish — лише якщо **не** перетинає open P0 paths, інакше **після** INT-1
+5. **INT-1** (wire `packages/context-store`) — **DONE** #12 → `main@7da1b79`
+6. ADR-005 / brand / polish — лише якщо **не** перетинає open P0 paths (ADR-005 вже на main)
 
 **Заборонено:** стартувати ADR-N+1 у код, поки залежний ADR-N не в `main`.
 
@@ -129,6 +129,7 @@ TodoWrite — на оркестраційні або owner-кроки до ви�
 | Файл | Роль |
 |------|------|
 | [TEAM_SETUP.md](./TEAM_SETUP.md) | **Bootstrap нового проєкту з цим сетапом** |
+| [templates/](./templates/) | Порожні файли `docs/ops/` для копіювання в інший репо |
 | [PROCESS.md](./PROCESS.md) | операційний цикл оркестратора |
 | [OWNERS.md](./OWNERS.md) | реєстр owners |
 | [BACKLOG.md](./BACKLOG.md) | P0–P3 + черга |
