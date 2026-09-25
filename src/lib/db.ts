@@ -82,6 +82,14 @@ function ensureSchema(db: Database.Database) {
       FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS activity_events (
+      id TEXT PRIMARY KEY,
+      kind TEXT NOT NULL,
+      summary TEXT NOT NULL,
+      detail TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS audit_events (
       id TEXT PRIMARY KEY,
       action TEXT NOT NULL,

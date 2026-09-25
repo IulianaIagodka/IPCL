@@ -180,6 +180,14 @@ export interface Integration {
   updatedAt: string;
 }
 
+export interface ActivityEvent {
+  id: string;
+  kind: "share" | "import" | "integration" | "permission" | "system";
+  summary: string;
+  detail: string;
+  createdAt: string;
+}
+
 export interface AuditEvent {
   id: string;
   action: AuditAction;
