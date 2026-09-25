@@ -1,0 +1,24 @@
+{
+  "name": "ipcl",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Independent Portable Context Layer — structured memory + semantic retrieval (ADR-002)",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "tsx --test tests/*.test.ts",
+    "benchmark": "tsx scripts/benchmark-retrieval.ts",
+    "demo": "tsx scripts/demo-adr-002.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "nanoid": "^5.1.5"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.15.29",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}
