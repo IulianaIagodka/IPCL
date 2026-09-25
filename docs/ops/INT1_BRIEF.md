@@ -1,8 +1,8 @@
 # INT-1 brief — ADR-002 library ↔ vault/control-plane
 
-Статус: **готово до виконання після merge #7** (не стартувати зараз — overlapping + #7 ще не в main).  
-Пріоритет: P2 → **P1** одразу після merge #7.  
-Owner (майбутній): окремий агент `cursor/int1-adr002-vault-…` — перевірити OWNERS перед стартом.
+Статус: **готово до призначення owner** після merge **#11** (`bbd3eba` на main).  
+Пріоритет: **P1**.  
+Owner: **unassigned** — перед стартом: BACKLOG + OWNERS + `list-cloud-agents` (RULES §3). Один агент.
 
 ## Проблема
 Два паралельні світи:
@@ -10,7 +10,7 @@ Owner (майбутній): окремий агент `cursor/int1-adr002-vault-
 | Світ | Де | Канонічний об’єкт | API |
 |------|-----|-------------------|-----|
 | ADR-002 library | `main` → `src/memories.ts`, `store.ts`, `retrieve.ts`, `assemble.ts` | **Memory** + Source + Project | `createContextStore()`, `assembleContext()` |
-| Vault / ADR-003/004 | PR #7 → `src/lib/vault.ts` + `src/service/context-service.ts` | Context items + classification + integrations | HTTP `/api/*` + Context Service façade |
+| Vault / ADR-003/004 | **main** (через #6+#11) → `src/lib/vault.ts` + `src/service/context-service.ts` | Context items + classification + integrations | HTTP `/api/*` + Context Service façade |
 
 `#7` **не містить** `src/memories.ts` / `createContextStore`. Vault має власний SQLite/`search.ts`.
 
