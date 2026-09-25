@@ -2,11 +2,19 @@ import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
 
-const DATA_DIR = process.env.IPCL_DATA_DIR
-  ? path.resolve(process.env.IPCL_DATA_DIR)
-  : path.join(process.cwd(), "data");
+/** Align with vault/control-plane data dir resolution (INT-1). */
+const DATA_DIR = process.env.EIDOTHEA_DATA_DIR
+  ? path.resolve(process.env.EIDOTHEA_DATA_DIR)
+  : process.env.SLID_DATA_DIR
+    ? path.resolve(process.env.SLID_DATA_DIR)
+    : process.env.MEMORA_DATA_DIR
+      ? path.resolve(process.env.MEMORA_DATA_DIR)
+      : process.env.IPCL_DATA_DIR
+        ? path.resolve(process.env.IPCL_DATA_DIR)
+        : path.join(process.cwd(), "data");
 
-const DB_PATH = path.join(DATA_DIR, "ipcl.sqlite");
+/** ADR-002 memory index — separate file until full schema merge. */
+const DB_PATH = path.join(DATA_DIR, "context-memories.sqlite");
 
 let dbInstance: Database.Database | null = null;
 

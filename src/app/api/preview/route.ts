@@ -1,6 +1,5 @@
-import { buildPreview } from "@/lib/vault";
+import { buildPreview, recordAudit } from "@/service";
 import { readJson, withAuth } from "@/lib/http";
-import { recordAudit } from "@/lib/audit";
 
 export const runtime = "nodejs";
 

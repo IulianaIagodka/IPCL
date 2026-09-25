@@ -4,9 +4,12 @@
  * Web UI and MCP must not query storage directly. They go through this
  * façade (or the authenticated Product/MCP APIs that call it).
  *
+ * INT-1: memory retrieval/assembly is delegated to packages/context-store
+ * (ADR-002) inside the vault layer. UI/MCP stay on this façade.
+ *
  * Logical deployment units (may share one process as a modular monolith):
- *   Web control plane  →  Context Service  →  Storage
- *   MCP / Product API  →  Context Service  →  Storage
+ *   Web control plane  →  Context Service  →  Storage (+ ADR-002 index)
+ *   MCP / Product API  →  Context Service  →  Storage (+ ADR-002 index)
  */
 export {
   getProfile,

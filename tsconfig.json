@@ -25,6 +25,12 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@ipcl/context-store": [
+        "./packages/context-store/index.ts"
+      ],
+      "@ipcl/context-store/*": [
+        "./packages/context-store/*"
       ]
     }
   },
@@ -32,11 +38,14 @@
     "next-env.d.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
+    "packages/context-store/**/*.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
-    "packages"
+    "packages/context-store/scripts",
+    "packages/context-store/tests",
+    "packages/context-store/dist"
   ]
 }

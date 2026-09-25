@@ -1,5 +1,5 @@
-import { searchContext, updateContextClassification } from "@/lib/vault";
-import { jsonError, readJson, withAuth } from "@/lib/http";
+import { searchContext, updateContextClassification } from "@/service";
+import { readJson, withAuth } from "@/lib/http";
 import type { DataClassification } from "@/lib/types";
 
 export const runtime = "nodejs";

@@ -8,6 +8,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { resetDbForTests } from "../src/lib/db";
+import { resetMemoryStoreForTests } from "../src/lib/memory-bridge";
 import { resetMasterKeyCache } from "../src/lib/crypto";
 import { ensureTestOwner } from "../src/lib/auth";
 import { createIntegration, resolveIntegrationToken } from "../src/lib/integrations";
@@ -36,6 +37,7 @@ process.env.IPCL_MASTER_KEY =
   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 resetMasterKeyCache();
 resetDbForTests(path.join(tempDir, "test.sqlite"));
+resetMemoryStoreForTests(path.join(tempDir, "memories-test.sqlite"));
 const { user } = ensureTestOwner();
 setFallbackOwnerId(user.id);
 
@@ -313,4 +315,41 @@ test("ADR-004 control plane status and MCP config builder", async () => {
     "test-token-value"
   );
   assert.equal(config.mcpServers["ipcl-context-vault"].cwd, "/tmp/ipcl");
+});
+
+test("INT-1 search and preview go through ADR-002 retrieve/assemble", () => {
+  const project = createProject({
+    name: "Billing Core",
+    description: "Subscription engine",
+  });
+  createDecision({
+    projectId: project.id,
+    content: "Billing Core ships monthly and yearly plans only.",
+  });
+  saveContext("Token budgets are enforced per integration request.", {
+    projectId: project.id,
+    title: "Budgets",
+    tags: ["tokens"],
+  });
+
+  const hits = searchContext("monthly yearly subscription billing plans", {
+    projectId: project.id,
+    limit: 8,
+  });
+  assert.ok(hits.length > 0, "ADR-002 retrieve should return vault-linked hits");
+  assert.ok(
+    hits.some((h) => /monthly|yearly|subscription|billing/i.test(h.item.content))
+  );
+
+  const preview = buildPreview({
+    destination: "Cursor",
+    projectId: project.id,
+    query: "subscription billing token budget",
+    includeProfile: true,
+    includePreferences: true,
+    includeDecisions: true,
+    includeSearchHits: true,
+  });
+  assert.ok(preview.fragments.length > 0);
+  assert.ok(preview.estimatedTokens > 0);
 });

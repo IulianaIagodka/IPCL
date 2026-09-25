@@ -212,6 +212,14 @@ function ensureSchema(db: Database.Database) {
       kind,
       tokenize = 'porter unicode61'
     );
+
+    -- INT-1: links vault context item ids to ADR-002 memory ids
+    CREATE TABLE IF NOT EXISTS adr_memory_links (
+      vault_ref TEXT PRIMARY KEY,
+      memory_id TEXT NOT NULL,
+      owner_id TEXT,
+      created_at TEXT NOT NULL
+    );
   `);
 
   // Soft migrations for vaults created before ADR-003.
@@ -236,6 +244,7 @@ function ensureSchema(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_integrations_token ON integrations(token_hash);
     CREATE INDEX IF NOT EXISTS idx_context_owner ON context_items(owner_id);
     CREATE INDEX IF NOT EXISTS idx_audit_owner ON audit_events(owner_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_adr_memory_links_memory ON adr_memory_links(memory_id);
   `);
 }
 
