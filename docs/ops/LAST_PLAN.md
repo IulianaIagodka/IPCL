@@ -1,10 +1,11 @@
-# Last plan — 2026-09-25 ~14:20 Kyiv
+# Last plan — 2026-09-25 ~14:53 Kyiv
 
 ## Delta
-- INT-1 PR #12 synchronized → tip `8827f6a` (unify vault + ADR-002 one SQLite path)
+- Human `merge #12` → INT-1 на `main` @ `7da1b79`
+- OWNERS / BACKLOG / ACTION оновлено; #12 CLOSED
 
 ## Фокус
-Твій review + `merge #12`
+Немає відкритого merge gate. Чекаю наступну задачу.
 
 ## Do-not-start
-Другий INT-1 агент
+Другий INT-1 / wiring агент (тема Done)
