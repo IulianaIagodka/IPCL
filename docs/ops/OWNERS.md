@@ -12,6 +12,7 @@
 | ADR-005 product UX | Адр 005 `bc-01a0d7fc-…8895` | `cursor/implement-adr-005-8895` | [#5](https://github.com/IulianaIagodka/IPCL/pull/5) DRAFT | RUNNING |
 | Brand / naming | Context across AI `bc-01a0d7f6-…b722` | `cursor/brand-slogans-b722` | [#3](https://github.com/IulianaIagodka/IPCL/pull/3) DRAFT | P3 hold — tip **Eidothea** / eidothea.app + Fly.io (`64dd15c`) |
 | Daily plan / backlog | Щоденне планування `bc-01a0d80c-…70c7` | `cursor/ops-backlog-process-70c7` | [#8](https://github.com/IulianaIagodka/IPCL/pull/8) DRAFT | RUNNING (ops) |
+| main stability | Стабільність гілки main `bc-01a0d822-…3e8b` | — | — | RUNNING — watch; не дублювати INT-1/merge без OWNERS |
 
 ## Overlapping (не owners — зупинити або не давати нових задач)
 

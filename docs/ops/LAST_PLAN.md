@@ -1,7 +1,8 @@
-# Last plan refresh — 2026-09-25 ~14:25 Kyiv
+# Last plan refresh — 2026-09-25 ~14:30 Kyiv
 
-## Delta / виконання
-- **PORT-1 виконано:** PR [#9](https://github.com/IulianaIagodka/IPCL/pull/9) — cherry-pick MVP fixes у ADR-004 stack; tests 10/10.
+## Delta
+- #9 досі clean на tip #7 (`02b7035`); content MVP unique уже в port (різні SHA).
+- Новий агент: «Стабільність гілки main» — watch, не overlapping product ADR.
 
 ## Фокус
-Merge #9 → #7 → main. Потім close #1/#6.
+Merge #9 → #7 → main.
