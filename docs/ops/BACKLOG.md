@@ -49,6 +49,7 @@
 
 - [x] ADR-002 на `main`
 - [x] PROCESS + BACKLOG + OWNERS + daily/renew timers
+- [x] Persist ops docs → PR [#8](https://github.com/IulianaIagodka/IPCL/pull/8)
 
 ## Inbox
 Нова задача → P0–P3 тут → сверить `OWNERS.md` → TodoWrite → робота.

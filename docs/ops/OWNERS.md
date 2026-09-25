@@ -11,7 +11,7 @@
 | ADR-004 control plane | 004 `bc-01a0d800-…063d` | `cursor/implement-adr-004-control-plane-063d` | [#7](https://github.com/IulianaIagodka/IPCL/pull/7) DRAFT | RUNNING |
 | ADR-005 product UX | Адр 005 `bc-01a0d7fc-…8895` | `cursor/implement-adr-005-8895` | [#5](https://github.com/IulianaIagodka/IPCL/pull/5) DRAFT | RUNNING |
 | Brand / naming | Context across AI `bc-01a0d7f6-…b722` | `cursor/brand-slogans-b722` | [#3](https://github.com/IulianaIagodka/IPCL/pull/3) DRAFT | P3 hold |
-| Daily plan / backlog | Щоденне планування `bc-01a0d80c-…70c7` | — | — | RUNNING (ops) |
+| Daily plan / backlog | Щоденне планування `bc-01a0d80c-…70c7` | `cursor/ops-backlog-process-70c7` | [#8](https://github.com/IulianaIagodka/IPCL/pull/8) DRAFT | RUNNING (ops) |
 
 ## Overlapping (не owners — зупинити або не давати нових задач)
 
