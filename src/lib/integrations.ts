@@ -6,6 +6,7 @@ import { recordAudit } from "./audit";
 import { DEFAULT_READ_SCOPES } from "./policy";
 import type { Principal } from "./policy";
 import type {
+  ActivityEvent,
   DataClassification,
   Integration,
   IntegrationAccessMode,
@@ -314,4 +315,41 @@ export function resolveIntegrationToken(token: string | null | undefined): Princ
     allowedProjectIds: integration.allowedProjectIds,
     allowedClassifications: integration.allowedClassifications,
   };
+}
+
+/** Activity feed retained from main (ADR-005 vault UI) after ADR-003/004 merge. */
+export function listActivity(limit = 40): ActivityEvent[] {
+  const rows = getDb()
+    .prepare(
+      "SELECT * FROM activity_events ORDER BY created_at DESC LIMIT ?"
+    )
+    .all(limit) as Record<string, unknown>[];
+  return rows.map((row) => ({
+    id: String(row.id),
+    kind: String(row.kind) as ActivityEvent["kind"],
+    summary: String(row.summary),
+    detail: String(row.detail ?? ""),
+    createdAt: String(row.created_at),
+  }));
+}
+
+export function recordActivity(input: {
+  kind: ActivityEvent["kind"];
+  summary: string;
+  detail?: string;
+}): ActivityEvent {
+  const event: ActivityEvent = {
+    id: createId("act"),
+    kind: input.kind,
+    summary: input.summary,
+    detail: input.detail ?? "",
+    createdAt: nowIso(),
+  };
+  getDb()
+    .prepare(
+      `INSERT INTO activity_events (id, kind, summary, detail, created_at)
+       VALUES (?, ?, ?, ?, ?)`
+    )
+    .run(event.id, event.kind, event.summary, event.detail, event.createdAt);
+  return event;
 }

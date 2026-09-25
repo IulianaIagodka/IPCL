@@ -1,87 +1,71 @@
 "use client";
 
 import Link from "next/link";
-import { api, useAsyncResource } from "@/lib/client";
-import { StateBadge } from "@/components/StateBadge";
-
-type Stats = {
-  hasProfile: boolean;
-  projects: number;
-  contextItems: number;
-};
+import { api } from "@/lib/client";
 
 export default function SettingsPage() {
-  const { data, error, loading, reload } = useAsyncResource(
-    () => api<Stats>("/api/vault"),
-    []
-  );
+  async function logout() {
+    await api("/api/auth", {
+      method: "POST",
+      body: JSON.stringify({ action: "logout" }),
+    });
+    window.location.href = "/vault/login";
+  }
 
-  async function wipeVault() {
+  async function deleteAccount() {
     if (
-      !window.confirm(
-        "Delete all local vault data? This cannot be undone on this device."
+      !confirm(
+        "Delete this vault owner and all associated memories, sources, and integrations?"
       )
     ) {
       return;
     }
-    await api("/api/vault", { method: "DELETE" });
-    await reload();
+    await api("/api/auth", {
+      method: "POST",
+      body: JSON.stringify({ action: "delete_account" }),
+    });
+    window.location.href = "/vault/login";
   }
 
   return (
     <div className="shell section stack">
-      <div>
-        <p className="eyebrow">Settings</p>
-        <h2 className="page-title">Control</h2>
-        <p className="muted">
-          Profile, import, and local vault controls. Privacy stays legible.
+      <div className="fade-up">
+        <p className="pill">Settings</p>
+        <h2>Account & privacy</h2>
+        <p className="muted" style={{ maxWidth: "40rem", lineHeight: 1.55 }}>
+          The control plane owns account lifecycle. Context, permissions, and
+          audit trail live in the Context Service—not in any AI provider.
         </p>
       </div>
 
-      {loading && <p className="muted">Loading…</p>}
-      {error && <p style={{ color: "var(--danger)" }}>{error}</p>}
+      <div className="panel stack fade-up-delay">
+        <h3 className="font-display" style={{ margin: 0, fontSize: "1.35rem" }}>
+          Privacy controls
+        </h3>
+        <Link className="btn btn-ghost" href="/vault/preview">
+          Preview & manual export
+        </Link>
+        <Link className="btn btn-ghost" href="/vault/integrations">
+          Manage integration permissions
+        </Link>
+        <Link className="btn btn-ghost" href="/vault/activity">
+          Review activity
+        </Link>
+        <Link className="btn btn-ghost" href="/vault/profile">
+          Edit profile
+        </Link>
+      </div>
 
-      <div className="grid-2">
-        <div className="panel stack">
-          <p className="eyebrow">Account context</p>
-          <div className="list-row" style={{ padding: "0.55rem 0" }}>
-            <span>Profile</span>
-            <StateBadge
-              state={data?.hasProfile ? "active" : "restricted"}
-              label={data?.hasProfile ? "READY" : "INCOMPLETE"}
-            />
-          </div>
-          <div className="list-row" style={{ padding: "0.55rem 0" }}>
-            <span>Projects</span>
-            <strong>{data?.projects ?? "—"}</strong>
-          </div>
-          <div className="list-row" style={{ padding: "0.55rem 0" }}>
-            <span>Memories</span>
-            <strong>{data?.contextItems ?? "—"}</strong>
-          </div>
-          <Link href="/vault/profile" className="btn btn-primary">
-            Edit profile
-          </Link>
-          <Link href="/vault/import" className="btn btn-ghost">
-            Import notes or conversations
-          </Link>
-        </div>
-
-        <div className="panel stack">
-          <p className="eyebrow">Danger zone</p>
-          <p className="muted" style={{ margin: 0, lineHeight: 1.5 }}>
-            Local SQLite vault only. Wiping clears profile, projects, memories,
-            and search index on this machine.
-          </p>
-          <button
-            type="button"
-            className="btn btn-ghost"
-            style={{ borderColor: "rgba(231, 124, 124, 0.45)", color: "var(--danger)" }}
-            onClick={() => void wipeVault()}
-          >
-            Wipe local vault
-          </button>
-        </div>
+      <div className="panel stack">
+        <h3 className="font-display" style={{ margin: 0, fontSize: "1.35rem" }}>
+          Session
+        </h3>
+        <button className="btn btn-ghost" onClick={() => void logout()}>
+          Sign out
+        </button>
+        <button className="btn btn-ghost" onClick={() => void deleteAccount()}>
+          Delete account & wipe vault
+        </button>
       </div>
     </div>
   );

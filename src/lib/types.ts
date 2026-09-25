@@ -180,6 +180,14 @@ export interface Integration {
   updatedAt: string;
 }
 
+export interface ActivityEvent {
+  id: string;
+  kind: "share" | "import" | "integration" | "permission" | "system";
+  summary: string;
+  detail: string;
+  createdAt: string;
+}
+
 export interface AuditEvent {
   id: string;
   action: AuditAction;
@@ -209,4 +217,34 @@ export interface CandidateMemory {
   status: "pending" | "approved" | "rejected";
   createdAt: string;
   resolvedAt: string | null;
+}
+
+/** ADR-004 control-plane readiness (safe for client imports). */
+export type ControlPlaneNextStep =
+  | "setup_account"
+  | "complete_profile"
+  | "create_project"
+  | "connect_integration"
+  | "ready";
+
+export interface ControlPlaneStatus {
+  setupRequired: boolean;
+  authenticated: boolean;
+  ownerId: string | null;
+  displayName: string | null;
+  steps: {
+    account: boolean;
+    profile: boolean;
+    project: boolean;
+    integration: boolean;
+  };
+  nextStep: ControlPlaneNextStep;
+  stats: {
+    projects: number;
+    preferences: number;
+    decisions: number;
+    sources: number;
+    contextItems: number;
+    hasProfile: boolean;
+  } | null;
 }

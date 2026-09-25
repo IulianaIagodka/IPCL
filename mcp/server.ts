@@ -1,18 +1,19 @@
 #!/usr/bin/env node
 /**
- * Eidothea MCP server (ADR-001 + ADR-003)
+ * Eidothea MCP server (ADR-001 + ADR-003 + ADR-004)
  *
+ * Integration layer over the Context Service — not a separate source of truth.
  * Requires IPCL_INTEGRATION_TOKEN for a connected, non-revoked integration.
  * Default integrations are READ_ONLY; write tools create candidate memories.
  */
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { resolveIntegrationToken } from "../src/lib/integrations";
-import { PolicyDeniedError, type Principal } from "../src/lib/policy";
 import { runWithPrincipal } from "../src/lib/request-context";
 import { logError } from "../src/lib/logger";
 import {
+  PolicyDeniedError,
+  resolveIntegrationToken,
   getProfile,
   getProject,
   listDecisions,
@@ -20,7 +21,8 @@ import {
   principalCanUseTool,
   proposeCandidateMemory,
   searchContext,
-} from "../src/lib/vault";
+  type Principal,
+} from "../src/service";
 
 const server = new McpServer({
   name: "eidothea",
@@ -32,7 +34,7 @@ function requireIntegrationPrincipal(): Principal & { kind: "integration" } {
   const principal = resolveIntegrationToken(token);
   if (!principal || principal.kind !== "integration") {
     throw new PolicyDeniedError(
-      "MCP authentication failed. Set IPCL_INTEGRATION_TOKEN from Vault → Security."
+      "MCP authentication failed. Set IPCL_INTEGRATION_TOKEN from Control Plane → Integrations."
     );
   }
   return principal;

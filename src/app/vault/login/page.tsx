@@ -38,7 +38,7 @@ export default function LoginPage() {
         method: "POST",
         body: JSON.stringify({ action, email, password, displayName }),
       });
-      router.replace("/vault/security");
+      router.replace("/vault/onboarding");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Auth failed");
     } finally {
