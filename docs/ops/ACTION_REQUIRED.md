@@ -1,25 +1,21 @@
 # ACTION REQUIRED — P0 coordination
 
-Оновлено: 2026-09-25 ~14:10 Europe/Kyiv
+Оновлено: 2026-09-25 ~14:20 Europe/Kyiv
 
-## 1) Overlapping agents
-| Агент | Статус | Дія |
-|-------|--------|-----|
-| Demo ADR-003 security UI | **більше не RUNNING** | COORD-1 ✓ |
-| Open control plane UI | **більше не RUNNING** | COORD-3 ✓ |
-| Navigate to landing / Open landing | **більше не RUNNING** | частина COORD-2 ✓ |
-| [Retest vault pages correctly](https://cursor.com/agents/bc-0e2086b6-f72b-5405-be19-0c223e781672) | ще RUNNING | **pause** (MVP superseded by #7) |
-| [Independent context layer](https://cursor.com/agents/bc-01a0d7e9-c7bf-7e7b-9a0c-233c3fbbcc40) (#1) | ще RUNNING | після merge #7 — закрити #1, не розвивати окремо |
+## Alert: PR #1 більше не fully superseded
 
-Owners OK: `004` (#7), `Адр 005` (#5), `Алр 003` (#6 superseded).
+MVP tip `253e56d` має **2 коміти поза #7**:
+- `247218a` Harden profile merge + AGENTS.md/CLAUDE.md
+- `253e56d` Merge expertise on import extraction
 
-## 2) Merge path
-1. Review/merge **[PR #7](https://github.com/IulianaIagodka/IPCL/pull/7)** — tests 10/10, tsc clean
-2. Закрити **#1** і **#6**
-3. Rebase **#5**, потім brand **#3** (Eidothea)
-4. **INT-1** (див. `INT1_BRIEF.md`)
+Файли лише в #1: `AGENTS.md`, `CLAUDE.md` (+ зміни `src/lib/vault.ts`, `next.config.ts`).
 
-## 3) Ops
-Draft **[PR #8](https://github.com/IulianaIagodka/IPCL/pull/8)** — канон беклогу
+### Що зробити перед merge #7
+1. **Pause** MVP agent (#1), щоб не накопичувати ще delta
+2. **Port** ці 2 коміти в `#7` (cherry-pick на `implement-adr-004-…`) **або** rebase `#7` на новий tip `#1`
+3. Потім merge **#7**; закрити #1/#6
+4. Rebase #5 → brand #3 → INT-1
 
-Напиши `merge #7` коли готово.
+Owners: `004` (#7), `Адр 005` (#5). MVP (#1) не розвивати окремо після port.
+
+Напиши `port #1 into #7` — зроблю cherry-pick на гілці #7 / окремій гілці від #7 tip.

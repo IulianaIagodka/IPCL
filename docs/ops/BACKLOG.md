@@ -1,39 +1,34 @@
 # IPCL Backlog — 2026-09-25
 
-Оновлено: 2026-09-25 ~14:10 Europe/Kyiv  
-Див. також: `OWNERS.md`, `PROCESS.md`, `MERGE_READINESS.md`, `ACTION_REQUIRED.md`, `WAIT_STATE.md`
+Оновлено: 2026-09-25 ~14:20 Europe/Kyiv  
+Див. також: `OWNERS.md`, `ACTION_REQUIRED.md`, `WAIT_STATE.md`
 
-## Merge queue (за git ancestry) — verified 2026-09-25
+## Merge queue
 
-Фактично (доведено `merge-base --is-ancestor`):
-- `#6` ADR-003 **повністю входить у** `#7` ADR-004 → можна мерджити **лише #7**
-- MVP є предком #6/#7
-- **`main` (ADR-002) НЕ є предком #6/#7** → INT-1 після merge
-- `#5` / `#3` — форки від MVP без 003/004 → rebase обов’язковий
+1. **PORT-1** Cherry-pick `#1` unique commits (`247218a`, `253e56d`) into `#7` (або rebase #7 onto #1 tip)
+2. Merge **#7** (tests were green @ `02b7035`; re-test after port)
+3. Close **#6** і **#1**
+4. Rebase **#5** → brand **#3** (Eidothea) → **INT-1**
 
-**Merge readiness #7:** `npm test` 10/10 · `tsc` clean · DRAFT
-
-Рекомендований порядок:
-1. Змерджити **#7 ADR-004**
-2. Закрити **#6** і **#1** (COORD-5)
-3. Rebase **#5 ADR-005**
-4. **#3 Brand Eidothea** після #5
-5. **INT-1**
+**Merge readiness #7 @ `02b7035`:** was 10/10 tests — invalid until PORT-1 done.
 
 ## P0 — координація
 
-- [x] **COORD-1** Demo ADR-003 UI — більше не RUNNING
-- [ ] **COORD-2** Retest vault (+ MVP agent) ще RUNNING — pause / не розвивати #1
-- [x] **COORD-3** Open control plane UI — більше не RUNNING
-- [ ] **COORD-4** Hold brand PR #3 (Eidothea / eidothea.app) до після #5/#7
-- [x] **COORD-5** `#1` і `#6` superseded `#7` → закрити після merge #7
+- [x] **COORD-1** Demo ADR-003 UI stopped
+- [ ] **COORD-2** MVP agent (#1) знову пушить — pause; Retest якщо ще живий
+- [x] **COORD-3** Open control plane stopped
+- [ ] **COORD-4** Hold brand #3 (Eidothea + Fly.io `64dd15c`)
+- [ ] **COORD-5** ~~superseded~~ → **відкрито знову**: #1 має unique commits поза #7
+- [ ] **PORT-1** Перенести unique #1 → #7 перед merge
+
+## P1 — в роботі (owners only)
 
 ## P1 — в роботі (owners only)
 
 - [x] **ADR-003** PR [#6](https://github.com/IulianaIagodka/IPCL/pull/6) — superseded by #7 (не мерджити окремо)
 - [ ] **ADR-004** PR [#7](https://github.com/IulianaIagodka/IPCL/pull/7) @ `02b7035` — **канонічний merge target** (tests green)
 - [ ] **ADR-005** PR [#5](https://github.com/IulianaIagodka/IPCL/pull/5) @ `be422cf` — tests 4/4 local; **rebase після #7** (див. `MERGE_READINESS_PR5.md`)
-- [x] **MVP** PR [#1](https://github.com/IulianaIagodka/IPCL/pull/1) — superseded by #7 (закрити після merge)
+- [ ] **MVP** PR [#1](https://github.com/IulianaIagodka/IPCL/pull/1) @ `253e56d` — **unique commits**; port into #7 then close
 
 ## P2 — після merge
 
