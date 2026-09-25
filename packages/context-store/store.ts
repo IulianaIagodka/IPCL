@@ -11,13 +11,13 @@
  * - Context packages are ephemeral
  */
 
-import { assembleContext } from "./assemble.js";
+import { assembleContext } from "./assemble";
 import {
   detectConflicts,
   requiresConfirmation,
   resolveConflict,
-} from "./conflicts.js";
-import { extractMemoriesFromText } from "./extract.js";
+} from "./conflicts";
+import { extractMemoriesFromText } from "./extract";
 import {
   archiveMemory,
   createMemory,
@@ -27,10 +27,10 @@ import {
   pinMemory,
   supersedeMemory,
   updateMemory,
-} from "./memories.js";
-import { createProject, getProjectBySlug, listProjects } from "./projects.js";
-import { inferScopeFromQuery, retrieveMemories } from "./retrieve.js";
-import { createSource, getSource, listSources } from "./sources.js";
+} from "./memories";
+import { createProject, getProjectBySlug, listProjects } from "./projects";
+import { inferScopeFromQuery, retrieveMemories } from "./retrieve";
+import { createSource, getSource, listSources } from "./sources";
 import type {
   ConflictProposal,
   ConflictResolution,
@@ -41,7 +41,7 @@ import type {
   Scope,
   Source,
   SourceType,
-} from "./types.js";
+} from "./types";
 
 export interface ImportResult {
   source: Source;

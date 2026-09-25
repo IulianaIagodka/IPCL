@@ -1,12 +1,12 @@
-import { getDb } from "./db.js";
+import { getDb } from "./db";
 import {
   cosineSimilarity,
   deserializeEmbedding,
   embed,
   serializeEmbedding,
   type SparseEmbedding,
-} from "./embed.js";
-import { createId, nowIso } from "./id.js";
+} from "./embed";
+import { createId, nowIso } from "./id";
 import type {
   Confidence,
   Importance,
@@ -15,7 +15,7 @@ import type {
   MemoryType,
   Scope,
   Sensitivity,
-} from "./types.js";
+} from "./types";
 
 interface MemoryRow {
   id: string;

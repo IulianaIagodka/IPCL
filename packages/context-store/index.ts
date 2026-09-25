@@ -1,6 +1,6 @@
-export type * from "./types.js";
-export { createContextStore, ContextStore } from "./store.js";
-export type { ImportResult } from "./store.js";
+export type * from "./types";
+export { createContextStore, ContextStore } from "./store";
+export type { ImportResult } from "./store";
 export {
   getDb,
   resetDbForTests,
@@ -9,17 +9,17 @@ export {
   getDbPath,
   bindSharedDb,
   ensureAdrSchema,
-} from "./db.js";
-export { embed, cosineSimilarity, tokenize } from "./embed.js";
-export { projectScope, estimateTokens, slugify } from "./id.js";
-export { extractMemoriesFromText } from "./extract.js";
+} from "./db";
+export { embed, cosineSimilarity, tokenize } from "./embed";
+export { projectScope, estimateTokens, slugify } from "./id";
+export { extractMemoriesFromText } from "./extract";
 export {
   detectConflicts,
   requiresConfirmation,
   resolveConflict,
-} from "./conflicts.js";
-export { retrieveMemories, inferScopeFromQuery } from "./retrieve.js";
-export { assembleContext } from "./assemble.js";
+} from "./conflicts";
+export { retrieveMemories, inferScopeFromQuery } from "./retrieve";
+export { assembleContext } from "./assemble";
 export {
   createMemory,
   getMemory,
@@ -29,6 +29,6 @@ export {
   archiveMemory,
   deleteMemory,
   pinMemory,
-} from "./memories.js";
-export { createSource, getSource, listSources } from "./sources.js";
-export { createProject, listProjects, getProjectBySlug } from "./projects.js";
+} from "./memories";
+export { createSource, getSource, listSources } from "./sources";
+export { createProject, listProjects, getProjectBySlug } from "./projects";
