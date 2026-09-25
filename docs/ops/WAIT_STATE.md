@@ -1,6 +1,6 @@
 # WAIT STATE — next progress gates
 
-Оновлено: 2026-09-25 ~13:50 UTC / ~16:50 Europe/Kyiv
+Оновлено: 2026-09-25 ~13:50 UTC → conflict note ~10:48 UTC
 
 ## Цей goal ACTIVE навмисно
 Continuous ops (daily plan + backlog). **Не** UpdateGoal=complete, поки потрібні щоденні плани.
@@ -12,8 +12,8 @@ Continuous ops (daily plan + backlog). **Не** UpdateGoal=complete, поки п
 4. **Goal continue** без delta → лише перевірити tips+agents; **не** плодити docs якщо tips не змінилися
 
 ## Заблоковано ззовні
-- Pause overlapping Demo/Navigate/Retest/Open control plane (якщо знову RUNNING)
-- Merge **#11** — потрібен явніший OK від owner
+- **Алр 003 RUNNING** на #6 — overlap з #11 (0 unique commits) → pause
+- Merge **#11** — потрібен явний OK від owner
 - INT-1 — після merge #11
 
 ## Вже виконано (не повторювати без delta)

@@ -7,8 +7,11 @@ Draft **[PR #11](https://github.com/IulianaIagodka/IPCL/pull/11)** — ADR-003/0
 - Re-merged latest `main`; conflicts resolved (MCP / vault page / tests)
 - tests **17/17** · tsc clean
 
+### Конфлікт (anti-dup)
+**Алр 003** (`bc-01a0d7fa-…c745`) знову **RUNNING** на #6 — гілка без унікальних комітів vs #11. Не дублювати ADR-003; pause той агент.
+
 ### Далі
 1. Review/merge **#11** → main
-2. Закрити застарілі #7 / #9 / #6
+2. Закрити застарілі #7 / #9 / #6 (+ pause Алр 003)
 3. **INT-1** wire `packages/context-store`
 4. Brand: #3 closed — no further brand PR until after #11
