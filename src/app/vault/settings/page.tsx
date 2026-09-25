@@ -51,8 +51,8 @@ export default function SettingsPage() {
         <Link className="btn btn-ghost" href="/vault/activity">
           Review activity
         </Link>
-        <Link className="btn btn-ghost" href="/vault/security">
-          Legacy security page
+        <Link className="btn btn-ghost" href="/vault/profile">
+          Edit profile
         </Link>
       </div>
 
