@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "ipcl-context-vault": {
+      "command": "npx",
+      "args": ["tsx", "mcp/server.ts"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "IPCL_DATA_DIR": "${workspaceFolder}/data"
+      }
+    }
+  }
+}
