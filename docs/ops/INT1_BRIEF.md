@@ -1,8 +1,12 @@
 # INT-1 brief — ADR-002 library ↔ vault/control-plane
 
-Статус: **готово до призначення owner** після merge **#11** (`bbd3eba` на main).  
+Статус: **IN PROGRESS** — owner призначено.  
 Пріоритет: **P1**.  
-Owner: **unassigned** — перед стартом: BACKLOG + OWNERS + `list-cloud-agents` (RULES §3). Один агент.
+Owner: **Context store wiring** `bc-01a0d840-d424-7bac-96dd-84a4011a4e11`  
+(label від людини: `INT-1 wire context-store`)  
+URL: https://cursor.com/agents/bc-01a0d840-d424-7bac-96dd-84a4011a4e11  
+
+**Правило:** один PR · один агент · не дублювати. Brief нижче — для owner.
 
 ## Проблема
 Два паралельні світи:

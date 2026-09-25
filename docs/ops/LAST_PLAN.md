@@ -1,10 +1,10 @@
-# Last plan — 2026-09-25 ~14:05 Kyiv
+# Last plan — 2026-09-25 ~14:10 Kyiv
 
 ## Delta
-- #11 merged · **#7 closed · #9 closed** (human OK)
+- `start INT-1` → owner **Context store wiring** (`bc-01a0d840-…4e11`)
 
 ## Фокус
-Призначити одного owner на **INT-1**.
+INT-1 in progress (sole owner). Оркестратор лише стежить.
 
 ## Do-not-start
-Другий INT-1 агент; brand/UI паралельно з INT-1; новий ADR-003/004.
+Другий INT-1 агент; brand/UI на тих самих storage paths.

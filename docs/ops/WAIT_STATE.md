@@ -1,17 +1,17 @@
 # WAIT STATE — orchestrator gates
 
-Оновлено: 2026-09-25 ~11:05 UTC
+Оновлено: 2026-09-25 ~11:10 UTC
 
-Канон: **[RULES.md](./RULES.md)**. Product-код — стоп.
+Канон: **[RULES.md](./RULES.md)**. Product-код оркестратором — стоп.
 
 ## Gates
-- ~~#11 merge~~ DONE · ~~close #7/#9~~ DONE
-- Next: user assigns INT-1 owner → оркестратор оновлює OWNERS, не кодить
+- ~~#11~~ · ~~#7/#9~~ · **INT-1 owner ASSIGNED** (Context store wiring)
 
 ## Wake
 | Подія | Дія |
 |-------|-----|
 | 08:00 | план |
-| PR delta | backlog |
+| PR від INT-1 | оновити BACKLOG/OWNERS (номер PR) |
+| Другий агент на INT-1 | **конфлікт P0** — stop / не дублювати |
 | Goal continue без delta | тиша |
-| User `start INT-1` / assign | OWNERS + brief |
+| User merge INT-1 PR | лише після явного OK |

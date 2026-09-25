@@ -1,20 +1,19 @@
 # IPCL Backlog — 2026-09-25
 
-Оновлено: 2026-09-25 ~11:05 UTC — #7/#9 closed
+Оновлено: 2026-09-25 ~11:10 UTC — INT-1 owner assigned
 
-## Merge queue
-1. ~~#11~~ MERGED (`bbd3eba`)
-2. ~~Close #7 / #9~~ **DONE** (human `Закрий 7 9`)
-3. **INT-1** — призначити **одного** owner
+## Merge queue / active
+1. ~~#11~~ · ~~close #7/#9~~
+2. **INT-1** — owner: **Context store wiring** (`bc-01a0d840-…4e11`) · in progress
 
 ## Done
-- [x] #1 MVP · #5 · #3 · #6 ADR-003 · #11 ADR-004 · #7/#9 closed
+- [x] #1 · #5 · #3 · #6 · #11 · #7/#9 closed · INT-1 assigned
 
 ## P0
-- [ ] (none — gate clear)
+- [ ] (none)
 
 ## P1
-- [ ] INT-1 — assign one owner (BACKLOG+OWNERS+anti-dup before start)
+- [ ] INT-1 wire `packages/context-store` → vault/Context Service — **owner RUNNING**
 
 ## P3
 - [ ] DOCS-1 · daily 08:00

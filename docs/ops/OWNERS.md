@@ -1,19 +1,20 @@
 # IPCL Owners registry (anti-dup)
 
-Оновлено: 2026-09-25 ~11:05 UTC  
+Оновлено: 2026-09-25 ~11:10 UTC — INT-1 assigned  
 Канон: **[RULES.md](./RULES.md)**.
 
-| Тема | Owner | PR | Статус |
-|------|-------|-----|--------|
-| Orchestration | ops `…70c7` | [#8](https://github.com/IulianaIagodka/IPCL/pull/8) | RUNNING |
+| Тема | Owner | PR / branch | Статус |
+|------|-------|-------------|--------|
+| Orchestration | ops `bc-01a0d80c-…70c7` | [#8](https://github.com/IulianaIagodka/IPCL/pull/8) | RUNNING |
 | ADR-002 | — | main | Done |
 | MVP | — | #1 MERGED | Done |
-| ADR-003 | — | #6 MERGED | Done — pause Алр 003 |
-| ADR-004 | — | #11 MERGED | Done — pause 004 IDLE |
-| ADR-004 legacy | — | #7 **CLOSED** | Cleared |
-| PORT | — | #9 **CLOSED** | Cleared |
-| ADR-005 / brand | — | #5/#3 CLOSED | On main |
-| **INT-1** | **unassigned** | — | **Ready — assign one owner** |
+| ADR-003 | — | #6 MERGED | Done |
+| ADR-004 | — | #11 MERGED | Done |
+| #7 / #9 | — | CLOSED | Cleared |
+| ADR-005 / brand | — | CLOSED | On main |
+| **INT-1** | **Context store wiring** `bc-01a0d840-d424-7bac-96dd-84a4011a4e11` (label: INT-1 wire context-store) | TBD one PR from `main` | **RUNNING — sole owner** |
 
-## Перед стартом INT-1
-1. BACKLOG P1 → 2. OWNERS рядок → 3. `list-cloud-agents` → 4. один агент.
+## Anti-dup INT-1
+- **Єдиний owner:** [Context store wiring](https://cursor.com/agents/bc-01a0d840-d424-7bac-96dd-84a4011a4e11)
+- Іншим агентам **не** стартувати wiring `packages/context-store` / vault storage
+- Brief: [INT1_BRIEF.md](./INT1_BRIEF.md)
