@@ -22,18 +22,18 @@
 
 ## P0 — координація
 
-- [ ] **COORD-1** Pause Demo ADR-003 UI; owner = PR #6
-- [ ] **COORD-2** Pause Open landing + Retest vault; owner = PR #1 (або #6 якщо MVP superseded)
+- [ ] **COORD-1** Pause Demo ADR-003 UI; owner = PR #6 (superseded by #7 after merge)
+- [ ] **COORD-2** Pause Open landing + Retest vault; MVP owner superseded by #7
 - [ ] **COORD-3** Pause Open control plane UI; owner = PR #7
-- [ ] **COORD-4** Hold brand PR #3 (Memora/Slid churn) до після #5
-- [ ] **COORD-5** Вирішити: чи #1 ще потрібен окремо, чи закрити на користь стеку #6/#7
+- [ ] **COORD-4** Hold brand PR #3 до після #5
+- [x] **COORD-5** `#1` і `#6` **повністю superseded `#7`** (0 unique commits/files у MVP поза #7; 0 commits #6 поза #7) → після merge #7 закрити #1 і #6
 
 ## P1 — в роботі (owners only)
 
-- [ ] **ADR-003** PR [#6](https://github.com/IulianaIagodka/IPCL/pull/6) @ `16c26c4`
-- [ ] **ADR-004** PR [#7](https://github.com/IulianaIagodka/IPCL/pull/7) @ `02b7035` (includes 003)
-- [ ] **ADR-005** PR [#5](https://github.com/IulianaIagodka/IPCL/pull/5) @ `be422cf` — rebase після 003/004
-- [ ] **MVP** PR [#1](https://github.com/IulianaIagodka/IPCL/pull/1) @ `83124ac` — під питанням (COORD-5)
+- [x] **ADR-003** PR [#6](https://github.com/IulianaIagodka/IPCL/pull/6) — superseded by #7 (не мерджити окремо)
+- [ ] **ADR-004** PR [#7](https://github.com/IulianaIagodka/IPCL/pull/7) @ `02b7035` — **канонічний merge target** (tests green)
+- [ ] **ADR-005** PR [#5](https://github.com/IulianaIagodka/IPCL/pull/5) — 2 unique commits vs #7; rebase після merge #7
+- [x] **MVP** PR [#1](https://github.com/IulianaIagodka/IPCL/pull/1) — superseded by #7 (закрити після merge)
 
 ## P2 — після merge
 

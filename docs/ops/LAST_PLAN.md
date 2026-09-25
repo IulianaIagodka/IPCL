@@ -1,12 +1,12 @@
-# Last plan refresh — 2026-09-25 ~13:40 Kyiv
+# Last plan refresh — 2026-09-25 ~13:45 Kyiv
 
 ## Delta / виконання
-- Перевірено PR #7 у worktree: **npm test 10/10**, **tsc clean**.
-- Підтверджено: vault-стек **без** ADR-002 library → INT-1 після merge.
-- Додано `MERGE_READINESS.md`.
+- **COORD-5 done:** `#1` і `#6` повністю входять у `#7` (0 unique commits/files).
+- Канонічний merge target = **#7 only**.
+- Pause overlapping досі потрібен (Demo 003 / Open landing / Retest / Open control plane).
 
 ## Фокус
-User: pause overlapping → merge #7 (вже green на тестах).
+Merge #7 → close #1+#6 → rebase #5 → INT-1.
 
 ## Не стартувати
-Новий product UI/security/brand; INT-1 до merge #7.
+Новий product UI/security/brand; окремий merge #1/#6.

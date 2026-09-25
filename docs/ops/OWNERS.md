@@ -6,9 +6,9 @@
 | Тема | Owner agent | Branch | PR | Статус |
 |------|-------------|--------|-----|--------|
 | ADR-002 store (library) | — | `main` | merged | **Done** (`b463a07`) |
-| Context Vault MVP | Independent context layer `bc-01a0d7e9-…cc40` | `cursor/context-vault-mvp-cc40` | [#1](https://github.com/IulianaIagodka/IPCL/pull/1) DRAFT | RUNNING |
-| ADR-003 security | Алр 003 `bc-01a0d7fa-…c745` | `cursor/implement-adr-003-security-c745` | [#6](https://github.com/IulianaIagodka/IPCL/pull/6) DRAFT | RUNNING |
-| ADR-004 control plane | 004 `bc-01a0d800-…063d` | `cursor/implement-adr-004-control-plane-063d` | [#7](https://github.com/IulianaIagodka/IPCL/pull/7) DRAFT | RUNNING |
+| Context Vault MVP | Independent context layer `bc-01a0d7e9-…cc40` | `cursor/context-vault-mvp-cc40` | [#1](https://github.com/IulianaIagodka/IPCL/pull/1) DRAFT | **Superseded by #7** — close after merge |
+| ADR-003 security | Алр 003 `bc-01a0d7fa-…c745` | `cursor/implement-adr-003-security-c745` | [#6](https://github.com/IulianaIagodka/IPCL/pull/6) DRAFT | **Superseded by #7** — close after merge |
+| ADR-004 control plane | 004 `bc-01a0d800-…063d` | `cursor/implement-adr-004-control-plane-063d` | [#7](https://github.com/IulianaIagodka/IPCL/pull/7) DRAFT | **Canonical merge target** |
 | ADR-005 product UX | Адр 005 `bc-01a0d7fc-…8895` | `cursor/implement-adr-005-8895` | [#5](https://github.com/IulianaIagodka/IPCL/pull/5) DRAFT | RUNNING |
 | Brand / naming | Context across AI `bc-01a0d7f6-…b722` | `cursor/brand-slogans-b722` | [#3](https://github.com/IulianaIagodka/IPCL/pull/3) DRAFT | P3 hold |
 | Daily plan / backlog | Щоденне планування `bc-01a0d80c-…70c7` | `cursor/ops-backlog-process-70c7` | [#8](https://github.com/IulianaIagodka/IPCL/pull/8) DRAFT | RUNNING (ops) |
