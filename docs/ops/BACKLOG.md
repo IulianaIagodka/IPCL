@@ -1,6 +1,6 @@
 # IPCL Backlog — 2026-09-25
 
-Оновлено: 2026-09-25 ~13:55 Europe/Kyiv
+Оновлено: 2026-09-25 ~13:40 Europe/Kyiv  
 Див. також: `OWNERS.md`, `PROCESS.md`, `MERGE_READINESS.md`, `ACTION_REQUIRED.md`
 
 ## Merge queue (за git ancestry) — verified 2026-09-25
@@ -25,7 +25,7 @@
 - [ ] **COORD-1** Pause Demo ADR-003 UI; owner = PR #6 (superseded by #7 after merge)
 - [ ] **COORD-2** Pause Open landing + Retest vault; MVP owner superseded by #7
 - [ ] **COORD-3** Pause Open control plane UI; owner = PR #7
-- [ ] **COORD-4** Hold brand PR #3 до після #5
+- [ ] **COORD-4** Hold brand PR #3 до після #5/#7 — tip зараз **Eidothea** + `eidothea.app` (після churn Memora→Slid→Eidothea); не мерджити в нестабільний UI-стек
 - [x] **COORD-5** `#1` і `#6` **повністю superseded `#7`** (0 unique commits/files у MVP поза #7; 0 commits #6 поза #7) → після merge #7 закрити #1 і #6
 
 ## P1 — в роботі (owners only)
@@ -43,7 +43,7 @@
 
 ## P3
 
-- [ ] **BRAND-1** PR [#3](https://github.com/IulianaIagodka/IPCL/pull/3) — фінальна назва (зараз tip = Slid)
+- [ ] **BRAND-1** PR [#3](https://github.com/IulianaIagodka/IPCL/pull/3) @ `d754066` — **Eidothea** / `eidothea.app` (зафіксувати після #5+#7, не під час rename churn)
 - [ ] **DOCS-1** Дублі ADR filename (`001-` vs `ADR-001-`)
 - [ ] **OPS-1** Daily 08:00 Kyiv (timer до 2026-10-02) + OWNERS anti-dup
 
