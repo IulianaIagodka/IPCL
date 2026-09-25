@@ -1,10 +1,7 @@
-# Last plan refresh — 2026-09-25 ~14:40 Kyiv
+# Last plan — 2026-09-25 ~14:50 Kyiv
 
-## Delta
-- #1 **merged** into main (`709b9a2`)
-- #5 **closed** unmerged (content mostly already on main)
-- #7 diverged — next = rebase ADR-003/004 onto main
-- INT-1: package exists, not wired
+## Виконання
+REBASE-7 → **PR #11** (ADR-003/004 on main). Tests 17/17.
 
 ## Фокус
-Rebase #7 onto main. Не merge #7 as-is. #9 secondary.
+Merge #11. Далі INT-1.
