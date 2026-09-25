@@ -7,6 +7,7 @@
 | [BACKLOG.md](./BACKLOG.md) | P0–P3 + merge queue |
 | [ACTION_REQUIRED.md](./ACTION_REQUIRED.md) | P0 рішення, які потрібні від людини |
 | [GOAL_AUDIT.md](./GOAL_AUDIT.md) | Докази виконання вимог планувального goal |
+| [MERGE_READINESS.md](./MERGE_READINESS.md) | Перевірка готовності PR #7 (tests/tsc) |
 | [LAST_PLAN.md](./LAST_PLAN.md) | Останній план |
 
 Агент: «Щоденне планування завдань беклогу».

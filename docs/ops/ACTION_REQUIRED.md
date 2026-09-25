@@ -12,8 +12,10 @@
 
 ## 2) Merge path
 1. Review/merge **[PR #7](https://github.com/IulianaIagodka/IPCL/pull/7)** (містить MVP + ADR-003 + ADR-004)
+   - **Готовність:** `npm test` 10/10 · `tsc` clean (див. `MERGE_READINESS.md`)
 2. Закрити **#6** і ймовірно **#1** як superseded
 3. Rebase **#5**, потім brand **#3**
+4. Після merge #7 — стартувати **INT-1** (ADR-002 library відсутня у vault-стеку)
 
 ## 3) Ops
 - Merge або залиш draft **[PR #8](https://github.com/IulianaIagodka/IPCL/pull/8)** (`docs/ops`) — канон беклогу

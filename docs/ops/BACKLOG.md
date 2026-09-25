@@ -1,7 +1,7 @@
 # IPCL Backlog — 2026-09-25
 
-Оновлено: 2026-09-25 ~13:25 Europe/Kyiv  
-Див. також: `OWNERS.md`, `PROCESS.md`, `LAST_PLAN.md`
+Оновлено: 2026-09-25 ~13:40 Europe/Kyiv  
+Див. також: `OWNERS.md`, `PROCESS.md`, `MERGE_READINESS.md`, `ACTION_REQUIRED.md`
 
 ## Merge queue (за git ancestry) — verified 2026-09-25
 
@@ -10,6 +10,8 @@
 - MVP є предком #6/#7
 - **`main` (ADR-002) НЕ є предком #6/#7** → стек Next/vault і library на main роз’їхались (INT-1 критичний після merge)
 - `#5` / `#3` — форки від MVP без 003/004 → rebase обов’язковий
+
+**Merge readiness #7 (executed check):** `npm test` 10/10 pass · `tsc --noEmit` clean · DRAFT · див. `MERGE_READINESS.md`
 
 Рекомендований порядок:
 1. Змерджити **#7 ADR-004** (тягне MVP+003+004) — або #6 потім #7
