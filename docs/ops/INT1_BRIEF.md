@@ -12,12 +12,12 @@ Owner: **unassigned** — перед стартом: BACKLOG + OWNERS + `list-cl
 | ADR-002 library | `main` → `src/memories.ts`, `store.ts`, `retrieve.ts`, `assemble.ts` | **Memory** + Source + Project | `createContextStore()`, `assembleContext()` |
 | Vault / ADR-003/004 | **main** (через #6+#11) → `src/lib/vault.ts` + `src/service/context-service.ts` | Context items + classification + integrations | HTTP `/api/*` + Context Service façade |
 
-`#7` **не містить** `src/memories.ts` / `createContextStore`. Vault має власний SQLite/`search.ts`.
+`main` має vault + Context Service; ADR-002 лишається в `packages/context-store` і ще **не** підключений як єдиний storage path.
 
 ## Ціль INT-1
 Один storage+retrieval шлях: Context Service викликає ADR-002 primitives; UI/MCP лишаються за façade (ADR-004).
 
-## Рекомендовані кроки (після merge #7)
+## Рекомендовані кроки (зараз)
 1. **Bring-up:** скопіювати/перенести ADR-002 modules з `main` у пакет (напр. `src/core/` або `packages/context-store`), без ламання Next aliases.
 2. **Adapter:** у `context-service` / `vault` замінити прямі writes на:
    - import → `createSource` + `extractMemoriesFromText` + `createMemory`

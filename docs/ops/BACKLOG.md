@@ -1,21 +1,21 @@
 # IPCL Backlog — 2026-09-25
 
-Оновлено: 2026-09-25 ~11:05 UTC — **#11 MERGED** (`bbd3eba`)
+Оновлено: 2026-09-25 ~11:05 UTC — #7/#9 closed
 
 ## Merge queue
-1. ~~Merge #11~~ **DONE** — ADR-004 on main
-2. **Close obsolete #7 / #9** (human `close #7 #9` або OK)
-3. **INT-1** — призначити **одного** owner; wire `packages/context-store`
+1. ~~#11~~ MERGED (`bbd3eba`)
+2. ~~Close #7 / #9~~ **DONE** (human `Закрий 7 9`)
+3. **INT-1** — призначити **одного** owner
 
-## Done recently
-- [x] #1 MVP · #5 UX · #3 brand closed · #6 ADR-003 · **#11 ADR-004** (`bbd3eba`)
+## Done
+- [x] #1 MVP · #5 · #3 · #6 ADR-003 · #11 ADR-004 · #7/#9 closed
 
 ## P0
-- [ ] Close #7 / #9 (obsolete after #11)
+- [ ] (none — gate clear)
 
 ## P1
-- [ ] INT-1 — assign one owner (anti-dup clear)
+- [ ] INT-1 — assign one owner (BACKLOG+OWNERS+anti-dup before start)
 
 ## P3
-- [ ] DOCS-1 · daily 08:00 ops
-- [x] RULES.md canon · RETRO parallel ADR
+- [ ] DOCS-1 · daily 08:00
+- [x] RULES.md · RETRO

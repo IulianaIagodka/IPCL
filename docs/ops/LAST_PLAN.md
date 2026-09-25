@@ -1,11 +1,10 @@
 # Last plan — 2026-09-25 ~14:05 Kyiv
 
 ## Delta
-- **#11 MERGED** → `main` @ `bbd3eba` (ADR-004). Human OK «Мердж 11».
+- #11 merged · **#7 closed · #9 closed** (human OK)
 
 ## Фокус
-1. `close #7 #9`
-2. Призначити одного owner на INT-1
+Призначити одного owner на **INT-1**.
 
 ## Do-not-start
-Паралельний UI/brand з INT-1; новий ADR-003/004 агент; другий INT-1 агент.
+Другий INT-1 агент; brand/UI паралельно з INT-1; новий ADR-003/004.
