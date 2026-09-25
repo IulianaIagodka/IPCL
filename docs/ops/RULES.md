@@ -124,10 +124,11 @@ TodoWrite — на оркестраційні або owner-кроки до ви�
 
 ---
 
-## Пов’язані файли
+Пов’язані файли
 
 | Файл | Роль |
 |------|------|
+| [TEAM_SETUP.md](./TEAM_SETUP.md) | **Bootstrap нового проєкту з цим сетапом** |
 | [PROCESS.md](./PROCESS.md) | операційний цикл оркестратора |
 | [OWNERS.md](./OWNERS.md) | реєстр owners |
 | [BACKLOG.md](./BACKLOG.md) | P0–P3 + черга |
