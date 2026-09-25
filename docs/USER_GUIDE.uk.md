@@ -106,5 +106,6 @@
 |---------|------------|
 | Редірект на login | Сесія зникла → увійти знову |
 | Onboarding «висить» на кроці | Refresh checklist; переконайтесь, що профіль/проєкт/інтеграція збережені |
+| MCP config з `cwd: /app` | Це Fly-шлях. Локально не спрацює → Preview→Copy або локальний clone + свій cwd |
 | MCP «порожній» контекст | Перевірте scopes, project allow-list, classification; зробіть Preview з тим самим query |
 | Після деплою немає даних | На Fly дані на volume `/data`; локальний `data/` — окремий файл |
