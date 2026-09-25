@@ -16,4 +16,4 @@
 
 ## P3
 - [ ] daily 08:00
-- [x] RULES · RETRO · TEAM_SETUP
+- [x] RULES · RETRO · TEAM_SETUP · templates/

@@ -1,7 +1,9 @@
 # Team setup — оркестратор + theme owners
 
-Шаблон для **нових проєктів**: як стартувати той самий сетап, що на IPCL.  
-Канон правил (деталі): [RULES.md](./RULES.md). Цей файл — **bootstrap playbook**.
+**Bootstrap playbook для нового проєкту.** Скопіюй цей сетап → кидай задачі оркестратору → product-агенти по одному на тему.
+
+Канон правил (деталі для працюючого репо): [RULES.md](./RULES.md).  
+Порожні шаблони для копіювання: [`templates/`](./templates/).
 
 ---
 
@@ -19,15 +21,17 @@
                                          1 PR → твій merge OK
 ```
 
-- **Оркестратор** не пише product-код.
-- **Theme owner** робить один PR на свою тему.
-- **Ти** даєш `merge #N` / `start …` / пріоритети.
+| Роль | Робить | Не робить |
+|------|--------|-----------|
+| **Ти** | `start` / `merge #N` / `close #N` / пріоритети | ганяєш 5 агентів паралельно на одну тему |
+| **Оркестратор** | BACKLOG, OWNERS, anti-dup, daily 08:00, briefs | product-код, merge без твого OK |
+| **Theme owner** | один PR на свою тему | чужі теми, другий PR «про всяк випадок» |
 
 ---
 
-## 2. Що створити в репо (день 0)
+## 2. День 0 — файли в репо
 
-Каталог `docs/ops/` (або `.cursor/ops/` — головне одне місце):
+Створи каталог `docs/ops/` (або скопіюй `templates/` → `docs/ops/` і перейменуй `*.TEMPLATE.md`).
 
 | Файл | Навіщо |
 |------|--------|
@@ -36,22 +40,23 @@
 | `OWNERS.md` | таблиця тема → агент → PR |
 | `BACKLOG.md` | P0–P3 + черга merge |
 | `ACTION_REQUIRED.md` | що треба від тебе зараз |
-| `WAIT_STATE.md` | коли агент мовчить / які gates |
+| `WAIT_STATE.md` | gates / коли агент мовчить |
 | `LAST_PLAN.md` | останній daily план |
-| `TEAM_SETUP.md` | цей playbook |
+| `TEAM_SETUP.md` | цей playbook (можна лишити як є) |
+| `README.md` | індекс файлів |
 | `briefs/…` | за потреби, бриф на велику тему |
 
-Скопіюй структуру з IPCL `docs/ops/` і вичисти IPCL-специфіку (номери PR, ADR).
+Гілка оркестратора: `cursor/ops-backlog-<suffix>` → draft PR «ops: backlog & orchestration».
 
-Гілка оркестратора: `cursor/ops-backlog-…` → draft PR «ops: backlog & orchestration».
+**З IPCL:** скопіюй `docs/ops/` і вичисти IPCL-специфіку (номери PR, ADR-00N, bcId). Або візьми чисті файли з [`templates/`](./templates/).
 
 ---
 
-## 3. Запуск оркестратора (Cloud Agent)
+## 3. День 0 — запуск оркестратора (Cloud Agent)
 
 1. **New Cloud Agent** на репо, гілка від `main`.
 2. Назва: `Orchestrator` / `Щоденне планування`.
-3. Перший промпт (встав як є, підстав шляхи):
+3. Перший промпт (підстав шляхи / назву репо):
 
 ```text
 Ти ОРКЕСТРАТОР цього репо, не product-інженер.
@@ -65,20 +70,20 @@
 CreateGoal з цим objective і тримай активним, поки людина не скаже pause goal.
 ```
 
-4. Підписки оркестратора:
+4. Підписки:
    - timer `0 5 * * *` UTC (= 08:00 Kyiv EEST) — daily plan
    - PR watch на ops-PR + активні product PR
-5. Зафіксуй агента в `OWNERS.md` як Orchestration owner.
+5. Запиши агента в `OWNERS.md` як Orchestration owner.
 
 ---
 
 ## 4. Як ти кидаєш задачі
 
-Пишеш **оркестратору** (цей чат), не одразу 5 product-агентам.
+Пишеш **оркестратору** (один чат), не одразу кільком product-агентам.
 
 | Команда | Що станеться |
 |---------|----------------|
-| довільний опис фічі | → P0–P3 у BACKLOG, пропозиція owner / «створи агента X» |
+| довільний опис фічі / бага | → P0–P3 у BACKLOG, пропозиція owner / «створи агента X» |
 | `start <тема> <ім’я агента>` | → рядок у OWNERS, sole owner |
 | `merge #N` | → оркестратор мерджить (або каже як), оновлює backlog |
 | `close #N` | → закрити obsolete PR |
@@ -93,15 +98,15 @@ CreateGoal з цим objective і тримай активним, поки люд
 Після того як оркестратор сказав «створи агента»:
 
 1. New Cloud Agent від **актуального `main`**.
-2. Назва = тема (`INT-1 wire store`, `ADR-003 security`, …).
+2. Назва = тема (`Auth`, `Billing API`, `INT-1 wire store`, …).
 3. Перший промпт:
 
 ```text
 Ти єдиний theme owner теми: <ТЕМА>.
 Прочитай docs/ops/OWNERS.md і docs/ops/RULES.md.
-Brief (якщо є): docs/ops/<BRIEF>.md
+Brief (якщо є): docs/ops/briefs/<BRIEF>.md
 Один PR. Спочатку list-cloud-agents — якщо вже є owner на цю тему, зупинись.
-Не чіпай чужі теми / brand mid-flight без freeze.
+Не чіпай чужі теми / rename env mid-flight без freeze.
 ```
 
 4. Напиши оркестратору: `start <ТЕМА> <точна назва агента>` — він зареєструє owner.
@@ -132,12 +137,14 @@ Brand / rename env = окреме вікно або **freeze** інших PR.
 | **P2** | інтеграція після gate |
 | **P3** | docs, polish, brand поза P0 paths |
 
+Нова задача завжди: **пріоритет → BACKLOG → OWNERS → виконання owner-ом**.
+
 ---
 
 ## 8. Checklist «новий проєкт за 15 хв»
 
-- [ ] `docs/ops/` з файлами з §2
-- [ ] RULES адаптовані під проєкт (без чужих ADR)
+- [ ] `docs/ops/` з файлами з §2 (або з `templates/`)
+- [ ] RULES адаптовані під проєкт (свої теми / merge gate, без чужих ADR)
 - [ ] Orchestrator agent + CreateGoal + daily timer 08:00
 - [ ] OWNERS: рядок Orchestration
 - [ ] BACKLOG: порожня черга або перший P0
@@ -148,12 +155,14 @@ Brand / rename env = окреме вікно або **freeze** інших PR.
 
 ## 9. Антиприклад (не повторювати)
 
-IPCL на старті: паралельні ADR-002…005 + MVP + brand без OWNERS і без merge queue → роз’їзд tips, зайві PR, повторні конфлікти.  
-Див. [RETRO_2026-09-25_PARALLEL_ADR.md](./RETRO_2026-09-25_PARALLEL_ADR.md).
+Паралельні великі теми + MVP + brand без OWNERS і без merge queue → роз’їзд tips, зайві PR, повторні конфлікти.  
+IPCL: [RETRO_2026-09-25_PARALLEL_ADR.md](./RETRO_2026-09-25_PARALLEL_ADR.md).
 
 ---
 
-## 10. Мінімальний шаблон OWNERS (скопіюй)
+## 10. Мінімальні шаблони (inline)
+
+### OWNERS
 
 ```markdown
 | Тема | Owner | Branch / PR | Статус |
@@ -162,7 +171,7 @@ IPCL на старті: паралельні ADR-002…005 + MVP + brand без 
 | <Theme A> | unassigned | — | Ready |
 ```
 
-## 11. Мінімальний шаблон BACKLOG
+### BACKLOG
 
 ```markdown
 ## P0
@@ -177,6 +186,8 @@ IPCL на старті: паралельні ADR-002…005 + MVP + brand без 
 ## P3
 - [ ] …
 ```
+
+Повні файли: [`templates/`](./templates/).
 
 ---
 
