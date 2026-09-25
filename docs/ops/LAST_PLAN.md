@@ -1,12 +1,11 @@
-# Last plan refresh — 2026-09-25 ~13:55 Kyiv
+# Last plan refresh — 2026-09-25 ~14:00 Kyiv
 
-## Delta
-- Brand tip → **Eidothea** + `eidothea.app` (`d754066`); підписка PR #3.
-- Owners/merge path без змін: **#7 only**; INT-1 brief готовий.
-- Overlapping agents досі RUNNING (Demo 003, Open landing, Retest, Open control plane).
+## Delta / виконання
+- PR #5 verified: **npm test 4/4**, tsc clean; **не rebase-ready** на #7.
+- Overlapping: Open landing renamed → «Navigate to landing for recording» (досі pause).
 
-## Wait state
-Блокери зовнішні: user pause/merge #7 · daily timer 08:00 Kyiv (наступний fire завтра 05:00 UTC).
+## Фокус
+Merge #7 → close #1+#6 → rebase #5 → INT-1 / brand Eidothea.
 
-## Не стартувати
-INT-1 · brand merge · новий UI-агент.
+## Wait
+User pause/merge · daily 08:00 Kyiv.

@@ -1,6 +1,6 @@
 # IPCL Backlog — 2026-09-25
 
-Оновлено: 2026-09-25 ~14:00 Europe/Kyiv
+Оновлено: 2026-09-25 ~13:55 Europe/Kyiv  
 Див. також: `OWNERS.md`, `PROCESS.md`, `MERGE_READINESS.md`, `ACTION_REQUIRED.md`
 
 ## Merge queue (за git ancestry) — verified 2026-09-25
@@ -32,7 +32,7 @@
 
 - [x] **ADR-003** PR [#6](https://github.com/IulianaIagodka/IPCL/pull/6) — superseded by #7 (не мерджити окремо)
 - [ ] **ADR-004** PR [#7](https://github.com/IulianaIagodka/IPCL/pull/7) @ `02b7035` — **канонічний merge target** (tests green)
-- [ ] **ADR-005** PR [#5](https://github.com/IulianaIagodka/IPCL/pull/5) — 2 unique commits vs #7; rebase після merge #7
+- [ ] **ADR-005** PR [#5](https://github.com/IulianaIagodka/IPCL/pull/5) @ `be422cf` — tests 4/4 local; **rebase після #7** (див. `MERGE_READINESS_PR5.md`)
 - [x] **MVP** PR [#1](https://github.com/IulianaIagodka/IPCL/pull/1) — superseded by #7 (закрити після merge)
 
 ## P2 — після merge

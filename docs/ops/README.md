@@ -8,7 +8,8 @@
 | [ACTION_REQUIRED.md](./ACTION_REQUIRED.md) | P0 рішення, які потрібні від людини |
 | [GOAL_AUDIT.md](./GOAL_AUDIT.md) | Докази виконання вимог планувального goal |
 | [INT1_BRIEF.md](./INT1_BRIEF.md) | План інтеграції ADR-002 ↔ vault (після #7) |
-| [MERGE_READINESS.md](./MERGE_READINESS.md) | Перевірка готовності PR #7 (tests/tsc) |
+| [MERGE_READINESS.md](./MERGE_READINESS.md) | PR #7 tests/tsc |
+| [MERGE_READINESS_PR5.md](./MERGE_READINESS_PR5.md) | PR #5 tests + rebase gate |
 | [LAST_PLAN.md](./LAST_PLAN.md) | Останній план |
 
 Агент: «Щоденне планування завдань беклогу».

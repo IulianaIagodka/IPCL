@@ -6,7 +6,7 @@
 | Зупинити | Чому | Залишити |
 |----------|------|----------|
 | [Demo ADR-003 security UI](https://cursor.com/agents/bc-11a6609f-fb3e-513d-a12b-370850246302) | дубль ADR-003 | [Алр 003](https://cursor.com/agents/bc-01a0d7fa-972a-7721-8209-21318da3c745) → PR #6 |
-| [Open landing and vault UI](https://cursor.com/agents/bc-7f9dea4c-0bb8-5341-8b86-ebcbdbefbc99) | дубль MVP | [Independent context layer](https://cursor.com/agents/bc-01a0d7e9-c7bf-7e7b-9a0c-233c3fbbcc40) → PR #1 |
+| [Open landing → Navigate to landing for recording](https://cursor.com/agents/bc-7f9dea4c-0bb8-5341-8b86-ebcbdbefbc99) | дубль MVP/UI | MVP superseded by #7 — pause |
 | [Retest vault pages correctly](https://cursor.com/agents/bc-0e2086b6-f72b-5405-be19-0c223e781672) | дубль MVP | той самий #1 |
 | [Open control plane UI](https://cursor.com/agents/bc-9c1d5d6e-90c6-5e85-82f9-be0039cdccc2) | дубль ADR-004 | [004](https://cursor.com/agents/bc-01a0d800-d238-7134-b8a5-63a44147063d) → PR #7 |
 
