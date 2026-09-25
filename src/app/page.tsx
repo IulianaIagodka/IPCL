@@ -6,7 +6,7 @@ export default function HomePage() {
       <section className="hero-plane">
         <div className="hero-visual" aria-hidden="true" />
         <div className="shell hero-copy">
-          <p className="fade-up brand-mark">Memora</p>
+          <p className="fade-up brand-mark">Slid</p>
           <h1 className="fade-up-delay">Stop explaining yourself.</h1>
           <p className="fade-up-delay-2">
             Your context follows you across AI.
@@ -28,7 +28,7 @@ export default function HomePage() {
             <p className="pill">Product principle</p>
             <h2>One memory. Every AI.</h2>
             <p className="muted" style={{ maxWidth: "40rem", lineHeight: 1.6 }}>
-              AI providers generate answers. Memora is the independent layer that
+              AI providers generate answers. Slid is the independent layer that
               holds who you are, what you decided, and what matters for the
               project—then shares only the relevant fragments with whichever
               AI you open next.

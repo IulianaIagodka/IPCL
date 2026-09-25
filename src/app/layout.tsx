@@ -16,7 +16,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Memora — One memory. Every AI.",
+  title: "Slid — One memory. Every AI.",
   description:
     "Stop explaining yourself. Your context follows you across AI. One memory. Every AI.",
 };
@@ -39,7 +39,7 @@ export default function RootLayout({
         <header className="site-header">
           <div className="shell site-header-inner">
             <Link href="/" className="brand">
-              Memora
+              Slid
             </Link>
             <nav className="nav-links">
               <Link href="/vault">Vault</Link>

@@ -1,11 +1,11 @@
 {
   "mcpServers": {
-    "memora": {
+    "slid": {
       "command": "npx",
       "args": ["tsx", "mcp/server.ts"],
       "cwd": "${workspaceFolder}",
       "env": {
-        "MEMORA_DATA_DIR": "${workspaceFolder}/data"
+        "SLID_DATA_DIR": "${workspaceFolder}/data"
       }
     }
   }
