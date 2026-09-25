@@ -16,7 +16,7 @@ export default function HomePage() {
               Open your vault
             </Link>
             <Link href="/vault/preview" className="btn btn-ghost">
-              Preview what gets shared
+              Use in AI
             </Link>
           </div>
           <div className="fade-up-delay-2">

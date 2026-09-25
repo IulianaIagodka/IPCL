@@ -6,34 +6,24 @@ import { useRouter } from "next/navigation";
 import { api, useAsyncResource } from "@/lib/client";
 import type { ControlPlaneStatus } from "@/lib/types";
 
-const STEP_LINKS: Record<
-  ControlPlaneStatus["nextStep"],
-  { href: string; label: string; hint: string }
+const SETUP: Record<
+  Exclude<ControlPlaneStatus["nextStep"], "ready" | "connect_integration">,
+  { href: string; label: string; why: string }
 > = {
   setup_account: {
     href: "/vault/login",
-    label: "Create vault owner",
-    hint: "Authenticate the control plane before any AI can connect.",
+    label: "Create your account",
+    why: "One owner for this vault — takes a minute.",
   },
   complete_profile: {
     href: "/vault/profile",
-    label: "Set up profile",
-    hint: "Who you are, how you work, and recurring instructions.",
+    label: "Add who you are",
+    why: "Role and standing instructions, so AI stops asking again.",
   },
   create_project: {
     href: "/vault/projects",
-    label: "Create a project",
-    hint: "Scope memory to the work you actually do.",
-  },
-  connect_integration: {
-    href: "/vault/integrations",
-    label: "Connect an AI tool",
-    hint: "Issue an MCP token so Cursor, Claude, or others can retrieve context.",
-  },
-  ready: {
-    href: "/vault/context",
-    label: "Inspect context",
-    hint: "Your control plane is ready. Keep managing memory here; work in your AI tools.",
+    label: "Name your project",
+    why: "Keeps decisions for this product separate from others.",
   },
 };
 
@@ -51,87 +41,96 @@ export default function VaultHomePage() {
     }
   }, [data, router]);
 
-  const next = data ? STEP_LINKS[data.nextStep] : null;
+  const setupKey =
+    data && data.nextStep !== "ready" && data.nextStep !== "connect_integration"
+      ? data.nextStep
+      : null;
+  const setup = setupKey ? SETUP[setupKey] : null;
+  const ready = data?.nextStep === "ready" || data?.nextStep === "connect_integration";
 
   return (
     <div className="shell section stack">
       <div className="fade-up">
         <p className="eyebrow">Eidothea</p>
-        <h2 className="page-title">Manage context. Use AI elsewhere.</h2>
-        <p className="lede" style={{ maxWidth: "40rem" }}>
-          This web app is the management surface for your portable context
-          layer—not a chat product. Configure memory and permissions here;
-          experience the value inside Cursor, Claude, ChatGPT, and friends.
+        <h2 className="page-title">Two moves. Every day.</h2>
+        <p className="lede" style={{ maxWidth: "36rem" }}>
+          Save important decisions here. When you open Cursor or ChatGPT, copy
+          the matching context out. This is not a chat — it is your memory.
         </p>
       </div>
 
-      {loading && <p className="muted">Loading control plane…</p>}
+      {loading && <p className="muted">Loading…</p>}
       {error && <p style={{ color: "#8a2f2f" }}>{error}</p>}
 
       {data?.authenticated && (
         <>
-          <div className="grid-2 fade-up-delay">
-            <div className="panel stack">
+          {!ready && setup && (
+            <div className="panel stack fade-up-delay">
+              <p className="eyebrow">First-time setup</p>
               <h3 className="font-display" style={{ margin: 0, fontSize: "1.45rem" }}>
-                {data.nextStep === "ready" ? "Ready" : "Next step"}
+                {setup.label}
               </h3>
               <p className="muted" style={{ margin: 0, lineHeight: 1.5 }}>
-                {next?.hint}
+                {setup.why}
               </p>
-              {next && (
-                <Link className="btn btn-primary" href={next.href}>
-                  {next.label}
-                </Link>
-              )}
+              <Link className="btn btn-primary" href={setup.href}>
+                Continue
+              </Link>
               <button className="btn btn-ghost" onClick={() => void reload()}>
-                Refresh status
+                Refresh
               </button>
             </div>
+          )}
 
-            <div className="panel stack">
-              <h3 className="font-display" style={{ margin: 0, fontSize: "1.45rem" }}>
-                Setup checklist
-              </h3>
-              <ChecklistItem done={data.steps.account} label="Owner account" />
-              <ChecklistItem done={data.steps.profile} label="Profile" />
-              <ChecklistItem done={data.steps.project} label="At least one project" />
-              <ChecklistItem
-                done={data.steps.integration}
-                label="Connected AI integration"
-              />
-              {data.stats && (
-                <div className="muted" style={{ fontSize: "0.9rem", marginTop: "0.5rem" }}>
-                  {data.stats.projects} projects · {data.stats.decisions} decisions ·{" "}
-                  {data.stats.contextItems} fragments
-                </div>
-              )}
+          {ready && (
+            <div className="grid-2 fade-up-delay">
+              <div className="panel stack">
+                <p className="eyebrow">1 · Save</p>
+                <h3 className="font-display" style={{ margin: 0, fontSize: "1.45rem" }}>
+                  Something new was decided?
+                </h3>
+                <p className="muted" style={{ margin: 0, lineHeight: 1.5 }}>
+                  Paste a chat snippet or note. We keep the decision so you do
+                  not re-explain it tomorrow.
+                </p>
+                <Link className="btn btn-primary" href="/vault/import">
+                  Save from chat
+                </Link>
+              </div>
+
+              <div className="panel stack">
+                <p className="eyebrow">2 · Use</p>
+                <h3 className="font-display" style={{ margin: 0, fontSize: "1.45rem" }}>
+                  Opening Cursor or ChatGPT?
+                </h3>
+                <p className="muted" style={{ margin: 0, lineHeight: 1.5 }}>
+                  Build a short context pack, copy it, paste at the top of the
+                  chat. That is the whole daily loop.
+                </p>
+                <Link className="btn btn-primary" href="/vault/preview">
+                  Use in AI
+                </Link>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="panel stack fade-up-delay">
-            <h3 className="font-display" style={{ margin: 0, fontSize: "1.35rem" }}>
-              Control-plane surfaces
+            <h3 className="font-display" style={{ margin: 0, fontSize: "1.2rem" }}>
+              Status
             </h3>
-            <div className="stack" style={{ gap: "0.45rem" }}>
-              <Link className="btn btn-ghost" href="/vault/context">
-                Context — inspect & search memory
-              </Link>
-              <Link className="btn btn-ghost" href="/vault/projects">
-                Projects — scoped work context
-              </Link>
-              <Link className="btn btn-ghost" href="/vault/integrations">
-                Integrations — MCP permissions & tokens
-              </Link>
-              <Link className="btn btn-ghost" href="/vault/activity">
-                Activity — what was accessed or shared
-              </Link>
-              <Link className="btn btn-ghost" href="/vault/preview">
-                Export — manual fallback when MCP is unavailable
-              </Link>
-              <Link className="btn btn-ghost" href="/vault/settings">
-                Settings — account & privacy
-              </Link>
-            </div>
+            <ChecklistItem done={data.steps.account} label="Account" />
+            <ChecklistItem done={data.steps.profile} label="Profile" />
+            <ChecklistItem done={data.steps.project} label="Project" />
+            <ChecklistItem
+              done={data.steps.integration}
+              label="MCP connect (optional)"
+            />
+            {data.stats && (
+              <p className="muted" style={{ fontSize: "0.9rem", margin: "0.35rem 0 0" }}>
+                {data.stats.projects} projects · {data.stats.decisions} decisions ·{" "}
+                {data.stats.contextItems} saved fragments
+              </p>
+            )}
           </div>
         </>
       )}
@@ -144,7 +143,7 @@ function ChecklistItem({ done, label }: { done: boolean; label: string }) {
     <div className="list-row" style={{ padding: "0.45rem 0" }}>
       <span>{label}</span>
       <strong style={{ color: done ? "var(--sea-deep)" : "var(--ink-soft)" }}>
-        {done ? "Done" : "Pending"}
+        {done ? "Done" : "Later"}
       </strong>
     </div>
   );

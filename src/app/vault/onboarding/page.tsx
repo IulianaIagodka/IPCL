@@ -12,34 +12,36 @@ const STEPS: Array<{
   body: string;
   href: string;
   cta: string;
+  optional?: boolean;
 }> = [
   {
     key: "account",
-    title: "1. Authenticate",
-    body: "Create the vault owner so the control plane has a trusted identity.",
+    title: "1. Account",
+    body: "Sign in so only you can open this vault.",
     href: "/vault/login",
     cta: "Open login",
   },
   {
     key: "profile",
     title: "2. Profile",
-    body: "Capture role, expertise, and recurring instructions once.",
+    body: "Who you are and standing instructions.",
     href: "/vault/profile",
     cta: "Edit profile",
   },
   {
     key: "project",
     title: "3. Project",
-    body: "Add a project so retrieval and permissions can be scoped.",
+    body: "One named space for this product’s decisions.",
     href: "/vault/projects",
     cta: "Add project",
   },
   {
     key: "integration",
-    title: "4. Connect AI",
-    body: "Issue an MCP token and return to Cursor/Claude—no first-party chat here.",
-    href: "/vault/integrations",
-    cta: "Connect MCP",
+    title: "4. MCP (optional)",
+    body: "Skip for now. Use “Use in AI” to copy context into Cursor.",
+    href: "/vault/preview",
+    cta: "Use in AI instead",
+    optional: true,
   },
 ];
 
@@ -59,12 +61,11 @@ export default function OnboardingPage() {
   return (
     <div className="shell section stack">
       <div className="fade-up">
-        <p className="pill">Onboarding</p>
-        <h2>Configure once. Use everywhere.</h2>
+        <p className="pill">Setup</p>
+        <h2>Three required steps</h2>
         <p className="muted" style={{ maxWidth: "40rem", lineHeight: 1.55 }}>
-          ADR-004 success path: open the web app → create or import context →
-          connect an AI tool → return to that tool with relevant context
-          available.
+          Account → profile → project. Then use Save and Use in AI every day.
+          MCP is optional.
         </p>
       </div>
 
@@ -82,7 +83,7 @@ export default function OnboardingPage() {
                     {step.title}
                   </h3>
                   <strong style={{ color: done ? "var(--sea-deep)" : undefined }}>
-                    {done ? "Done" : "Todo"}
+                    {done ? "Done" : step.optional ? "Optional" : "Todo"}
                   </strong>
                 </div>
                 <p className="muted" style={{ margin: 0, lineHeight: 1.5 }}>
@@ -97,11 +98,11 @@ export default function OnboardingPage() {
             );
           })}
           <button className="btn btn-ghost" onClick={() => void reload()}>
-            Refresh checklist
+            Refresh
           </button>
           {data.nextStep === "ready" && (
             <Link className="btn btn-primary" href="/vault">
-              Open control plane home
+              Go to home
             </Link>
           )}
         </div>

@@ -62,11 +62,11 @@ export default function ImportPage() {
   return (
     <div className="shell section stack">
       <div>
-        <p className="eyebrow">Import</p>
-        <h2 className="page-title">Bring notes and conversations in</h2>
-        <p className="muted">
-          Paste text once. Eidothea extracts reusable profile updates, preferences,
-          decisions, and knowledge fragments.
+        <p className="eyebrow">Save</p>
+        <h2 className="page-title">Paste a decision from chat</h2>
+        <p className="muted" style={{ maxWidth: "36rem", lineHeight: 1.55 }}>
+          Copy 5–20 lines from Cursor or ChatGPT when something important was
+          decided. We extract what to remember.
         </p>
       </div>
 

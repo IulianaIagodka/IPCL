@@ -9,7 +9,7 @@ import { StateBadge } from "@/components/StateBadge";
 
 export default function PreviewPage() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [destination, setDestination] = useState("Claude");
+  const [destination, setDestination] = useState("Cursor");
   const [query, setQuery] = useState("");
   const [projectId, setProjectId] = useState("");
   const [includeProfile, setIncludeProfile] = useState(true);
@@ -61,40 +61,41 @@ export default function PreviewPage() {
   return (
     <div className="shell section stack">
       <div>
-        <p className="eyebrow">Share preview</p>
-        <h2 className="page-title">See exactly what will be shared</h2>
-        <p className="muted">
-          What AI is asking for → what context will be sent → where it is going.
+        <p className="eyebrow">Use in AI</p>
+        <h2 className="page-title">Copy context into your chat</h2>
+        <p className="muted" style={{ maxWidth: "36rem", lineHeight: 1.55 }}>
+          1) Topic · 2) Build · 3) Copy · 4) Paste at the top of Cursor or
+          ChatGPT. No MCP required.
         </p>
       </div>
 
       <form className="panel stack" onSubmit={onPreview}>
         <label>
-          <span className="field-label">Destination</span>
+          <span className="field-label">Where will you paste this?</span>
           <input
             className="field"
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
-            placeholder="ChatGPT, Claude, Cursor, Gemini…"
+            placeholder="Cursor, ChatGPT, Claude…"
           />
         </label>
         <label>
-          <span className="field-label">Intent / topic query</span>
+          <span className="field-label">What are you working on?</span>
           <input
             className="field"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="billing subscriptions architecture"
+            placeholder="e.g. pricing page, onboarding, billing"
           />
         </label>
         <label>
-          <span className="field-label">Project</span>
+          <span className="field-label">Project (optional)</span>
           <select
             className="field"
             value={projectId}
             onChange={(e) => setProjectId(e.target.value)}
           >
-            <option value="">None / all</option>
+            <option value="">All</option>
             {projects.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -102,30 +103,35 @@ export default function PreviewPage() {
             ))}
           </select>
         </label>
-        <div className="stack" style={{ gap: "0.55rem" }}>
-          <Toggle
-            label="Include profile"
-            checked={includeProfile}
-            onChange={setIncludeProfile}
-          />
-          <Toggle
-            label="Include preferences"
-            checked={includePreferences}
-            onChange={setIncludePreferences}
-          />
-          <Toggle
-            label="Include decisions"
-            checked={includeDecisions}
-            onChange={setIncludeDecisions}
-          />
-          <Toggle
-            label="Include search hits for query"
-            checked={includeSearchHits}
-            onChange={setIncludeSearchHits}
-          />
-        </div>
+        <details>
+          <summary className="muted" style={{ cursor: "pointer" }}>
+            Advanced includes
+          </summary>
+          <div className="stack" style={{ gap: "0.55rem", marginTop: "0.75rem" }}>
+            <Toggle
+              label="Profile"
+              checked={includeProfile}
+              onChange={setIncludeProfile}
+            />
+            <Toggle
+              label="Preferences"
+              checked={includePreferences}
+              onChange={setIncludePreferences}
+            />
+            <Toggle
+              label="Decisions"
+              checked={includeDecisions}
+              onChange={setIncludeDecisions}
+            />
+            <Toggle
+              label="Search hits for topic"
+              checked={includeSearchHits}
+              onChange={setIncludeSearchHits}
+            />
+          </div>
+        </details>
         <button className="btn btn-primary" type="submit">
-          Build preview
+          Build &amp; show text
         </button>
         {error && <p style={{ color: "var(--danger)", margin: 0 }}>{error}</p>}
       </form>

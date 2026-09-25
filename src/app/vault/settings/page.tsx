@@ -30,35 +30,44 @@ export default function SettingsPage() {
   return (
     <div className="shell section stack">
       <div className="fade-up">
-        <p className="pill">Settings</p>
-        <h2>Account & privacy</h2>
-        <p className="muted" style={{ maxWidth: "40rem", lineHeight: 1.55 }}>
-          The control plane owns account lifecycle. Context, permissions, and
-          audit trail live in the Context Service—not in any AI provider.
+        <p className="pill">More</p>
+        <h2>Everything else</h2>
+        <p className="muted" style={{ maxWidth: "36rem", lineHeight: 1.55 }}>
+          Daily work lives in Save and Use in AI. These links are for setup and
+          rare tasks.
         </p>
       </div>
 
       <div className="panel stack fade-up-delay">
-        <h3 className="font-display" style={{ margin: 0, fontSize: "1.35rem" }}>
-          Privacy controls
+        <h3 className="font-display" style={{ margin: 0, fontSize: "1.25rem" }}>
+          Setup
         </h3>
-        <Link className="btn btn-ghost" href="/vault/preview">
-          Preview & manual export
-        </Link>
-        <Link className="btn btn-ghost" href="/vault/integrations">
-          Manage integration permissions
-        </Link>
-        <Link className="btn btn-ghost" href="/vault/activity">
-          Review activity
-        </Link>
         <Link className="btn btn-ghost" href="/vault/profile">
-          Edit profile
+          Profile — who you are
+        </Link>
+        <Link className="btn btn-ghost" href="/vault/projects">
+          Projects — name your work
+        </Link>
+        <Link className="btn btn-ghost" href="/vault/onboarding">
+          Setup checklist
         </Link>
       </div>
 
       <div className="panel stack">
-        <h3 className="font-display" style={{ margin: 0, fontSize: "1.35rem" }}>
-          Session
+        <h3 className="font-display" style={{ margin: 0, fontSize: "1.25rem" }}>
+          Advanced
+        </h3>
+        <Link className="btn btn-ghost" href="/vault/integrations">
+          MCP connect (optional)
+        </Link>
+        <Link className="btn btn-ghost" href="/vault/activity">
+          Activity log
+        </Link>
+      </div>
+
+      <div className="panel stack">
+        <h3 className="font-display" style={{ margin: 0, fontSize: "1.25rem" }}>
+          Account
         </h3>
         <button className="btn btn-ghost" onClick={() => void logout()}>
           Sign out

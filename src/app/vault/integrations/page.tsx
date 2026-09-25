@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { api, useAsyncResource } from "@/lib/client";
 import type {
@@ -124,13 +125,17 @@ export default function IntegrationsPage() {
   return (
     <div className="shell section stack">
       <div className="fade-up">
-        <p className="pill">Integrations</p>
-        <h2>Connect AI tools via MCP</h2>
-        <p className="muted" style={{ maxWidth: "42rem", lineHeight: 1.55 }}>
-          External clients never talk to storage directly. They use MCP (or the
-          Product API) against the same Context Service and permission policy as
-          this control plane.
+        <p className="pill">Optional</p>
+        <h2>MCP connect (advanced)</h2>
+        <p className="muted" style={{ maxWidth: "40rem", lineHeight: 1.55 }}>
+          Most people should skip this. Daily path:{" "}
+          <a href="/vault/preview">Use in AI</a> → copy → paste into Cursor.
+          MCP is for local desktop setups with a repo clone — Fly-hosted vaults
+          emit a container path that will not work on your phone or laptop.
         </p>
+        <Link className="btn btn-primary" href="/vault/preview">
+          Go to Use in AI instead
+        </Link>
       </div>
 
       <form className="panel stack fade-up-delay" onSubmit={connectIntegration}>
@@ -212,8 +217,10 @@ export default function IntegrationsPage() {
             MCP connect wizard
           </h3>
           <p className="muted" style={{ margin: 0, lineHeight: 1.5 }}>
-            Copy the token once, then paste the config into Cursor or Claude
-            Desktop. Return to your AI tool—this app stays the control plane.
+            Copy the token once. Paste the JSON into <strong>Cursor Desktop →
+            Settings → MCP</strong> (not the mobile Plugins marketplace). Replace
+            <code>cwd: /app</code> with your local repo path, or skip MCP and use{" "}
+            <a href="/vault/preview">Use in AI</a>.
           </p>
           <div>
             <p className="field-label">Integration token</p>
