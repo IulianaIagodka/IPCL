@@ -1,11 +1,12 @@
-# Last plan — 2026-09-25 ~14:57 Kyiv
+# Last plan — 2026-09-25 ~15:22 Kyiv
 
 ## Delta
-- Human «Пр 8» → ops #8 на `main` @ `7162041` (конфлікти INT1/OWNERS/RULES → ops canon)
-- #8 CLOSED
+- Agent `bc-01a0d881-…1547` «Приватність та авторські права» → branch `cursor/privacy-copyright-pages-1547` · DRAFT [#13](https://github.com/IulianaIagodka/IPCL/pull/13)
+- OWNERS/BACKLOG updated; anti-dup OK (один owner)
+- Goal лишається **PAUSED** (без daily timer)
 
 ## Фокус
-Немає відкритого merge gate. Чекаю наступну задачу.
+Theme owner: legal pages. Оркестратор: лише registry, не UI.
 
 ## Do-not-start
-Другий INT-1 / wiring агент
+Другий privacy/copyright / legal-pages агент
