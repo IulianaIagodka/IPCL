@@ -22,10 +22,10 @@ export default function VaultPage() {
     <div className="shell section stack">
       <div className="fade-up">
         <p className="pill">Context Vault</p>
-        <h2>Your portable knowledge layer</h2>
+        <h2>One memory. Every AI.</h2>
         <p className="muted" style={{ maxWidth: "38rem", lineHeight: 1.55 }}>
-          Maintain context once. Retrieve only what is relevant. Share only when
-          you choose.
+          Your context follows you across AI. Maintain it once, retrieve only
+          what is relevant, and share only when you choose.
         </p>
       </div>
 

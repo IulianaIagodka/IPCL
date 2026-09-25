@@ -1,6 +1,9 @@
 # IPCL — Independent Portable Context Layer
 
-**Stop explaining yourself to AI.**
+**Stop explaining yourself.**  
+**Your context follows you across AI.**
+
+*One memory. Every AI.*
 
 IPCL is a vendor-independent **Context Vault**: you keep profile, projects, decisions, preferences, and knowledge in one place, then make only the relevant fragments available to ChatGPT, Claude, Cursor, Codex, Gemini, or any other AI client.
 

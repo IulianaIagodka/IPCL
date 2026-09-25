@@ -6,13 +6,10 @@ export default function HomePage() {
       <section className="hero-plane">
         <div className="hero-visual" aria-hidden="true" />
         <div className="shell hero-copy">
-          <p className="fade-up" style={{ letterSpacing: "0.16em", textTransform: "uppercase", fontSize: "0.78rem", fontWeight: 700, marginBottom: "0.4rem" }}>
-            IPCL
-          </p>
-          <h1 className="fade-up-delay">Stop explaining yourself to AI.</h1>
+          <p className="fade-up brand-mark">IPCL</p>
+          <h1 className="fade-up-delay">Stop explaining yourself.</h1>
           <p className="fade-up-delay-2">
-            Keep your profile, projects, decisions, and preferences in one
-            portable vault—then share only what each AI needs.
+            Your context follows you across AI.
           </p>
           <div className="hero-actions fade-up-delay-2">
             <Link href="/vault" className="btn btn-primary">
@@ -29,11 +26,12 @@ export default function HomePage() {
         <div className="shell stack">
           <div>
             <p className="pill">Product principle</p>
-            <h2>Own the context, not the conversation.</h2>
+            <h2>One memory. Every AI.</h2>
             <p className="muted" style={{ maxWidth: "40rem", lineHeight: 1.6 }}>
               AI providers generate answers. IPCL is the independent layer that
-              remembers who you are, what you decided, and what matters for the
-              project—then retrieves only the relevant fragments.
+              holds who you are, what you decided, and what matters for the
+              project—then shares only the relevant fragments with whichever
+              AI you open next.
             </p>
           </div>
 

@@ -23,7 +23,10 @@ Native memory systems are vendor-specific and generally cannot be reliably read,
 
 The product goal is:
 
-> Stop explaining yourself to AI.
+> Stop explaining yourself.  
+> Your context follows you across AI.
+
+Short form: **One memory. Every AI.**
 
 The product should let users maintain their context once and make the relevant parts available to whichever AI they are using.
 

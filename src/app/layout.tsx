@@ -18,7 +18,7 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: "IPCL — Context Vault",
   description:
-    "Stop explaining yourself to AI. An independent portable context layer for every AI tool you use.",
+    "Stop explaining yourself. Your context follows you across AI. One memory. Every AI.",
 };
 
 export default function RootLayout({
