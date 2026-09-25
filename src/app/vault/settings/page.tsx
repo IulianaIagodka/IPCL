@@ -54,6 +54,12 @@ export default function SettingsPage() {
         <Link className="btn btn-ghost" href="/vault/profile">
           Edit profile
         </Link>
+        <Link className="btn btn-ghost" href="/privacy">
+          Privacy policy
+        </Link>
+        <Link className="btn btn-ghost" href="/copyright">
+          Copyright
+        </Link>
       </div>
 
       <div className="panel stack">
