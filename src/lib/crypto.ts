@@ -11,9 +11,13 @@ const ENC_PREFIX = "enc:v1:";
 let cachedKey: Buffer | null = null;
 
 function dataDir(): string {
-  return process.env.IPCL_DATA_DIR
-    ? path.resolve(process.env.IPCL_DATA_DIR)
-    : path.join(process.cwd(), "data");
+  if (process.env.EIDOTHEA_DATA_DIR) {
+    return path.resolve(process.env.EIDOTHEA_DATA_DIR);
+  }
+  if (process.env.IPCL_DATA_DIR) {
+    return path.resolve(process.env.IPCL_DATA_DIR);
+  }
+  return path.join(process.cwd(), "data");
 }
 
 function parseKeyMaterial(raw: string): Buffer {
