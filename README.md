@@ -37,6 +37,32 @@ npm test
 npm run mcp
 ```
 
+## Deploy on Fly.io
+
+Cheapest path for the full app (Next.js + SQLite on a persistent volume).
+
+1. Install the Fly CLI and sign in: https://fly.io/docs/hands-on/install-flyctl/
+2. From this repo:
+
+```bash
+fly auth login
+fly apps create eidothea   # pick another name if taken
+fly deploy
+fly certs add eidothea.app
+fly certs add www.eidothea.app   # optional
+```
+
+3. In Cloudflare DNS for `eidothea.app`:
+
+| Type | Name | Target | Proxy |
+|------|------|--------|-------|
+| CNAME | `@` | `eidothea.fly.dev` | DNS only (grey cloud) while cert issues, then can proxy |
+| CNAME | `www` | `eidothea.fly.dev` | same |
+
+Fly serves HTTPS. SQLite lives on the `eidothea_data` volume at `/data`.
+
+Config files: `Dockerfile`, `fly.toml`.
+
 ## MCP (Cursor / Claude Desktop)
 
 Example config is in `mcp/cursor-mcp.config.example.json`:

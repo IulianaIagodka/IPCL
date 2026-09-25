@@ -1,0 +1,31 @@
+# fly.toml app configuration file generated for Eidothea
+# See https://fly.io/docs/reference/configuration/
+
+app = "eidothea"
+primary_region = "ams"
+
+[build]
+
+[env]
+  NODE_ENV = "production"
+  PORT = "3000"
+  HOSTNAME = "0.0.0.0"
+  EIDOTHEA_DATA_DIR = "/data"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+  cpus = 1
+
+[mounts]
+  source = "eidothea_data"
+  destination = "/data"
+  initial_size = "1gb"
