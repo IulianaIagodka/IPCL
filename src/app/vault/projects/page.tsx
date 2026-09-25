@@ -47,8 +47,8 @@ export default function ProjectsPage() {
   return (
     <div className="shell section stack">
       <div>
-        <p className="pill">Projects</p>
-        <h2>Project-scoped context</h2>
+        <p className="eyebrow">Projects</p>
+        <h2 className="page-title">Project-scoped context</h2>
         <p className="muted">
           Product description, stack, users, architecture, and constraints.
         </p>
@@ -56,7 +56,7 @@ export default function ProjectsPage() {
 
       <div className="grid-2">
         <form className="panel stack" onSubmit={onCreate}>
-          <h3 className="font-display" style={{ margin: 0, fontSize: "1.35rem" }}>
+          <h3 style={{ margin: 0, fontSize: "1.15rem" }}>
             Create project
           </h3>
           <label>
@@ -94,7 +94,7 @@ export default function ProjectsPage() {
         </form>
 
         <div className="panel">
-          <h3 className="font-display" style={{ margin: "0 0 0.75rem", fontSize: "1.35rem" }}>
+          <h3 style={{ margin: "0 0 0.75rem", fontSize: "1.15rem" }}>
             Your projects
           </h3>
           {loading && <p className="muted">Loading…</p>}

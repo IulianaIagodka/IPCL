@@ -15,6 +15,7 @@ import type {
   Source,
   SourceType,
 } from "./types";
+import { recordActivity } from "./integrations";
 
 function parseJsonArray(value: string | null | undefined): string[] {
   if (!value) return [];
@@ -951,7 +952,7 @@ export function buildPreview(input: {
     includeDecisions: input.includeDecisions,
   });
 
-  return {
+  const payload: PreviewPayload = {
     destination: input.destination,
     query: input.query ?? null,
     projectId: input.projectId ?? null,
@@ -963,6 +964,22 @@ export function buildPreview(input: {
     estimatedTokens: exported.estimatedTokens,
     exportText: exported.text,
   };
+
+  const project = input.projectId ? getProject(input.projectId) : null;
+  const decisionCount = exported.fragments.filter((f) => f.kind === "decision").length;
+  recordActivity({
+    kind: "share",
+    summary: `${input.destination} preview · ${exported.fragments.length} memories`,
+    detail: [
+      project ? `Project: ${project.name}` : "Scope: global / selected",
+      decisionCount ? `${decisionCount} decisions` : null,
+      `${exported.estimatedTokens} estimated tokens`,
+    ]
+      .filter(Boolean)
+      .join(" · "),
+  });
+
+  return payload;
 }
 
 export function wipeAllContext(): void {
@@ -983,6 +1000,10 @@ export function getVaultStats() {
   const count = (table: string) =>
     (db.prepare(`SELECT COUNT(*) AS c FROM ${table}`).get() as { c: number }).c;
 
+  const recent = listContextItems().slice(0, 8);
+  const projects = listProjects();
+  const projectName = new Map(projects.map((p) => [p.id, p.name]));
+
   return {
     projects: count("projects"),
     preferences: count("preferences"),
@@ -992,5 +1013,11 @@ export function getVaultStats() {
     hasProfile: Boolean(
       getProfile().displayName || getProfile().role || getProfile().expertise.length
     ),
+    recentMemories: recent.map((item) => ({
+      ...item,
+      projectName: item.projectId
+        ? projectName.get(item.projectId) ?? null
+        : null,
+    })),
   };
 }

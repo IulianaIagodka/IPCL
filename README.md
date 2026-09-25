@@ -7,7 +7,10 @@
 
 IPCL is a vendor-independent **Context Vault**: you keep profile, projects, decisions, preferences, and knowledge in one place, then make only the relevant fragments available to ChatGPT, Claude, Cursor, Codex, Gemini, or any other AI client.
 
-Architecture decision: [docs/adr/001-portable-context-layer.md](docs/adr/001-portable-context-layer.md)
+## Architecture
+
+- ADR index: [docs/adr/](docs/adr/)
+- Visual system: [ADR-005](docs/adr/ADR-005-product-experience-visual-design.md) — dark-first control plane for memory, scope, permission, and AI access.
 
 ## What this MVP includes
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ContextFlow } from "@/components/ContextFlow";
 
 export default function HomePage() {
   return (
@@ -15,9 +16,17 @@ export default function HomePage() {
             <Link href="/vault" className="btn btn-primary">
               Open your vault
             </Link>
-            <Link href="/vault/preview" className="btn btn-ghost" style={{ color: "#f4faf7", borderColor: "rgba(244,250,247,0.35)" }}>
+            <Link href="/vault/preview" className="btn btn-ghost">
               Preview what gets shared
             </Link>
+          </div>
+          <div className="fade-up-delay-2">
+            <ContextFlow
+              from="Memory"
+              to="Any AI"
+              label="Controlled transfer — not AI magic"
+              compact
+            />
           </div>
         </div>
       </section>
@@ -25,35 +34,35 @@ export default function HomePage() {
       <section className="section">
         <div className="shell stack">
           <div>
-            <p className="pill">Product principle</p>
+            <p className="eyebrow">Product principle</p>
             <h2>One memory. Every AI.</h2>
             <p className="muted" style={{ maxWidth: "40rem", lineHeight: 1.6 }}>
-              AI providers generate answers. IPCL is the independent layer that
-              holds who you are, what you decided, and what matters for the
-              project—then shares only the relevant fragments with whichever
-              AI you open next.
+              Everything AI knows about you should be visible and under your
+              control. IPCL is the calm control plane for personal context —
+              inspectable memories, scoped access, and explicit share.
             </p>
           </div>
 
           <div className="grid-2">
             <div className="panel stack">
-              <h3 className="font-display" style={{ margin: 0, fontSize: "1.5rem" }}>
-                Connect → choose → continue
+              <p className="eyebrow">Memory → Scope → Permission</p>
+              <h3 style={{ margin: 0, fontSize: "1.25rem", letterSpacing: "-0.02em" }}>
+                See what your AI knows
               </h3>
               <p className="muted" style={{ margin: 0, lineHeight: 1.55 }}>
-                Start a new AI tool in seconds. Pull profile, project decisions,
-                and matching knowledge through MCP, API, or copy/export—without
-                re-teaching your stack and working style.
+                Browse memories by scope, trace sources, and restrict what each
+                connected tool can reach — without turning the vault into a
+                document manager.
               </p>
             </div>
             <div className="panel stack">
-              <h3 className="font-display" style={{ margin: 0, fontSize: "1.5rem" }}>
-                Privacy by explicit share
+              <p className="eyebrow">Who can see what?</p>
+              <h3 style={{ margin: 0, fontSize: "1.25rem", letterSpacing: "-0.02em" }}>
+                Access is a matrix, not a mystery
               </h3>
               <p className="muted" style={{ margin: 0, lineHeight: 1.55 }}>
-                Nothing leaves the vault until you connect or invoke an
-                integration. Preview exactly what will be sent, where it is
-                going, and remove context at item, project, or account level.
+                Integrations show permission state at a glance. Activity logs
+                every share preview so trust comes from visibility, not slogans.
               </p>
             </div>
           </div>

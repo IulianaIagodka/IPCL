@@ -1,19 +1,9 @@
 import type { Metadata } from "next";
-import { Fraunces, Manrope } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import Link from "next/link";
+import { BrandMark } from "@/components/ContextFlow";
 import "./globals.css";
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-fraunces",
-  display: "swap",
-});
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-manrope",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "IPCL — Context Vault",
@@ -21,33 +11,45 @@ export const metadata: Metadata = {
     "Stop explaining yourself. Your context follows you across AI. One memory. Every AI.",
 };
 
+const NAV = [
+  { href: "/vault", label: "Home" },
+  { href: "/vault/context", label: "Context" },
+  { href: "/vault/projects", label: "Projects" },
+  { href: "/vault/integrations", label: "Integrations" },
+  { href: "/vault/activity", label: "Activity" },
+  { href: "/vault/settings", label: "Settings" },
+];
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${manrope.variable}`}>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body
         style={
           {
-            ["--font-display" as string]: "var(--font-fraunces)",
-            ["--font-body" as string]: "var(--font-manrope)",
+            ["--font-body" as string]: "var(--font-geist-sans)",
+            ["--font-mono" as string]: "var(--font-geist-mono)",
           } as React.CSSProperties
         }
       >
         <header className="site-header">
           <div className="shell site-header-inner">
             <Link href="/" className="brand">
-              IPCL <span>Context Vault</span>
+              <BrandMark />
+              <span className="brand-text">
+                IPCL
+                <small>Context Vault</small>
+              </span>
             </Link>
-            <nav className="nav-links">
-              <Link href="/vault">Vault</Link>
-              <Link href="/vault/profile">Profile</Link>
-              <Link href="/vault/projects">Projects</Link>
-              <Link href="/vault/import">Import</Link>
-              <Link href="/vault/search">Search</Link>
-              <Link href="/vault/preview">Preview</Link>
+            <nav className="nav-links" aria-label="Primary">
+              {NAV.map((item) => (
+                <Link key={item.href} href={item.href}>
+                  {item.label}
+                </Link>
+              ))}
             </nav>
           </div>
         </header>

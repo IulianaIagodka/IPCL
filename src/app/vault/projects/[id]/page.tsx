@@ -89,8 +89,8 @@ export default function ProjectDetailPage({
   return (
     <div className="shell section stack">
       <div>
-        <p className="pill">Project</p>
-        <h2>{project.name}</h2>
+        <p className="eyebrow">Project</p>
+        <h2 className="page-title">{project.name}</h2>
         <p className="muted">Decisions here should not be reopened by AI clients.</p>
       </div>
 
@@ -162,7 +162,7 @@ export default function ProjectDetailPage({
 
       <div className="grid-2">
         <form className="panel stack" onSubmit={addDecision}>
-          <h3 className="font-display" style={{ margin: 0, fontSize: "1.3rem" }}>
+          <h3 style={{ margin: 0, fontSize: "1.3rem" }}>
             Add decision
           </h3>
           <textarea
@@ -197,7 +197,7 @@ export default function ProjectDetailPage({
         </form>
 
         <form className="panel stack" onSubmit={addPreference}>
-          <h3 className="font-display" style={{ margin: 0, fontSize: "1.3rem" }}>
+          <h3 style={{ margin: 0, fontSize: "1.3rem" }}>
             Add preference
           </h3>
           <textarea

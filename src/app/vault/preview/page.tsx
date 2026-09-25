@@ -3,10 +3,13 @@
 import { FormEvent, useEffect, useState } from "react";
 import { api } from "@/lib/client";
 import type { PreviewPayload, Project } from "@/lib/types";
+import { ContextFlow } from "@/components/ContextFlow";
+import { MemoryCard } from "@/components/MemoryCard";
+import { StateBadge } from "@/components/StateBadge";
 
 export default function PreviewPage() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [destination, setDestination] = useState("Claude / Cursor paste");
+  const [destination, setDestination] = useState("Claude");
   const [query, setQuery] = useState("");
   const [projectId, setProjectId] = useState("");
   const [includeProfile, setIncludeProfile] = useState(true);
@@ -50,11 +53,14 @@ export default function PreviewPage() {
     setCopied(true);
   }
 
+  const projectName =
+    projects.find((p) => p.id === projectId)?.name || "Global";
+
   return (
     <div className="shell section stack">
       <div>
-        <p className="pill">Privacy</p>
-        <h2>See exactly what will be shared</h2>
+        <p className="eyebrow">Share preview</p>
+        <h2 className="page-title">See exactly what will be shared</h2>
         <p className="muted">
           What AI is asking for → what context will be sent → where it is going.
         </p>
@@ -119,45 +125,42 @@ export default function PreviewPage() {
         <button className="btn btn-primary" type="submit">
           Build preview
         </button>
-        {error && <p style={{ color: "#8a2f2f", margin: 0 }}>{error}</p>}
+        {error && <p style={{ color: "var(--danger)", margin: 0 }}>{error}</p>}
       </form>
 
       {preview && (
         <div className="grid-2 fade-up">
           <div className="panel stack">
-            <h3 className="font-display" style={{ margin: 0, fontSize: "1.35rem" }}>
-              Share plan
-            </h3>
-            <p className="muted" style={{ margin: 0 }}>
-              Destination: <strong>{preview.destination}</strong>
-            </p>
-            <p className="muted" style={{ margin: 0 }}>
-              Estimated tokens: <strong>{preview.estimatedTokens}</strong>
-            </p>
-            <p className="muted" style={{ margin: 0 }}>
-              Fragments: <strong>{preview.fragments.length}</strong>
-            </p>
-            <div>
+            <p className="eyebrow">Transfer</p>
+            <ContextFlow
+              from={projectName}
+              to={preview.destination}
+              label={`${preview.fragments.length} memories · ~${preview.estimatedTokens} tokens`}
+            />
+            <div className="list-row" style={{ padding: "0.55rem 0" }}>
+              <span>Status</span>
+              <StateBadge state="shared" label="PREVIEW ONLY" />
+            </div>
+            <div className="stack" style={{ gap: "0.65rem" }}>
               {preview.fragments.map((fragment, index) => (
-                <div key={`${fragment.source}-${index}`} className="list-row">
-                  <div>
-                    <strong>
-                      {fragment.title}{" "}
-                      <span className="pill">{fragment.kind}</span>
-                    </strong>
-                    <p className="muted" style={{ margin: "0.35rem 0 0", whiteSpace: "pre-wrap" }}>
-                      {fragment.content}
-                    </p>
-                  </div>
-                </div>
+                <MemoryCard
+                  key={`${fragment.source}-${index}`}
+                  memory={{
+                    id: `${index}`,
+                    kind: String(fragment.kind),
+                    title: fragment.title,
+                    content: fragment.content,
+                    projectName,
+                    sourceLabel: fragment.source,
+                    updatedAt: new Date().toISOString(),
+                  }}
+                />
               ))}
             </div>
           </div>
 
           <div className="panel stack">
-            <h3 className="font-display" style={{ margin: 0, fontSize: "1.35rem" }}>
-              Copy / export fallback
-            </h3>
+            <p className="eyebrow">Copy / export fallback</p>
             <textarea
               className="field"
               rows={18}
@@ -165,7 +168,11 @@ export default function PreviewPage() {
               value={preview.exportText}
             />
             <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-              <button className="btn btn-primary" type="button" onClick={() => void copyExport()}>
+              <button
+                className="btn btn-primary"
+                type="button"
+                onClick={() => void copyExport()}
+              >
                 {copied ? "Copied" : "Copy for AI"}
               </button>
               <a

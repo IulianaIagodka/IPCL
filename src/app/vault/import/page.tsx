@@ -62,8 +62,8 @@ export default function ImportPage() {
   return (
     <div className="shell section stack">
       <div>
-        <p className="pill">Import</p>
-        <h2>Bring notes and conversations in</h2>
+        <p className="eyebrow">Import</p>
+        <h2 className="page-title">Bring notes and conversations in</h2>
         <p className="muted">
           Paste text once. IPCL extracts reusable profile updates, preferences,
           decisions, and knowledge fragments.
@@ -132,12 +132,12 @@ export default function ImportPage() {
         <button className="btn btn-primary" type="submit" disabled={busy}>
           {busy ? "Importing…" : "Import into vault"}
         </button>
-        {error && <p style={{ color: "#8a2f2f", margin: 0 }}>{error}</p>}
+        {error && <p style={{ color: "var(--danger)", margin: 0 }}>{error}</p>}
       </form>
 
       {result && (
         <div className="panel stack fade-up">
-          <h3 className="font-display" style={{ margin: 0, fontSize: "1.35rem" }}>
+          <h3 style={{ margin: 0, fontSize: "1.35rem" }}>
             Extraction complete
           </h3>
           <p className="muted" style={{ margin: 0 }}>

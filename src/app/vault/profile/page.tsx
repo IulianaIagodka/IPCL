@@ -57,8 +57,8 @@ export default function ProfilePage() {
   return (
     <div className="shell section stack">
       <div>
-        <p className="pill">Profile</p>
-        <h2>Long-lived context about you</h2>
+        <p className="eyebrow">Profile</p>
+        <h2 className="page-title">Long-lived context about you</h2>
         <p className="muted">
           Role, expertise, communication style, and recurring instructions.
         </p>
@@ -127,7 +127,7 @@ export default function ProfilePage() {
           Save profile
         </button>
         {status && <p style={{ color: "var(--sea-deep)", margin: 0 }}>{status}</p>}
-        {error && <p style={{ color: "#8a2f2f", margin: 0 }}>{error}</p>}
+        {error && <p style={{ color: "var(--danger)", margin: 0 }}>{error}</p>}
       </form>
     </div>
   );
