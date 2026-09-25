@@ -1,20 +1,19 @@
 # IPCL Backlog — 2026-09-25
 
-Оновлено: 2026-09-25 ~11:10 UTC — INT-1 owner assigned
+Оновлено: 2026-09-25 ~11:20 UTC — INT-1 branch live
 
-## Merge queue / active
-1. ~~#11~~ · ~~close #7/#9~~
-2. **INT-1** — owner: **Context store wiring** (`bc-01a0d840-…4e11`) · in progress
+## Active
+1. **INT-1** — owner Context store wiring · branch `cursor/int1-wire-context-store-4e11` (`1bd31cc`) · чекаємо PR + твій merge
 
 ## Done
-- [x] #1 · #5 · #3 · #6 · #11 · #7/#9 closed · INT-1 assigned
+- [x] #1 · #5 · #3 · #6 · #11 · #7/#9 · INT-1 assigned · TEAM_SETUP playbook
 
 ## P0
 - [ ] (none)
 
 ## P1
-- [ ] INT-1 wire `packages/context-store` → vault/Context Service — **owner RUNNING**
+- [ ] INT-1 → open PR → human merge
 
 ## P3
-- [ ] DOCS-1 · daily 08:00
-- [x] RULES.md · RETRO
+- [ ] daily 08:00
+- [x] RULES · RETRO · TEAM_SETUP

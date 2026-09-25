@@ -1,6 +1,6 @@
 # IPCL Owners registry (anti-dup)
 
-Оновлено: 2026-09-25 ~11:10 UTC — INT-1 assigned  
+Оновлено: 2026-09-25 ~11:20 UTC — INT-1 branch pushed  
 Канон: **[RULES.md](./RULES.md)**.
 
 | Тема | Owner | PR / branch | Статус |
@@ -12,9 +12,11 @@
 | ADR-004 | — | #11 MERGED | Done |
 | #7 / #9 | — | CLOSED | Cleared |
 | ADR-005 / brand | — | CLOSED | On main |
-| **INT-1** | **Context store wiring** `bc-01a0d840-d424-7bac-96dd-84a4011a4e11` (label: INT-1 wire context-store) | TBD one PR from `main` | **RUNNING — sole owner** |
+| **INT-1** | **Context store wiring** `bc-01a0d840-…4e11` | `cursor/int1-wire-context-store-4e11` @ `1bd31cc` · **PR TBD** | **RUNNING — sole owner** |
 
 ## Anti-dup INT-1
-- **Єдиний owner:** [Context store wiring](https://cursor.com/agents/bc-01a0d840-d424-7bac-96dd-84a4011a4e11)
-- Іншим агентам **не** стартувати wiring `packages/context-store` / vault storage
+- Sole owner: Context store wiring (`bc-01a0d840-d424-7bac-96dd-84a4011a4e11`)
+- Branch: `cursor/int1-wire-context-store-4e11` (tip `1bd31cc` — Wire vault search/preview through ADR-002)
+- Іншим **не** стартувати wiring
 - Brief: [INT1_BRIEF.md](./INT1_BRIEF.md)
+- Merge лише після твого `merge #N`
