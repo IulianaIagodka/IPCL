@@ -40,6 +40,8 @@ npm test
 npm run mcp
 ```
 
+CI (GitHub Actions) runs the same gate on every PR and again on every push to `main`, so **main stays green** after merges. Policy: [docs/ops/MAIN_GREEN.md](docs/ops/MAIN_GREEN.md).
+
 ## ADR-002 context store
 
 Structured memory lives in `packages/context-store`:
