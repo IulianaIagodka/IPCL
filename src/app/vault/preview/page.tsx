@@ -19,6 +19,7 @@ export default function PreviewPage() {
   const [preview, setPreview] = useState<PreviewPayload | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [acknowledgeSensitive, setAcknowledgeSensitive] = useState(false);
 
   useEffect(() => {
     void api<Project[]>("/api/projects").then(setProjects);
@@ -39,6 +40,7 @@ export default function PreviewPage() {
           includePreferences,
           includeDecisions,
           includeSearchHits,
+          acknowledgeSensitive,
         }),
       });
       setPreview(payload);
@@ -48,7 +50,7 @@ export default function PreviewPage() {
   }
 
   async function copyExport() {
-    if (!preview) return;
+    if (!preview || preview.requiresSensitiveAck) return;
     await navigator.clipboard.writeText(preview.exportText);
     setCopied(true);
   }
@@ -139,8 +141,38 @@ export default function PreviewPage() {
             />
             <div className="list-row" style={{ padding: "0.55rem 0" }}>
               <span>Status</span>
-              <StateBadge state="shared" label="PREVIEW ONLY" />
+              <StateBadge
+                state={preview.includesSensitive ? "restricted" : "shared"}
+                label={
+                  preview.requiresSensitiveAck
+                    ? "ACK REQUIRED"
+                    : "PREVIEW ONLY"
+                }
+              />
             </div>
+            {preview.includesSensitive && (
+              <div className="stack" style={{ gap: "0.5rem" }}>
+                <p style={{ color: "var(--danger)", margin: 0 }}>
+                  This share includes SENSITIVE context leaving the vault.
+                </p>
+                <Toggle
+                  label="I acknowledge sensitive context will be sent to an external AI"
+                  checked={acknowledgeSensitive}
+                  onChange={setAcknowledgeSensitive}
+                />
+                {preview.requiresSensitiveAck && (
+                  <button
+                    className="btn btn-ghost"
+                    type="button"
+                    onClick={() =>
+                      void onPreview({ preventDefault() {} } as FormEvent)
+                    }
+                  >
+                    Rebuild export with acknowledgment
+                  </button>
+                )}
+              </div>
+            )}
             <div className="stack" style={{ gap: "0.65rem" }}>
               {preview.fragments.map((fragment, index) => (
                 <MemoryCard
@@ -148,7 +180,10 @@ export default function PreviewPage() {
                   memory={{
                     id: `${index}`,
                     kind: String(fragment.kind),
-                    title: fragment.title,
+                    title:
+                      fragment.classification !== "NORMAL"
+                        ? `${fragment.title} · ${fragment.classification}`
+                        : fragment.title,
                     content: fragment.content,
                     projectName,
                     sourceLabel: fragment.source,
@@ -172,6 +207,7 @@ export default function PreviewPage() {
                 className="btn btn-primary"
                 type="button"
                 onClick={() => void copyExport()}
+                disabled={Boolean(preview.requiresSensitiveAck)}
               >
                 {copied ? "Copied" : "Copy for AI"}
               </button>

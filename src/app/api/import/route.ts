@@ -1,16 +1,18 @@
 import { importAndExtract, listSources } from "@/lib/vault";
-import { jsonError, jsonOk, readJson } from "@/lib/http";
-import type { SourceType } from "@/lib/types";
+import { readJson, withAuth } from "@/lib/http";
+import type { DataClassification, SourceType } from "@/lib/types";
 
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
-  const projectId = new URL(request.url).searchParams.get("projectId");
-  return jsonOk(listSources(projectId));
+  return withAuth(request, async () => {
+    const projectId = new URL(request.url).searchParams.get("projectId");
+    return listSources(projectId);
+  });
 }
 
 export async function POST(request: Request) {
-  try {
+  return withAuth(request, async () => {
     const body = await readJson<{
       content: string;
       type?: SourceType;
@@ -18,18 +20,17 @@ export async function POST(request: Request) {
       projectId?: string | null;
       applyExtraction?: boolean;
       useLlm?: boolean;
+      classification?: DataClassification;
     }>(request);
-    if (!body.content?.trim()) return jsonError("content is required");
-    const result = await importAndExtract({
+    if (!body.content?.trim()) throw new Error("content is required");
+    return importAndExtract({
       content: body.content,
       type: body.type ?? "note",
       title: body.title,
       projectId: body.projectId,
       applyExtraction: body.applyExtraction,
       useLlm: body.useLlm,
+      classification: body.classification,
     });
-    return jsonOk(result, { status: 201 });
-  } catch (error) {
-    return jsonError(error instanceof Error ? error.message : "Invalid request");
-  }
+  });
 }

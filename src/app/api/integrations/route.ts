@@ -1,48 +1,79 @@
-import { jsonOk, jsonError } from "@/lib/http";
 import {
-  getPermissionMatrix,
+  createIntegration,
   listIntegrations,
-  setIntegrationStatus,
-  setPermission,
+  revokeIntegration,
+  rotateIntegrationToken,
+  updateIntegration,
 } from "@/lib/integrations";
-import { listProjects } from "@/lib/vault";
+import { readJson, withAuth } from "@/lib/http";
+import type {
+  DataClassification,
+  IntegrationAccessMode,
+  IntegrationScope,
+} from "@/lib/types";
 
 export const runtime = "nodejs";
 
-export async function GET() {
-  const projects = listProjects();
-  const scopes = ["global", "work", ...projects.map((p) => p.name.toLowerCase())];
-  const uniqueScopes = Array.from(new Set(scopes));
-  return jsonOk({
-    integrations: listIntegrations(),
-    matrix: getPermissionMatrix(uniqueScopes),
+export async function GET(request: Request) {
+  return withAuth(request, async (principal) => {
+    if (principal.kind !== "user") throw new Error("User session required");
+    return listIntegrations(principal.userId);
   });
 }
 
-export async function PATCH(request: Request) {
-  const body = await request.json().catch(() => null);
-  if (!body || typeof body !== "object") {
-    return jsonError("Invalid body", 400);
-  }
+export async function POST(request: Request) {
+  return withAuth(request, async (principal) => {
+    if (principal.kind !== "user") throw new Error("User session required");
+    const body = await readJson<{
+      action?: "create" | "update" | "revoke" | "rotate";
+      id?: string;
+      name?: string;
+      provider?: string;
+      accessMode?: IntegrationAccessMode;
+      scopes?: IntegrationScope[];
+      allowedProjectIds?: string[] | null;
+      allowedClassifications?: DataClassification[];
+    }>(request);
 
-  if ("status" in body && "id" in body) {
-    const updated = setIntegrationStatus(
-      String(body.id),
-      body.status === "connected" ? "connected" : "disconnected"
-    );
-    if (!updated) return jsonError("Integration not found", 404);
-    return jsonOk(updated);
-  }
+    if (body.action === "create") {
+      if (!body.name) throw new Error("name is required");
+      return createIntegration({
+        ownerId: principal.userId,
+        name: body.name,
+        provider: body.provider || "mcp",
+        accessMode: body.accessMode,
+        scopes: body.scopes,
+        allowedProjectIds: body.allowedProjectIds,
+        allowedClassifications: body.allowedClassifications,
+      });
+    }
 
-  if ("integrationId" in body && "scopeKey" in body && "allowed" in body) {
-    return jsonOk(
-      setPermission(
-        String(body.integrationId),
-        String(body.scopeKey),
-        Boolean(body.allowed)
-      )
-    );
-  }
+    if (!body.id) throw new Error("id is required");
 
-  return jsonError("Unsupported update", 400);
+    if (body.action === "update") {
+      const updated = updateIntegration(body.id, principal.userId, {
+        name: body.name,
+        accessMode: body.accessMode,
+        scopes: body.scopes,
+        allowedProjectIds: body.allowedProjectIds,
+        allowedClassifications: body.allowedClassifications,
+      });
+      if (!updated) throw new Error("Integration not found");
+      return updated;
+    }
+
+    if (body.action === "revoke") {
+      const ok = revokeIntegration(body.id, principal.userId);
+      if (!ok) throw new Error("Integration not found");
+      return { ok: true };
+    }
+
+    if (body.action === "rotate") {
+      const rotated = rotateIntegrationToken(body.id, principal.userId);
+      if (!rotated) throw new Error("Integration not found");
+      return rotated;
+    }
+
+    throw new Error("Unknown action");
+  });
 }

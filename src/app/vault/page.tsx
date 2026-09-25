@@ -5,6 +5,7 @@ import { useAsyncResource, api } from "@/lib/client";
 import { MemoryCard } from "@/components/MemoryCard";
 import { ContextFlow } from "@/components/ContextFlow";
 import { StateBadge } from "@/components/StateBadge";
+import type { Integration } from "@/lib/types";
 
 type Stats = {
   projects: number;
@@ -24,23 +25,19 @@ type Stats = {
   }>;
 };
 
-type IntegrationsPayload = {
-  integrations: Array<{ id: string; name: string; status: string }>;
-};
-
 export default function VaultPage() {
   const { data, error, loading, reload } = useAsyncResource(
     () => api<Stats>("/api/vault"),
     []
   );
   const integrations = useAsyncResource(
-    () => api<IntegrationsPayload>("/api/integrations"),
+    () => api<Integration[]>("/api/integrations"),
     []
   );
 
-  const connected =
-    integrations.data?.integrations.filter((i) => i.status === "connected")
-      .length ?? 0;
+  const active =
+    integrations.data?.filter((i) => !i.revokedAt) ?? [];
+  const connected = active.length;
 
   return (
     <div className="shell section stack">
@@ -121,11 +118,7 @@ export default function VaultPage() {
                 <p className="eyebrow">Live transfer</p>
                 <ContextFlow
                   from="Vault"
-                  to={
-                    integrations.data?.integrations.find(
-                      (i) => i.status === "connected"
-                    )?.name || "AI client"
-                  }
+                  to={active[0]?.name || "AI client"}
                   label={
                     connected
                       ? `${connected} integration${connected === 1 ? "" : "s"} connected`
@@ -133,20 +126,21 @@ export default function VaultPage() {
                   }
                 />
                 <div className="stack" style={{ gap: "0.45rem" }}>
-                  {(integrations.data?.integrations || []).map((item) => (
-                    <div key={item.id} className="list-row" style={{ padding: "0.55rem 0" }}>
-                      <span>{item.name}</span>
-                      <StateBadge
-                        state={
-                          item.status === "connected"
-                            ? "connected"
-                            : "disconnected"
-                        }
-                      />
+                  {active.map((item) => (
+                    <div
+                      key={item.id}
+                      className="list-row"
+                      style={{ padding: "0.55rem 0" }}
+                    >
+                      <span>
+                        {item.name}{" "}
+                        <span className="muted">({item.accessMode})</span>
+                      </span>
+                      <StateBadge state="connected" />
                     </div>
                   ))}
                 </div>
-                <Link href="/vault/integrations" className="btn btn-ghost">
+                <Link href="/vault/security" className="btn btn-ghost">
                   Manage access
                 </Link>
               </div>
@@ -163,6 +157,12 @@ export default function VaultPage() {
                 <div className="list-row" style={{ padding: "0.55rem 0" }}>
                   <span>Share preview</span>
                   <Link href="/vault/preview" className="btn btn-ghost btn-sm">
+                    Open
+                  </Link>
+                </div>
+                <div className="list-row" style={{ padding: "0.55rem 0" }}>
+                  <span>Security</span>
+                  <Link href="/vault/security" className="btn btn-ghost btn-sm">
                     Open
                   </Link>
                 </div>

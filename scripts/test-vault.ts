@@ -1,5 +1,5 @@
 /**
- * Unit tests for vault + search (ADR-001 MVP).
+ * Vault + ADR-003 security tests.
  * Run: npm test
  */
 import assert from "node:assert/strict";
@@ -8,6 +8,11 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { resetDbForTests } from "../src/lib/db";
+import { resetMasterKeyCache } from "../src/lib/crypto";
+import { ensureTestOwner } from "../src/lib/auth";
+import { createIntegration, resolveIntegrationToken } from "../src/lib/integrations";
+import { PolicyDeniedError } from "../src/lib/policy";
+import { runWithPrincipal, setFallbackOwnerId } from "../src/lib/request-context";
 import {
   buildPreview,
   createDecision,
@@ -15,15 +20,23 @@ import {
   createProject,
   getProfile,
   importAndExtract,
+  proposeCandidateMemory,
+  resolveCandidateMemory,
   saveContext,
   searchContext,
+  updateContextClassification,
   updateProfile,
 } from "../src/lib/vault";
 import { cosineSimilarity, semanticScore, tokenize } from "../src/lib/search";
 
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "eidothea-test-"));
 process.env.EIDOTHEA_DATA_DIR = tempDir;
+process.env.IPCL_DATA_DIR = tempDir;
+process.env.IPCL_MASTER_KEY = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+resetMasterKeyCache();
 resetDbForTests(path.join(tempDir, "test.sqlite"));
+const { user } = ensureTestOwner();
+setFallbackOwnerId(user.id);
 
 test("tokenize and semantic similarity rank related text higher", () => {
   assert.ok(tokenize("Avoid basic concepts").includes("avoid"));
@@ -129,5 +142,145 @@ test("preview shows exactly which fragments would be shared", () => {
   assert.equal(preview.destination, "Claude");
   assert.ok(preview.fragments.length > 0);
   assert.ok(preview.estimatedTokens > 0);
-  assert.ok(preview.exportText.includes("Eidothea export"));
+  assert.ok(preview.exportText.includes("Context Vault export"));
+  assert.equal(preview.includesSensitive, false);
+});
+
+test("RESTRICTED memories are excluded from normal retrieval", () => {
+  const item = saveContext("root password is hunter2-example", {
+    title: "Secret note",
+    tags: ["secret"],
+    classification: "RESTRICTED",
+  });
+  assert.equal(item.classification, "RESTRICTED");
+
+  const hits = searchContext("hunter2 password secret");
+  assert.ok(!hits.some((h) => h.item.id === item.id));
+});
+
+test("SENSITIVE preview requires acknowledgment before export text", () => {
+  const sensitive = saveContext("Salary band is confidential internal data.", {
+    title: "Compensation",
+    classification: "SENSITIVE",
+  });
+  assert.equal(sensitive.classification, "SENSITIVE");
+
+  const blocked = buildPreview({
+    destination: "ChatGPT",
+    query: "salary compensation",
+    includeProfile: false,
+    includePreferences: false,
+    includeDecisions: false,
+    includeSearchHits: true,
+    acknowledgeSensitive: false,
+  });
+  assert.equal(blocked.includesSensitive, true);
+  assert.equal(blocked.requiresSensitiveAck, true);
+  assert.ok(blocked.exportText.includes("Acknowledge sensitive"));
+
+  const allowed = buildPreview({
+    destination: "ChatGPT",
+    query: "salary compensation",
+    includeProfile: false,
+    includePreferences: false,
+    includeDecisions: false,
+    includeSearchHits: true,
+    acknowledgeSensitive: true,
+  });
+  assert.equal(allowed.requiresSensitiveAck, false);
+  assert.ok(allowed.exportText.includes("Salary band"));
+});
+
+test("read-only integration cannot write; write integration creates candidates", () => {
+  const project = createProject({ name: "Scoped App" });
+  const readOnly = createIntegration({
+    ownerId: user.id,
+    name: "Claude Desktop",
+    provider: "claude",
+    accessMode: "READ_ONLY",
+    allowedProjectIds: [project.id],
+    allowedClassifications: ["NORMAL"],
+  });
+
+  const readPrincipal = resolveIntegrationToken(readOnly.token);
+  assert.ok(readPrincipal);
+  assert.equal(readPrincipal?.kind, "integration");
+
+  assert.throws(
+    () =>
+      runWithPrincipal(readPrincipal!, () =>
+        proposeCandidateMemory({
+          kind: "knowledge",
+          content: "should fail",
+          projectId: project.id,
+        })
+      ),
+    (err: unknown) => err instanceof PolicyDeniedError
+  );
+
+  const readWrite = createIntegration({
+    ownerId: user.id,
+    name: "Cursor",
+    provider: "cursor",
+    accessMode: "READ_WRITE",
+    scopes: [
+      "profile:read",
+      "preferences:read",
+      "projects:read",
+      "decisions:read",
+      "context:search",
+      "context:write",
+      "memory:create",
+    ],
+    allowedProjectIds: [project.id],
+  });
+  const writePrincipal = resolveIntegrationToken(readWrite.token)!;
+  const candidate = runWithPrincipal(writePrincipal, () =>
+    proposeCandidateMemory({
+      kind: "decision",
+      content: "Use Postgres later",
+      projectId: project.id,
+      rationale: "Scale",
+    })
+  );
+  assert.equal(candidate.status, "pending");
+
+  const approved = resolveCandidateMemory(candidate.id, "approved");
+  assert.equal(approved?.status, "approved");
+});
+
+test("integration project scope cannot expand into other projects", () => {
+  const allowed = createProject({ name: "Allowed" });
+  const denied = createProject({ name: "Denied" });
+  saveContext("Allowed project secret architecture", {
+    projectId: allowed.id,
+    title: "Allowed knowledge",
+  });
+  saveContext("Denied project payroll process", {
+    projectId: denied.id,
+    title: "Denied knowledge",
+  });
+
+  const { token } = createIntegration({
+    ownerId: user.id,
+    name: "Narrow Cursor",
+    provider: "cursor",
+    allowedProjectIds: [allowed.id],
+  });
+  const principal = resolveIntegrationToken(token)!;
+
+  const hits = runWithPrincipal(principal, () =>
+    searchContext("payroll architecture", { limit: 20 })
+  );
+  assert.ok(hits.every((h) => h.item.projectId === allowed.id || h.item.projectId == null));
+  assert.ok(!hits.some((h) => h.item.projectId === denied.id));
+});
+
+test("classification update to RESTRICTED removes item from search", () => {
+  const item = saveContext("temporary public note about roadmap", {
+    title: "Roadmap",
+  });
+  assert.ok(searchContext("roadmap").some((h) => h.item.id === item.id));
+  updateContextClassification(item.id, "RESTRICTED");
+  assert.ok(!searchContext("roadmap").some((h) => h.item.id === item.id));
 });

@@ -3,29 +3,38 @@ import {
   deletePreference,
   listPreferences,
 } from "@/lib/vault";
-import { jsonError, jsonOk, readJson } from "@/lib/http";
+import { readJson, withAuth } from "@/lib/http";
+import type { DataClassification } from "@/lib/types";
 
 export const runtime = "nodejs";
 
-export async function GET() {
-  return jsonOk(listPreferences());
+export async function GET(request: Request) {
+  return withAuth(request, async () => listPreferences(), {
+    allowIntegration: true,
+  });
 }
 
 export async function POST(request: Request) {
-  try {
-    const body = await readJson<{ content: string; tags?: string[] }>(request);
-    if (!body.content?.trim()) return jsonError("content is required");
-    return jsonOk(createPreference(body.content, body.tags ?? []), {
-      status: 201,
-    });
-  } catch (error) {
-    return jsonError(error instanceof Error ? error.message : "Invalid request");
-  }
+  return withAuth(request, async () => {
+    const body = await readJson<{
+      content: string;
+      tags?: string[];
+      classification?: DataClassification;
+    }>(request);
+    if (!body.content?.trim()) throw new Error("content is required");
+    return createPreference(
+      body.content,
+      body.tags ?? [],
+      body.classification ?? "NORMAL"
+    );
+  });
 }
 
 export async function DELETE(request: Request) {
-  const id = new URL(request.url).searchParams.get("id");
-  if (!id) return jsonError("id is required");
-  if (!deletePreference(id)) return jsonError("Preference not found", 404);
-  return jsonOk({ ok: true });
+  return withAuth(request, async () => {
+    const id = new URL(request.url).searchParams.get("id");
+    if (!id) throw new Error("id is required");
+    if (!deletePreference(id)) throw new Error("Preference not found");
+    return { ok: true };
+  });
 }

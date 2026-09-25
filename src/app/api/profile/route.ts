@@ -1,14 +1,22 @@
 import { getProfile, updateProfile } from "@/lib/vault";
-import { jsonError, jsonOk, readJson } from "@/lib/http";
+import { readJson, withAuth } from "@/lib/http";
+import { assertScope } from "@/lib/policy";
 
 export const runtime = "nodejs";
 
-export async function GET() {
-  return jsonOk(getProfile());
+export async function GET(request: Request) {
+  return withAuth(
+    request,
+    async (principal) => {
+      assertScope(principal, "profile:read");
+      return getProfile();
+    },
+    { allowIntegration: true }
+  );
 }
 
 export async function PUT(request: Request) {
-  try {
+  return withAuth(request, async () => {
     const body = await readJson<{
       displayName?: string;
       role?: string;
@@ -16,8 +24,6 @@ export async function PUT(request: Request) {
       communicationPreferences?: string;
       recurringInstructions?: string;
     }>(request);
-    return jsonOk(updateProfile(body));
-  } catch (error) {
-    return jsonError(error instanceof Error ? error.message : "Invalid request");
-  }
+    return updateProfile(body);
+  });
 }

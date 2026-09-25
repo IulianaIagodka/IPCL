@@ -5,7 +5,9 @@
       "args": ["tsx", "mcp/server.ts"],
       "cwd": "${workspaceFolder}",
       "env": {
-        "EIDOTHEA_DATA_DIR": "${workspaceFolder}/data"
+        "EIDOTHEA_DATA_DIR": "${workspaceFolder}/data",
+        "IPCL_INTEGRATION_TOKEN": "paste-token-from-vault-security",
+        "IPCL_MASTER_KEY": "optional-64-hex-chars-for-stable-key"
       }
     }
   }
