@@ -1,6 +1,6 @@
 # ACTION REQUIRED
 
-Оновлено: 2026-09-25 ~12:22 UTC
+Оновлено: 2026-09-25 ~12:41 UTC
 
 Канон: **[RULES.md](./RULES.md)**.
 
@@ -8,10 +8,10 @@
 —(goal paused)
 
 ## Рекомендація
-1. Коли готово: theme owner rebase [#13](https://github.com/IulianaIagodka/IPCL/pull/13) onto `main`, потім `merge #13`
-2. Archive INT-1 owner (Context store wiring), коли буде зручно
-3. Прод уже: https://eidothea.fly.dev/vault/login
-4. Щоб відновити оркестратор (daily 08:00): `resume`
+1. Коли готово: rebase [#13](https://github.com/IulianaIagodka/IPCL/pull/13) onto `main`, потім `merge #13` (owner зараз IDLE)
+2. Опційно: `merge #14` (ops OWNERS + USER_GUIDE.uk.md)
+3. Прод: https://eidothea.fly.dev/vault/login
+4. `resume` — щоб знову daily 08:00
 
 ## Оркестратор
-Paused. Daily timers зняті. Product-код не пишу. Anti-dup: #13 зареєстровано в OWNERS.
+Paused. Timers off. Product-код не пишу. Delta: privacy owner RUNNING→IDLE; INT-1 archived.
