@@ -201,14 +201,19 @@ export function updateProfile(
       | "communicationPreferences"
       | "recurringInstructions"
     >
-  >
+  > & { mergeExpertise?: boolean }
 ): Profile {
   const current = getProfile();
+  const expertise = updates.expertise
+    ? updates.mergeExpertise
+      ? [...new Set([...current.expertise, ...updates.expertise])]
+      : updates.expertise
+    : current.expertise;
   const next: Profile = {
     ...current,
     displayName: updates.displayName ?? current.displayName,
     role: updates.role ?? current.role,
-    expertise: updates.expertise ?? current.expertise,
+    expertise,
     communicationPreferences:
       updates.communicationPreferences ?? current.communicationPreferences,
     recurringInstructions:
