@@ -1,6 +1,6 @@
-import { getDb } from "./db.js";
-import { createId, nowIso } from "./id.js";
-import type { Scope, Source, SourceType } from "./types.js";
+import { getDb } from "./db";
+import { createId, nowIso } from "./id";
+import type { Scope, Source, SourceType } from "./types";
 
 function rowToSource(row: Record<string, unknown>): Source {
   return {

@@ -4,8 +4,8 @@ import type {
   MemoryCandidate,
   MemoryType,
   Scope,
-} from "./types.js";
-import { detectConflicts } from "./conflicts.js";
+} from "./types";
+import { detectConflicts } from "./conflicts";
 
 /**
  * Extract candidate memories from user-provided source text.

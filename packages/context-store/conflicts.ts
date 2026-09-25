@@ -3,7 +3,7 @@ import {
   findConflictingMemories,
   listMemories,
   supersedeMemory,
-} from "./memories.js";
+} from "./memories";
 import type {
   ConflictProposal,
   ConflictResolution,
@@ -11,7 +11,7 @@ import type {
   Memory,
   MemoryCandidate,
   MemoryType,
-} from "./types.js";
+} from "./types";
 
 const HIGH_RISK_TYPES = new Set<MemoryType>([
   "decision",

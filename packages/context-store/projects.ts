@@ -1,5 +1,5 @@
-import { getDb } from "./db.js";
-import { createId, nowIso, projectScope, slugify } from "./id.js";
+import { getDb } from "./db";
+import { createId, nowIso, projectScope, slugify } from "./id";
 
 export interface Project {
   id: string;

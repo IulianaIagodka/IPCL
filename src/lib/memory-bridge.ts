@@ -30,7 +30,7 @@ import {
   type RankedMemory,
   type Scope,
   type Sensitivity,
-} from "../../packages/context-store/index.js";
+} from "@ipcl/context-store";
 import { getDb } from "./db";
 import type {
   ContextItem,

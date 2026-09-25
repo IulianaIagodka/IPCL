@@ -1,7 +1,7 @@
 import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
-import { bindSharedDb } from "../../packages/context-store/db.js";
+import { bindSharedDb } from "@ipcl/context-store/db";
 
 const DATA_DIR = process.env.EIDOTHEA_DATA_DIR
   ? path.resolve(process.env.EIDOTHEA_DATA_DIR)

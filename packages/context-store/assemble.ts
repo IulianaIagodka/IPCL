@@ -1,13 +1,13 @@
-import { estimateTokens, nowIso } from "./id.js";
-import { memoryTypeLabel } from "./extract.js";
+import { estimateTokens, nowIso } from "./id";
+import { memoryTypeLabel } from "./extract";
 import type {
   ContextPackage,
   MemoryType,
   RankedMemory,
   RetrievalRequest,
   Scope,
-} from "./types.js";
-import { retrieveMemories } from "./retrieve.js";
+} from "./types";
+import { retrieveMemories } from "./retrieve";
 
 const DEFAULT_BUDGET = 3000;
 

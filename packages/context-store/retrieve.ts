@@ -1,12 +1,12 @@
-import { cosineSimilarity, embed } from "./embed.js";
-import { getMemoryEmbedding, listMemories } from "./memories.js";
+import { cosineSimilarity, embed } from "./embed";
+import { getMemoryEmbedding, listMemories } from "./memories";
 import type {
   Memory,
   MemoryType,
   RankedMemory,
   RetrievalRequest,
   Scope,
-} from "./types.js";
+} from "./types";
 
 const IMPORTANCE_WEIGHT: Record<string, number> = {
   low: 0.1,
