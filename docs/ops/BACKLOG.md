@@ -1,6 +1,6 @@
 # IPCL Backlog — 2026-09-25
 
-Оновлено: 2026-09-25 ~13:40 Europe/Kyiv  
+Оновлено: 2026-09-25 ~13:55 Europe/Kyiv
 Див. також: `OWNERS.md`, `PROCESS.md`, `MERGE_READINESS.md`, `ACTION_REQUIRED.md`
 
 ## Merge queue (за git ancestry) — verified 2026-09-25
