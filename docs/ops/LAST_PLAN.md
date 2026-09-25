@@ -1,11 +1,12 @@
-# Last plan — 2026-09-25 ~14:57 Kyiv
+# Last plan — 2026-09-25 ~15:50 Kyiv
 
 ## Delta
-- Human «Пр 8» → ops #8 на `main` @ `7162041` (конфлікти INT1/OWNERS/RULES → ops canon)
-- #8 CLOSED
+- Human: MCP JSON з Fly (`cwd: /app` + token у чаті) → зафіксовано **P2** у BACKLOG
+- Workaround: Preview→Copy; MCP лише з локальним clone + Rotate token
+- Privacy #13 IDLE; goal **PAUSED**
 
 ## Фокус
-Немає відкритого merge gate. Чекаю наступну задачу.
+Не стартувати MCP theme owner без явного OK. Чекаю `merge` / `resume` / assign P2.
 
 ## Do-not-start
-Другий INT-1 / wiring агент
+Другий privacy agent; MCP/Fly fix без OWNERS + human OK

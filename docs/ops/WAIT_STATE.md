@@ -1,15 +1,17 @@
 # WAIT STATE — orchestrator gates
 
-Оновлено: 2026-09-25 ~12:03 UTC
+Оновлено: 2026-09-25 ~13:01 UTC
 
-Канон: **[RULES.md](./RULES.md)**. Product-код оркестратором — стоп.
+Канон: **[RULES.md](./RULES.md)**.
 
 ## Gates
 - ~~#11~~ · ~~#7/#9~~ · ~~#12 INT-1~~ · ~~#8 ops~~ → `main`
-- **GOAL PAUSED** (людина: `pause goal`)
+- **#13** privacy — DRAFT, owner IDLE
+- **#14** ops — DRAFT
+- **#10** CI — DRAFT
+- **GOAL STOPPED** (людина: `Стоп`)
 
 ## Wake
 | Подія | Дія |
 |-------|-----|
-| User нова задача / `resume` | BACKLOG → OWNERS → theme owner; re-subscribe daily 08:00 |
-| Goal continue | (goal paused — тиша) |
+| Нова задача / новий оркестратор | створити goal знову + BACKLOG |

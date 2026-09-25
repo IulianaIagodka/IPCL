@@ -1,17 +1,14 @@
 # ACTION REQUIRED
 
-Оновлено: 2026-09-25 ~12:03 UTC
+Оновлено: 2026-09-25 ~13:01 UTC
 
-Канон: **[RULES.md](./RULES.md)**.
-
-## Потрібно від людини (P0)
-—(goal paused)
+## Потрібно від людини
+—(оркестратор goal **stopped**)
 
 ## Рекомендація
-1. Archive INT-1 owner (Context store wiring), коли буде зручно
-2. Локально: `npm run dev` → http://localhost:3000/vault/login
-3. Прод: `fly deploy` (див. README)
-4. Щоб відновити оркестратор: напиши сюди або `resume`
+1. Preview→Copy для щоденного контексту (MCP Fly cwd=/app — P2)
+2. Rotate MCP token якщо був у чаті
+3. `merge #13` / `#14` коли готово
 
 ## Оркестратор
-Paused. Daily timers зняті. Product-код не пишу.
+Stopped за `Стоп`. Ping’ів goal continue більше не буде з цього goal.
