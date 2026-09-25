@@ -30,7 +30,7 @@ export function createProject(input: {
   };
 
   db.prepare(
-    `INSERT INTO projects (id, name, slug, description, created_at, updated_at)
+    `INSERT INTO adr_projects (id, name, slug, description, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, ?)`
   ).run(
     project.id,
@@ -46,7 +46,7 @@ export function createProject(input: {
 
 export function listProjects(): Project[] {
   const rows = getDb()
-    .prepare("SELECT * FROM projects ORDER BY name ASC")
+    .prepare("SELECT * FROM adr_projects ORDER BY name ASC")
     .all() as Array<{
     id: string;
     name: string;
@@ -69,7 +69,7 @@ export function listProjects(): Project[] {
 
 export function getProjectBySlug(slug: string): Project | null {
   const row = getDb()
-    .prepare("SELECT * FROM projects WHERE slug = ?")
+    .prepare("SELECT * FROM adr_projects WHERE slug = ?")
     .get(slugify(slug)) as
     | {
         id: string;

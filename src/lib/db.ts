@@ -1,6 +1,7 @@
 import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
+import { bindSharedDb } from "../../packages/context-store/db.js";
 
 const DATA_DIR = process.env.EIDOTHEA_DATA_DIR
   ? path.resolve(process.env.EIDOTHEA_DATA_DIR)
@@ -212,6 +213,14 @@ function ensureSchema(db: Database.Database) {
       kind,
       tokenize = 'porter unicode61'
     );
+
+    -- INT-1: links vault context item ids to ADR-002 memory ids
+    CREATE TABLE IF NOT EXISTS adr_memory_links (
+      vault_ref TEXT PRIMARY KEY,
+      memory_id TEXT NOT NULL,
+      owner_id TEXT,
+      created_at TEXT NOT NULL
+    );
   `);
 
   // Soft migrations for vaults created before ADR-003.
@@ -236,6 +245,7 @@ function ensureSchema(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_integrations_token ON integrations(token_hash);
     CREATE INDEX IF NOT EXISTS idx_context_owner ON context_items(owner_id);
     CREATE INDEX IF NOT EXISTS idx_audit_owner ON audit_events(owner_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_adr_memory_links_memory ON adr_memory_links(memory_id);
   `);
 }
 
@@ -245,6 +255,8 @@ export function getDb(): Database.Database {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   dbInstance = new Database(DB_PATH);
   ensureSchema(dbInstance);
+  // INT-1: one SQLite file — ADR-002 schema shares this connection.
+  bindSharedDb(dbInstance);
   return dbInstance;
 }
 
@@ -257,6 +269,7 @@ export function resetDbForTests(tempPath: string) {
   if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
   dbInstance = new Database(tempPath);
   ensureSchema(dbInstance);
+  bindSharedDb(dbInstance);
   return dbInstance;
 }
 

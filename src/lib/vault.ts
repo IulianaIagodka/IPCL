@@ -1,9 +1,23 @@
 import { getDb } from "./db";
 import { encryptString, decryptString, isEncrypted } from "./crypto";
 import { createId, nowIso } from "./id";
-import { buildFtsQuery, estimateTokens, semanticScore } from "./search";
+import { estimateTokens } from "./search";
 import { extractContextFromText } from "./extract";
 import { recordAudit } from "./audit";
+import {
+  archiveLinkedMemory,
+  assembleForVault,
+  conflictNeedsConfirmation,
+  detectStatementConflicts,
+  ensureStoreProject,
+  kindToMemoryType,
+  rankedToSearchHits,
+  resolveScopeForProjectId,
+  retrieveForVault,
+  syncVaultItemToMemory,
+  updateLinkedMemorySensitivity,
+  wipeOwnerMemories,
+} from "./memory-bridge";
 import {
   assertScope,
   assertWrite,
@@ -216,7 +230,49 @@ function insertContextItem(input: {
     item.updatedAt
   );
   upsertFts(item);
+  syncItemToAdrMemory(item);
   return item;
+}
+
+/** Dual-write vault context item into ADR-002 structured memory (INT-1). */
+function syncItemToAdrMemory(item: ContextItem) {
+  const scope = resolveScopeForProjectId(item.projectId, (id) => {
+    const row = getDb()
+      .prepare("SELECT name, description FROM projects WHERE id = ?")
+      .get(id) as { name: string; description: string } | undefined;
+    return row ?? null;
+  });
+  syncVaultItemToMemory({
+    vaultRef: item.id,
+    ownerId: item.ownerId,
+    kind: item.kind,
+    statement: item.content,
+    projectScope: scope,
+    classification: item.classification,
+    // Vault source ids are not ADR-002 source rows — omit to avoid FK errors.
+    sourceIds: [],
+    pinned: item.kind === "profile" || item.kind === "decision",
+  });
+}
+
+function getContextItemById(id: string): ContextItem | null {
+  const ownerId = requireOwnerId();
+  const row = getDb()
+    .prepare("SELECT * FROM context_items WHERE id = ? AND owner_id = ?")
+    .get(id, ownerId) as Record<string, unknown> | undefined;
+  if (!row) return null;
+  return rowToContextItem(row, { forRetrieval: true });
+}
+
+function projectIdForMemoryScope(scope: string): string | null {
+  if (!scope.startsWith("project/")) return null;
+  const slug = scope.slice("project/".length);
+  const projects = listProjects();
+  const match = projects.find((p) => {
+    const ensured = ensureStoreProject({ name: p.name });
+    return ensured.slug === slug;
+  });
+  return match?.id ?? null;
 }
 
 export function getProfile(): Profile {
@@ -340,6 +396,7 @@ function syncProfileContextItem(profile: Profile) {
     if (existing) {
       db.prepare("DELETE FROM context_items WHERE id = ?").run(existing.id);
       removeFts(existing.id);
+      archiveLinkedMemory(existing.id);
     }
     return;
   }
@@ -349,7 +406,7 @@ function syncProfileContextItem(profile: Profile) {
     db.prepare(
       `UPDATE context_items SET title = ?, content = ?, tags = ?, classification = 'NORMAL', updated_at = ? WHERE id = ?`
     ).run("User profile", content, JSON.stringify(["profile"]), now, existing.id);
-    upsertFts({
+    const item: ContextItem = {
       id: existing.id,
       ownerId: profile.ownerId,
       kind: "profile",
@@ -361,7 +418,9 @@ function syncProfileContextItem(profile: Profile) {
       classification: "NORMAL",
       createdAt: now,
       updatedAt: now,
-    });
+    };
+    upsertFts(item);
+    syncItemToAdrMemory(item);
   } else {
     insertContextItem({
       kind: "profile",
@@ -435,6 +494,7 @@ export function createProject(input: {
     );
 
   syncProjectContextItem(project);
+  ensureStoreProject({ name: project.name, description: project.description });
   return project;
 }
 
@@ -528,7 +588,7 @@ function syncProjectContextItem(project: Project) {
       now,
       existing.id
     );
-    upsertFts({
+    const item: ContextItem = {
       id: existing.id,
       ownerId: project.ownerId,
       kind: "project",
@@ -540,7 +600,10 @@ function syncProjectContextItem(project: Project) {
       classification: "NORMAL",
       createdAt: now,
       updatedAt: now,
-    });
+    };
+    upsertFts(item);
+    syncItemToAdrMemory(item);
+    ensureStoreProject({ name: project.name, description: project.description });
   } else {
     insertContextItem({
       kind: "project",
@@ -549,6 +612,7 @@ function syncProjectContextItem(project: Project) {
       content,
       tags: ["project", project.name.toLowerCase()],
     });
+    ensureStoreProject({ name: project.name, description: project.description });
   }
 }
 
@@ -631,6 +695,7 @@ export function deletePreference(id: string): boolean {
     if (plain === (isEncrypted(pref.content) ? decryptString(pref.content) : pref.content)) {
       getDb().prepare("DELETE FROM context_items WHERE id = ?").run(item.id);
       removeFts(item.id);
+      archiveLinkedMemory(item.id);
     }
   }
   return true;
@@ -733,6 +798,7 @@ export function deleteDecision(id: string): boolean {
     if (plain.startsWith(target)) {
       getDb().prepare("DELETE FROM context_items WHERE id = ?").run(item.id);
       removeFts(item.id);
+      archiveLinkedMemory(item.id);
     }
   }
   return true;
@@ -873,6 +939,11 @@ export function updateContextClassification(
     updatedAt: now,
   };
   upsertFts(next);
+  updateLinkedMemorySensitivity(id, classification);
+  // Keep ADR-002 statement in sync when decrypting RESTRICTED → readable.
+  if (classification !== "RESTRICTED") {
+    syncItemToAdrMemory(next);
+  }
   return next;
 }
 
@@ -881,7 +952,10 @@ export function deleteContextItem(id: string): boolean {
   const result = getDb()
     .prepare("DELETE FROM context_items WHERE id = ? AND owner_id = ?")
     .run(id, ownerId);
-  if (result.changes > 0) removeFts(id);
+  if (result.changes > 0) {
+    removeFts(id);
+    archiveLinkedMemory(id);
+  }
   return result.changes > 0;
 }
 
@@ -892,50 +966,28 @@ export function searchContext(
   const principal = requirePrincipal();
   assertScope(principal, "context:search", options?.projectId);
 
-  const db = getDb();
   const limit = options?.limit ?? 10;
-  const ftsQuery = buildFtsQuery(query);
-
-  let ftsRows: { item_id: string; rank: number }[] = [];
-  try {
-    ftsRows = db
-      .prepare(
-        `SELECT item_id, bm25(context_fts) AS rank
-         FROM context_fts
-         WHERE context_fts MATCH ?
-         ORDER BY rank
-         LIMIT 50`
-      )
-      .all(ftsQuery) as { item_id: string; rank: number }[];
-  } catch {
-    ftsRows = [];
-  }
-
-  const allItems = listContextItems(
-    options?.projectId ? { projectId: options.projectId } : undefined
+  const scope = resolveScopeForProjectId(options?.projectId, (id) =>
+    getProject(id)
   );
 
-  const ftsScore = new Map<string, number>();
-  for (const row of ftsRows) {
-    ftsScore.set(row.item_id, 1 / (1 + Math.abs(row.rank)));
-  }
-
-  const hits: SearchHit[] = allItems.map((item) => {
-    const haystack = `${item.title}\n${item.content}\n${item.tags.join(" ")}`;
-    const semantic = semanticScore(query, haystack);
-    const keyword = ftsScore.get(item.id) ?? 0;
-    const score = semantic * 0.65 + keyword * 0.35;
-    const matchedOn: string[] = [];
-    if (semantic > 0.05) matchedOn.push("semantic");
-    if (keyword > 0) matchedOn.push("keyword");
-    return { item, score, matchedOn };
+  // INT-1: retrieval goes through ADR-002 retrieveMemories.
+  const ranked = retrieveForVault({
+    query,
+    scope,
+    limit: Math.max(limit * 3, 20),
+    includeRestricted: false,
   });
 
-  const filtered = hits
-    .filter((h) => h.score > 0.02 || h.matchedOn.includes("keyword"))
-    .filter((h) => h.item.classification !== "RESTRICTED")
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit);
+  const filtered = rankedToSearchHits(ranked, {
+    ownerId: principal.userId,
+    resolveVaultItem: (vaultRef) => getContextItemById(vaultRef),
+    projectIdForScope: projectIdForMemoryScope,
+    allowItem: (item) =>
+      projectAllowed(principal, item.projectId) &&
+      classificationAllowed(principal, item.classification) &&
+      item.classification !== "RESTRICTED",
+  }).slice(0, limit);
 
   const includedSensitive = filtered.some(
     (h) => h.item.classification === "SENSITIVE"
@@ -948,7 +1000,7 @@ export function searchContext(
     memoryIds: filtered.map((h) => h.item.id),
     memoryCount: filtered.length,
     includedSensitive,
-    metadata: { resultCount: filtered.length },
+    metadata: { resultCount: filtered.length, via: "adr-002-retrieve" },
   });
 
   return filtered;
@@ -1162,21 +1214,45 @@ export function buildExportText(options?: {
   }
 
   if (options?.query) {
-    const hits = searchContext(options.query, {
-      projectId: options.projectId,
-      limit: options.searchLimit ?? 8,
+    // INT-1: preview/export search hits via ADR-002 assembleContext.
+    const scope = resolveScopeForProjectId(options.projectId, (id) =>
+      getProject(id)
+    );
+    const pkg = assembleForVault({
+      query: options.query,
+      scope,
+      tokenBudget: 3000,
+      includeRestricted: false,
     });
-    for (const hit of hits) {
-      if (["profile", "preference", "decision", "project"].includes(hit.item.kind)) {
+    const limit = options.searchLimit ?? 8;
+    let added = 0;
+    for (const ranked of pkg.ranked) {
+      if (added >= limit) break;
+      const linked = rankedToSearchHits([ranked], {
+        ownerId: principal.userId,
+        resolveVaultItem: (ref) => getContextItemById(ref),
+        projectIdForScope: projectIdForMemoryScope,
+        allowItem: (item) =>
+          projectAllowed(principal, item.projectId) &&
+          classificationAllowed(principal, item.classification) &&
+          item.classification !== "RESTRICTED",
+      })[0];
+      if (!linked) continue;
+      if (
+        ["profile", "preference", "decision", "project"].includes(
+          linked.item.kind
+        )
+      ) {
         continue;
       }
       pushFragment({
-        kind: hit.item.kind,
-        title: hit.item.title || hit.item.kind,
-        content: hit.item.content,
-        source: `vault:item:${hit.item.id}`,
-        classification: hit.item.classification,
+        kind: linked.item.kind,
+        title: linked.item.title || linked.item.kind,
+        content: linked.item.content,
+        source: `vault:item:${linked.item.id}`,
+        classification: linked.item.classification,
       });
+      added += 1;
     }
   }
 
@@ -1234,6 +1310,7 @@ export function buildPreview(input: {
     metadata: {
       fragmentCount: exported.fragments.length,
       acknowledged: Boolean(input.acknowledgeSensitive),
+      via: "adr-002-assemble",
     },
   });
 
@@ -1274,6 +1351,26 @@ export function proposeCandidateMemory(input: {
     assertScope(principal, "context:write", input.projectId);
   }
 
+  const scope = resolveScopeForProjectId(input.projectId, (id) => getProject(id));
+  const memoryType = kindToMemoryType(
+    input.kind === "knowledge" ? "knowledge" : input.kind
+  );
+  const conflicts = detectStatementConflicts([
+    {
+      type: memoryType,
+      scope: scope ?? "global",
+      statement: input.content.trim(),
+      sensitivity: undefined,
+    },
+  ]);
+  const confirmation = conflicts.find((c) => conflictNeedsConfirmation(c));
+  const rationale = [
+    input.rationale?.trim() ?? "",
+    confirmation ? `Conflict: ${confirmation.reason}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
   const candidate: CandidateMemory = {
     id: createId("cand"),
     ownerId: principal.userId,
@@ -1282,7 +1379,7 @@ export function proposeCandidateMemory(input: {
     projectId: input.projectId ?? null,
     title: input.title?.trim() || input.kind,
     content: input.content.trim(),
-    rationale: input.rationale?.trim() ?? "",
+    rationale,
     classification: input.classification ?? "NORMAL",
     status: "pending",
     createdAt: nowIso(),
@@ -1405,6 +1502,7 @@ export function wipeAllContext(): void {
   db.prepare("DELETE FROM projects WHERE owner_id = ?").run(ownerId);
   db.prepare("DELETE FROM profile WHERE owner_id = ?").run(ownerId);
   db.prepare("DELETE FROM candidate_memories WHERE owner_id = ?").run(ownerId);
+  wipeOwnerMemories(ownerId);
   recordAudit({
     action: "vault_wiped",
     principal,

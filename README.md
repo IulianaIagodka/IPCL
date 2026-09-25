@@ -18,6 +18,8 @@ Eidothea is a vendor-independent context layer: you keep profile, projects, deci
 - [ADR-004](docs/adr/ADR-004-web-first-control-plane.md) — web-first control plane
 - [ADR-005](docs/adr/ADR-005-product-experience-visual-design.md) — dark-first product experience
 
+**INT-1:** Context Service / vault search + preview go through ADR-002 `retrieveMemories` / `assembleContext` (`src/lib/memory-bridge.ts`). Vault and ADR-002 share one SQLite file (`context-vault.sqlite`).
+
 ## Security model (ADR-003)
 
 Default deny. Least privilege. Every external AI is a separate, minimally trusted consumer.
