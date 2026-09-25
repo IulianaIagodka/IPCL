@@ -284,13 +284,24 @@ select {
   color: rgba(245, 250, 247, 0.92);
 }
 
-.hero-copy h1 {
-  margin: 0.35rem 0 0.9rem;
+.hero-copy h1,
+.brand-hero {
+  margin: 0 0 0.85rem;
   font-family: var(--font-display);
-  font-size: clamp(2.8rem, 7vw, 5.4rem);
-  line-height: 0.95;
-  letter-spacing: -0.045em;
+  font-size: clamp(3.2rem, 9vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.05em;
   font-weight: 600;
+}
+
+.hero-slogan {
+  margin: 0 0 1.6rem !important;
+  max-width: 28rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.6vw, 1.85rem) !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.02em;
+  color: rgba(245, 250, 247, 0.92) !important;
 }
 
 .hero-copy p {

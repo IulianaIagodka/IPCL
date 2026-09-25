@@ -6,10 +6,9 @@ export default function HomePage() {
       <section className="hero-plane">
         <div className="hero-visual" aria-hidden="true" />
         <div className="shell hero-copy">
-          <p className="fade-up brand-mark">Eidothea</p>
-          <h1 className="fade-up-delay">Stop explaining yourself.</h1>
-          <p className="fade-up-delay-2">
-            Your context follows you across AI.
+          <h1 className="fade-up brand-hero">Eidothea</h1>
+          <p className="fade-up-delay hero-slogan">
+            Stop explaining yourself.
           </p>
           <div className="hero-actions fade-up-delay-2">
             <Link href="/vault" className="btn btn-primary">
@@ -28,10 +27,9 @@ export default function HomePage() {
             <p className="pill">Product principle</p>
             <h2>One memory. Every AI.</h2>
             <p className="muted" style={{ maxWidth: "40rem", lineHeight: 1.6 }}>
-              AI providers generate answers. Eidothea is the independent layer that
-              holds who you are, what you decided, and what matters for the
-              project—then shares only the relevant fragments with whichever
-              AI you open next.
+              Your context follows you across AI. Eidothea holds who you are,
+              what you decided, and what matters for the project—then shares
+              only the relevant fragments with whichever AI you open next.
             </p>
           </div>
 

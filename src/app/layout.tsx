@@ -16,9 +16,9 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Eidothea — One memory. Every AI.",
+  title: "Eidothea — Stop explaining yourself.",
   description:
-    "Stop explaining yourself. Your context follows you across AI. One memory. Every AI.",
+    "Eidothea. Stop explaining yourself. One memory. Every AI.",
 };
 
 export default function RootLayout({

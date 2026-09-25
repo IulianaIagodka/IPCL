@@ -1,9 +1,9 @@
 # Eidothea
 
-**Stop explaining yourself.**  
-**Your context follows you across AI.**
+**Stop explaining yourself.**
 
-*One memory. Every AI.*
+*One memory. Every AI.*  
+Your context follows you across AI.
 
 Eidothea is a vendor-independent context layer: you keep profile, projects, decisions, preferences, and knowledge in one place, then make only the relevant fragments available to ChatGPT, Claude, Cursor, Codex, Gemini, or any other AI client.
 

@@ -23,10 +23,10 @@ Native memory systems are vendor-specific and generally cannot be reliably read,
 
 The product goal is:
 
-> Stop explaining yourself.  
-> Your context follows you across AI.
+> **Eidothea**  
+> Stop explaining yourself.
 
-Short form: **One memory. Every AI.**
+Supporting lines: *One memory. Every AI.* / Your context follows you across AI.
 
 The product should let users maintain their context once and make the relevant parts available to whichever AI they are using.
 
