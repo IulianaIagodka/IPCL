@@ -20,3 +20,4 @@
 
 ## P3
 - [ ] DOCS-1 · daily 08:00 ops
+- [x] RETRO parallel ADR — `docs/ops/RETRO_2026-09-25_PARALLEL_ADR.md`
