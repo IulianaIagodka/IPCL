@@ -43,7 +43,7 @@
 
 ## P3
 
-- [ ] **BRAND-1** PR [#3](https://github.com/IulianaIagodka/IPCL/pull/3) @ `d754066` — **Eidothea** / `eidothea.app` (зафіксувати після #5+#7, не під час rename churn)
+- [ ] **BRAND-1** PR [#3](https://github.com/IulianaIagodka/IPCL/pull/3) @ `64dd15c` — **Eidothea** / `eidothea.app` (зафіксувати після #5+#7, не під час rename churn)
 - [ ] **DOCS-1** Дублі ADR filename (`001-` vs `ADR-001-`)
 - [ ] **OPS-1** Daily 08:00 Kyiv (timer до 2026-10-02) + OWNERS anti-dup
 
