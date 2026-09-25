@@ -6,20 +6,33 @@ export default function HomePage() {
       <section className="hero-plane">
         <div className="hero-visual" aria-hidden="true" />
         <div className="shell hero-copy">
-          <p className="fade-up" style={{ letterSpacing: "0.16em", textTransform: "uppercase", fontSize: "0.78rem", fontWeight: 700, marginBottom: "0.4rem" }}>
+          <p
+            className="fade-up"
+            style={{
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              fontSize: "0.78rem",
+              fontWeight: 700,
+              marginBottom: "0.4rem",
+            }}
+          >
             IPCL
           </p>
           <h1 className="fade-up-delay">Stop explaining yourself to AI.</h1>
           <p className="fade-up-delay-2">
-            Keep your profile, projects, decisions, and preferences in one
-            portable vault—then share only what each AI needs.
+            A web control plane for portable context—configure memory once,
+            then keep working in Cursor, Claude, ChatGPT, and the rest.
           </p>
           <div className="hero-actions fade-up-delay-2">
-            <Link href="/vault" className="btn btn-primary">
-              Open your vault
+            <Link href="/vault/onboarding" className="btn btn-primary">
+              Open control plane
             </Link>
-            <Link href="/vault/preview" className="btn btn-ghost" style={{ color: "#f4faf7", borderColor: "rgba(244,250,247,0.35)" }}>
-              Preview what gets shared
+            <Link
+              href="/vault/integrations"
+              className="btn btn-ghost"
+              style={{ color: "#f4faf7", borderColor: "rgba(244,250,247,0.35)" }}
+            >
+              Connect via MCP
             </Link>
           </div>
         </div>
@@ -28,37 +41,45 @@ export default function HomePage() {
       <section className="section">
         <div className="shell stack">
           <div>
-            <p className="pill">Product principle</p>
-            <h2>Own the context, not the conversation.</h2>
-            <p className="muted" style={{ maxWidth: "40rem", lineHeight: 1.6 }}>
-              AI providers generate answers. IPCL is the independent layer that
-              remembers who you are, what you decided, and what matters for the
-              project—then retrieves only the relevant fragments.
+            <p className="pill">ADR-004 architecture</p>
+            <h2>Manage here. Work in your AI tools.</h2>
+            <p className="muted" style={{ maxWidth: "42rem", lineHeight: 1.6 }}>
+              The web app is not a chat product. It is the management surface
+              over a Context Service that owns memory, retrieval, permissions,
+              and audit. MCP and the Product API are access layers—never a
+              second source of truth.
             </p>
           </div>
 
           <div className="grid-2">
             <div className="panel stack">
               <h3 className="font-display" style={{ margin: 0, fontSize: "1.5rem" }}>
-                Connect → choose → continue
+                Control plane
               </h3>
               <p className="muted" style={{ margin: 0, lineHeight: 1.55 }}>
-                Start a new AI tool in seconds. Pull profile, project decisions,
-                and matching knowledge through MCP, API, or copy/export—without
-                re-teaching your stack and working style.
+                Onboarding, profile, projects, memory inspection, integration
+                permissions, activity, and export—all in the browser, across
+                operating systems.
               </p>
             </div>
             <div className="panel stack">
               <h3 className="font-display" style={{ margin: 0, fontSize: "1.5rem" }}>
-                Privacy by explicit share
+                Integration layer
               </h3>
               <p className="muted" style={{ margin: 0, lineHeight: 1.55 }}>
-                Nothing leaves the vault until you connect or invoke an
-                integration. Preview exactly what will be sent, where it is
-                going, and remove context at item, project, or account level.
+                Primary path: MCP into Cursor or Claude. Fallback: Product API,
+                preview, and copy/export. Same authorization rules on every
+                transport.
               </p>
             </div>
           </div>
+
+          <ol className="panel stack" style={{ margin: 0, paddingLeft: "1.25rem" }}>
+            <li>Open the web app</li>
+            <li>Create or import context</li>
+            <li>Connect an AI tool</li>
+            <li>Return to that AI tool with relevant context available</li>
+          </ol>
         </div>
       </section>
     </>

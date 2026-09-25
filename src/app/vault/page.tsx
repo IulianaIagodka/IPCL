@@ -1,92 +1,151 @@
 "use client";
 
 import Link from "next/link";
-import { useAsyncResource, api } from "@/lib/client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { api, useAsyncResource } from "@/lib/client";
+import type { ControlPlaneStatus } from "@/lib/types";
 
-type Stats = {
-  projects: number;
-  preferences: number;
-  decisions: number;
-  sources: number;
-  contextItems: number;
-  hasProfile: boolean;
+const STEP_LINKS: Record<
+  ControlPlaneStatus["nextStep"],
+  { href: string; label: string; hint: string }
+> = {
+  setup_account: {
+    href: "/vault/login",
+    label: "Create vault owner",
+    hint: "Authenticate the control plane before any AI can connect.",
+  },
+  complete_profile: {
+    href: "/vault/profile",
+    label: "Set up profile",
+    hint: "Who you are, how you work, and recurring instructions.",
+  },
+  create_project: {
+    href: "/vault/projects",
+    label: "Create a project",
+    hint: "Scope memory to the work you actually do.",
+  },
+  connect_integration: {
+    href: "/vault/integrations",
+    label: "Connect an AI tool",
+    hint: "Issue an MCP token so Cursor, Claude, or others can retrieve context.",
+  },
+  ready: {
+    href: "/vault/context",
+    label: "Inspect context",
+    hint: "Your control plane is ready. Keep managing memory here; work in your AI tools.",
+  },
 };
 
-export default function VaultPage() {
+export default function VaultHomePage() {
+  const router = useRouter();
   const { data, error, loading, reload } = useAsyncResource(
-    () => api<Stats>("/api/vault"),
+    () => api<ControlPlaneStatus>("/api/control-plane"),
     []
   );
+
+  useEffect(() => {
+    if (!data) return;
+    if (data.setupRequired || !data.authenticated) {
+      router.replace("/vault/login");
+    }
+  }, [data, router]);
+
+  const next = data ? STEP_LINKS[data.nextStep] : null;
 
   return (
     <div className="shell section stack">
       <div className="fade-up">
-        <p className="pill">Context Vault</p>
-        <h2>Your portable knowledge layer</h2>
-        <p className="muted" style={{ maxWidth: "38rem", lineHeight: 1.55 }}>
-          Maintain context once. Retrieve only what is relevant. Share only when
-          you choose.
+        <p className="pill">Control plane</p>
+        <h2>Manage context. Use AI elsewhere.</h2>
+        <p className="muted" style={{ maxWidth: "40rem", lineHeight: 1.55 }}>
+          This web app is the management surface for your portable context
+          layer—not a chat product. Configure memory and permissions here;
+          experience the value inside Cursor, Claude, ChatGPT, and friends.
         </p>
       </div>
 
-      {loading && <p className="muted">Loading vault…</p>}
+      {loading && <p className="muted">Loading control plane…</p>}
       {error && <p style={{ color: "#8a2f2f" }}>{error}</p>}
 
-      {data && (
-        <div className="grid-2 fade-up-delay">
-          <div className="panel stack">
-            <h3 className="font-display" style={{ margin: 0, fontSize: "1.45rem" }}>
-              Vault snapshot
-            </h3>
-            <div className="stack" style={{ gap: "0.35rem" }}>
-              <Stat label="Profile ready" value={data.hasProfile ? "Yes" : "Not yet"} />
-              <Stat label="Projects" value={String(data.projects)} />
-              <Stat label="Preferences" value={String(data.preferences)} />
-              <Stat label="Decisions" value={String(data.decisions)} />
-              <Stat label="Sources" value={String(data.sources)} />
-              <Stat label="Searchable fragments" value={String(data.contextItems)} />
+      {data?.authenticated && (
+        <>
+          <div className="grid-2 fade-up-delay">
+            <div className="panel stack">
+              <h3 className="font-display" style={{ margin: 0, fontSize: "1.45rem" }}>
+                {data.nextStep === "ready" ? "Ready" : "Next step"}
+              </h3>
+              <p className="muted" style={{ margin: 0, lineHeight: 1.5 }}>
+                {next?.hint}
+              </p>
+              {next && (
+                <Link className="btn btn-primary" href={next.href}>
+                  {next.label}
+                </Link>
+              )}
+              <button className="btn btn-ghost" onClick={() => void reload()}>
+                Refresh status
+              </button>
             </div>
-            <button className="btn btn-ghost" onClick={() => void reload()}>
-              Refresh
-            </button>
+
+            <div className="panel stack">
+              <h3 className="font-display" style={{ margin: 0, fontSize: "1.45rem" }}>
+                Setup checklist
+              </h3>
+              <ChecklistItem done={data.steps.account} label="Owner account" />
+              <ChecklistItem done={data.steps.profile} label="Profile" />
+              <ChecklistItem done={data.steps.project} label="At least one project" />
+              <ChecklistItem
+                done={data.steps.integration}
+                label="Connected AI integration"
+              />
+              {data.stats && (
+                <div className="muted" style={{ fontSize: "0.9rem", marginTop: "0.5rem" }}>
+                  {data.stats.projects} projects · {data.stats.decisions} decisions ·{" "}
+                  {data.stats.contextItems} fragments
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="panel stack">
-            <h3 className="font-display" style={{ margin: 0, fontSize: "1.45rem" }}>
-              Continue where you left off
+          <div className="panel stack fade-up-delay">
+            <h3 className="font-display" style={{ margin: 0, fontSize: "1.35rem" }}>
+              Control-plane surfaces
             </h3>
-            <div className="stack">
-              <Link className="btn btn-primary" href="/vault/profile">
-                Edit profile
+            <div className="stack" style={{ gap: "0.45rem" }}>
+              <Link className="btn btn-ghost" href="/vault/context">
+                Context — inspect & search memory
               </Link>
               <Link className="btn btn-ghost" href="/vault/projects">
-                Manage projects
+                Projects — scoped work context
               </Link>
-              <Link className="btn btn-ghost" href="/vault/import">
-                Import notes or conversations
+              <Link className="btn btn-ghost" href="/vault/integrations">
+                Integrations — MCP permissions & tokens
               </Link>
-              <Link className="btn btn-ghost" href="/vault/search">
-                Search relevant context
+              <Link className="btn btn-ghost" href="/vault/activity">
+                Activity — what was accessed or shared
               </Link>
               <Link className="btn btn-ghost" href="/vault/preview">
-                Preview & export
+                Export — manual fallback when MCP is unavailable
               </Link>
-              <Link className="btn btn-ghost" href="/vault/security">
-                Security & integrations
+              <Link className="btn btn-ghost" href="/vault/settings">
+                Settings — account & privacy
               </Link>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function ChecklistItem({ done, label }: { done: boolean; label: string }) {
   return (
-    <div className="list-row" style={{ padding: "0.55rem 0" }}>
-      <span className="muted">{label}</span>
-      <strong>{value}</strong>
+    <div className="list-row" style={{ padding: "0.45rem 0" }}>
+      <span>{label}</span>
+      <strong style={{ color: done ? "var(--sea-deep)" : "var(--ink-soft)" }}>
+        {done ? "Done" : "Pending"}
+      </strong>
     </div>
   );
 }

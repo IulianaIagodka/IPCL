@@ -16,10 +16,19 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "IPCL — Context Vault",
+  title: "IPCL — Context Control Plane",
   description:
-    "Stop explaining yourself to AI. An independent portable context layer for every AI tool you use.",
+    "Web-first control plane for a portable AI context layer. Manage memory and permissions here; use context in the AI tools you already trust.",
 };
+
+const NAV = [
+  { href: "/vault", label: "Home" },
+  { href: "/vault/context", label: "Context" },
+  { href: "/vault/projects", label: "Projects" },
+  { href: "/vault/integrations", label: "Integrations" },
+  { href: "/vault/activity", label: "Activity" },
+  { href: "/vault/settings", label: "Settings" },
+] as const;
 
 export default function RootLayout({
   children,
@@ -39,16 +48,14 @@ export default function RootLayout({
         <header className="site-header">
           <div className="shell site-header-inner">
             <Link href="/" className="brand">
-              IPCL <span>Context Vault</span>
+              IPCL <span>Control Plane</span>
             </Link>
-            <nav className="nav-links">
-              <Link href="/vault">Vault</Link>
-              <Link href="/vault/profile">Profile</Link>
-              <Link href="/vault/projects">Projects</Link>
-              <Link href="/vault/import">Import</Link>
-              <Link href="/vault/search">Search</Link>
-              <Link href="/vault/preview">Preview</Link>
-              <Link href="/vault/security">Security</Link>
+            <nav className="nav-links" aria-label="Control plane">
+              {NAV.map((item) => (
+                <Link key={item.href} href={item.href}>
+                  {item.label}
+                </Link>
+              ))}
             </nav>
           </div>
         </header>

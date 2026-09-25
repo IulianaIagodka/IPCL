@@ -283,3 +283,32 @@ test("classification update to RESTRICTED removes item from search", () => {
   updateContextClassification(item.id, "RESTRICTED");
   assert.ok(!searchContext("roadmap").some((h) => h.item.id === item.id));
 });
+
+test("ADR-004 control plane status and MCP config builder", async () => {
+  const { getControlPlaneStatus, buildMcpClientConfig } = await import(
+    "../src/service"
+  );
+  const status = getControlPlaneStatus({
+    kind: "user",
+    userId: user.id,
+    email: user.email,
+    sessionId: "test-session",
+  });
+  assert.equal(status.authenticated, true);
+  assert.equal(status.steps.account, true);
+  assert.ok(status.steps.profile);
+  assert.ok(status.steps.project);
+  assert.ok(
+    status.nextStep === "connect_integration" || status.nextStep === "ready"
+  );
+
+  const config = buildMcpClientConfig({
+    token: "test-token-value",
+    cwd: "/tmp/ipcl",
+  });
+  assert.equal(
+    config.mcpServers["ipcl-context-vault"].env.IPCL_INTEGRATION_TOKEN,
+    "test-token-value"
+  );
+  assert.equal(config.mcpServers["ipcl-context-vault"].cwd, "/tmp/ipcl");
+});

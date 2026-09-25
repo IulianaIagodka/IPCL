@@ -210,3 +210,33 @@ export interface CandidateMemory {
   createdAt: string;
   resolvedAt: string | null;
 }
+
+/** ADR-004 control-plane readiness (safe for client imports). */
+export type ControlPlaneNextStep =
+  | "setup_account"
+  | "complete_profile"
+  | "create_project"
+  | "connect_integration"
+  | "ready";
+
+export interface ControlPlaneStatus {
+  setupRequired: boolean;
+  authenticated: boolean;
+  ownerId: string | null;
+  displayName: string | null;
+  steps: {
+    account: boolean;
+    profile: boolean;
+    project: boolean;
+    integration: boolean;
+  };
+  nextStep: ControlPlaneNextStep;
+  stats: {
+    projects: number;
+    preferences: number;
+    decisions: number;
+    sources: number;
+    contextItems: number;
+    hasProfile: boolean;
+  } | null;
+}
