@@ -1,11 +1,11 @@
-# Last plan — 2026-09-25 ~16:50 Kyiv (goal continue, not 08:00)
+# Last plan — 2026-09-25 ~13:55 Kyiv (PR #6 merged wake)
 
 ## Delta
-- **#3** closed without merge (brand already on main)
-- **#11** re-merged latest Eidothea `main`; conflicts fixed; **17/17** tests + tsc
+- **#6 MERGED** — ADR-003 на main
+- **#11** rebased onto post-#6 main; tests 17/17; тепер несе переважно **ADR-004**
 
 ## Фокус
-Merge **#11**. Далі INT-1. Close #7/#9/#6.
+Merge **#11**. Далі close #7/#9 → INT-1.
 
 ## Do-not-start
-Новий ADR/UI/brand агент; INT-1 до merge #11.
+Новий ADR-003 агент; INT-1 до merge #11; brand.
