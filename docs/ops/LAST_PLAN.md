@@ -1,11 +1,10 @@
 # Last plan — 2026-09-25 ~14:20 Kyiv
 
 ## Delta
-- INT-1 branch: `cursor/int1-wire-context-store-4e11` @ `1bd31cc`
-- TEAM_SETUP playbook published
+- INT-1 **PR #12** open (`1bd31cc`)
 
 ## Фокус
-INT-1 owner → відкрити PR → твій `merge #N`
+Твій review + `merge #12`
 
 ## Do-not-start
-Другий INT-1 агент; brand mid-flight
+Другий INT-1 агент
