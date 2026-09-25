@@ -1,15 +1,17 @@
 # ACTION REQUIRED
 
-Оновлено: 2026-09-25 ~11:57 UTC
+Оновлено: 2026-09-25 ~12:03 UTC
 
-Канон: **[RULES.md](./RULES.md)** (на `main` після #8).
+Канон: **[RULES.md](./RULES.md)**.
 
 ## Потрібно від людини (P0)
-—(немає блокуючого merge)
+—(goal paused)
 
 ## Рекомендація
-1. **Archive** INT-1 owner: Context store wiring (`bc-01a0d840-…4e11`)
-2. Кинь наступну задачу оркестратору (або `pause goal`)
+1. Archive INT-1 owner (Context store wiring), коли буде зручно
+2. Локально: `npm run dev` → http://localhost:3000/vault/login
+3. Прод: `fly deploy` (див. README)
+4. Щоб відновити оркестратор: напиши сюди або `resume`
 
 ## Оркестратор
-#12 і #8 на `main` (`7162041`). Product-код не пишу.
+Paused. Daily timers зняті. Product-код не пишу.
