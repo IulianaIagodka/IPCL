@@ -11,6 +11,7 @@ IPCL is a vendor-independent **Context Vault**: you keep profile, projects, deci
 
 - ADR index: [docs/adr/](docs/adr/)
 - Visual system: [ADR-005](docs/adr/ADR-005-product-experience-visual-design.md) — dark-first control plane for memory, scope, permission, and AI access.
+- Memory model: [ADR-002](docs/adr/ADR-002-context-storage-retrieval.md) — structured memory + semantic index (`packages/context-store`).
 
 ## What this MVP includes
 
@@ -23,6 +24,7 @@ IPCL is a vendor-independent **Context Vault**: you keep profile, projects, deci
 7. MCP access (`get_profile`, `get_project`, `search_context`, `get_decisions`, `get_preferences`, `save_context`, `save_decision`)  
 8. Manual copy / export fallback  
 9. Context preview of exactly what will be shared  
+10. Dark-first control-plane UI (memories, scopes, integrations matrix, activity)
 
 ## Quick start
 
@@ -36,6 +38,29 @@ Open [http://localhost:3000](http://localhost:3000).
 ```bash
 npm test
 npm run mcp
+```
+
+## ADR-002 context store
+
+Structured memory lives in `packages/context-store`:
+
+```bash
+npm run test:adr002
+npm run benchmark
+npm run demo:adr002
+```
+
+```ts
+import { createContextStore } from "./packages/context-store/index.ts";
+
+const store = createContextStore();
+const project = store.createProject({ name: "Paypace" });
+store.importSource({
+  type: "conversation",
+  title: "Pricing discussion",
+  scope: project.scope,
+  content: "We decided on monthly and yearly subscriptions.",
+});
 ```
 
 ## MCP (Cursor / Claude Desktop)
@@ -73,4 +98,7 @@ Set `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` to use model-assisted extraction on 
 | `npm run build` | Production build |
 | `npm run start` | Start production server |
 | `npm run mcp` | Start MCP stdio server |
-| `npm test` | Vault / search / preview tests |
+| `npm test` | Vault + ADR-002 tests |
+| `npm run test:adr002` | ADR-002 store tests |
+| `npm run benchmark` | Retrieval benchmark |
+| `npm run demo:adr002` | ADR-002 demo script |

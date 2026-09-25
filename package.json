@@ -2,12 +2,17 @@
   "name": "ipcl",
   "version": "0.1.0",
   "private": true,
+  "description": "Independent Portable Context Layer — Context Vault UI (ADR-005) + structured memory (ADR-002)",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --import tsx --test scripts/test-vault.ts",
+    "test": "node --import tsx --test scripts/test-vault.ts packages/context-store/tests/adr-002.test.ts",
+    "test:vault": "node --import tsx --test scripts/test-vault.ts",
+    "test:adr002": "tsx --test packages/context-store/tests/adr-002.test.ts",
+    "benchmark": "tsx packages/context-store/scripts/benchmark-retrieval.ts",
+    "demo:adr002": "tsx packages/context-store/scripts/demo-adr-002.ts",
     "mcp": "tsx mcp/server.ts"
   },
   "dependencies": {
