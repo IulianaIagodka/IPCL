@@ -111,10 +111,10 @@ export function getControlPlaneStatus(
     integration: integrations.length > 0,
   };
 
+  // Integration/MCP is optional — Preview→Copy is the default daily path.
   let nextStep: ControlPlaneStatus["nextStep"] = "ready";
   if (!steps.profile) nextStep = "complete_profile";
   else if (!steps.project) nextStep = "create_project";
-  else if (!steps.integration) nextStep = "connect_integration";
 
   return {
     setupRequired: false,

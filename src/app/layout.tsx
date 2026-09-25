@@ -15,14 +15,13 @@ export const metadata: Metadata = {
   },
 };
 
+/** Keep primary nav to the daily loop only. Rest lives under More. */
 const NAV = [
   { href: "/vault", label: "Home" },
-  { href: "/vault/context", label: "Context" },
-  { href: "/vault/projects", label: "Projects" },
-  { href: "/vault/integrations", label: "Integrations" },
-  { href: "/vault/security", label: "Security" },
-  { href: "/vault/activity", label: "Activity" },
-  { href: "/vault/settings", label: "Settings" },
+  { href: "/vault/import", label: "Save" },
+  { href: "/vault/preview", label: "Use in AI" },
+  { href: "/vault/context", label: "Memory" },
+  { href: "/vault/settings", label: "More" },
 ];
 
 export default function RootLayout({
