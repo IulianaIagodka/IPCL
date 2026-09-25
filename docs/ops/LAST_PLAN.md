@@ -1,12 +1,11 @@
-# Last plan refresh — 2026-09-25 ~13:45 Kyiv
+# Last plan refresh — 2026-09-25 ~13:50 Kyiv
 
 ## Delta / виконання
-- **COORD-5 done:** `#1` і `#6` повністю входять у `#7` (0 unique commits/files).
-- Канонічний merge target = **#7 only**.
-- Pause overlapping досі потрібен (Demo 003 / Open landing / Retest / Open control plane).
+- Додано **INT1_BRIEF.md** — мапінг ADR-002 API ↔ Context Service/vault; кроки після merge #7.
+- COORD-5 done раніше; #7 = sole merge target.
 
 ## Фокус
-Merge #7 → close #1+#6 → rebase #5 → INT-1.
+User merge #7 → close #1+#6 → тоді INT-1 (brief готовий) / rebase #5.
 
-## Не стартувати
-Новий product UI/security/brand; окремий merge #1/#6.
+## Не стартувати зараз
+INT-1 імплементацію (чекає #7); новий overlapping UI.

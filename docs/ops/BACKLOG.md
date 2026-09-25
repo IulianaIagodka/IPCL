@@ -37,9 +37,9 @@
 
 ## P2 — після merge
 
-- [ ] **INT-1** Зв’язати ADR-002 library (`main`/`src`) з Next vault/control-plane (зараз два світи)
+- [ ] **INT-1** Зв’язати ADR-002 library з vault/control-plane — brief готовий: [`INT1_BRIEF.md`](./INT1_BRIEF.md) (підвищити до P1 після merge #7)
 - [ ] **TEST-1** Vault retest після одного канонічного UI
-- [ ] **REBASE-5** ADR-005 на main після #6/#7
+- [ ] **REBASE-5** ADR-005 на main після #7
 
 ## P3
 
