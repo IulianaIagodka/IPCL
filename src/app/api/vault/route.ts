@@ -1,13 +1,15 @@
 import { getVaultStats, wipeAllContext } from "@/lib/vault";
-import { jsonOk } from "@/lib/http";
+import { withAuth } from "@/lib/http";
 
 export const runtime = "nodejs";
 
-export async function GET() {
-  return jsonOk(getVaultStats());
+export async function GET(request: Request) {
+  return withAuth(request, async () => getVaultStats());
 }
 
-export async function DELETE() {
-  wipeAllContext();
-  return jsonOk({ ok: true });
+export async function DELETE(request: Request) {
+  return withAuth(request, async () => {
+    wipeAllContext();
+    return { ok: true };
+  });
 }

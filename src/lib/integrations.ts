@@ -1,221 +1,317 @@
 import { getDb } from "./db";
+import { generateToken, hashToken } from "./crypto";
 import { createId, nowIso } from "./id";
+import { storeEncryptedSecret, deleteSecret } from "./auth";
+import { recordAudit } from "./audit";
+import { DEFAULT_READ_SCOPES } from "./policy";
+import type { Principal } from "./policy";
+import type {
+  DataClassification,
+  Integration,
+  IntegrationAccessMode,
+  IntegrationScope,
+} from "./types";
 
-export type IntegrationStatus = "connected" | "disconnected";
-
-export interface Integration {
-  id: string;
-  name: string;
-  status: IntegrationStatus;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface IntegrationPermission {
-  integrationId: string;
-  scopeKey: string;
-  allowed: boolean;
-}
-
-export interface ActivityEvent {
-  id: string;
-  kind: "share" | "access" | "connect" | "disconnect" | "restrict" | "learn";
-  summary: string;
-  detail: string;
-  createdAt: string;
-}
-
-const DEFAULT_INTEGRATIONS = ["ChatGPT", "Claude", "Cursor", "Gemini"] as const;
-
-function ensureIntegrationTables() {
-  const db = getDb();
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS integrations (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL UNIQUE,
-      status TEXT NOT NULL DEFAULT 'disconnected',
-      created_at TEXT NOT NULL,
-      updated_at TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS integration_permissions (
-      integration_id TEXT NOT NULL,
-      scope_key TEXT NOT NULL,
-      allowed INTEGER NOT NULL DEFAULT 0,
-      PRIMARY KEY (integration_id, scope_key),
-      FOREIGN KEY (integration_id) REFERENCES integrations(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS activity_events (
-      id TEXT PRIMARY KEY,
-      kind TEXT NOT NULL,
-      summary TEXT NOT NULL,
-      detail TEXT NOT NULL DEFAULT '',
-      created_at TEXT NOT NULL
-    );
-  `);
-
-  const count = (
-    db.prepare("SELECT COUNT(*) AS c FROM integrations").get() as { c: number }
-  ).c;
-  if (count === 0) {
-    const insert = db.prepare(
-      `INSERT INTO integrations (id, name, status, created_at, updated_at)
-       VALUES (?, ?, 'disconnected', ?, ?)`
-    );
-    const now = nowIso();
-    for (const name of DEFAULT_INTEGRATIONS) {
-      insert.run(createId(), name, now, now);
-    }
+function parseJson<T>(value: string | null | undefined, fallback: T): T {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
   }
 }
 
 function rowToIntegration(row: Record<string, unknown>): Integration {
   return {
     id: String(row.id),
+    ownerId: String(row.owner_id),
     name: String(row.name),
-    status: String(row.status) as IntegrationStatus,
+    provider: String(row.provider),
+    accessMode: String(row.access_mode) as IntegrationAccessMode,
+    scopes: parseJson<IntegrationScope[]>(String(row.scopes), []),
+    allowedProjectIds: parseJson<string[] | null>(
+      String(row.allowed_project_ids),
+      null
+    ),
+    allowedClassifications: parseJson<DataClassification[]>(
+      String(row.allowed_classifications),
+      ["NORMAL"]
+    ),
+    tokenHint: String(row.token_hint ?? ""),
+    revokedAt: row.revoked_at ? String(row.revoked_at) : null,
     createdAt: String(row.created_at),
     updatedAt: String(row.updated_at),
   };
 }
 
-export function listIntegrations(): Integration[] {
-  ensureIntegrationTables();
+export function listIntegrations(ownerId: string): Integration[] {
   const rows = getDb()
-    .prepare("SELECT * FROM integrations ORDER BY name ASC")
-    .all() as Record<string, unknown>[];
+    .prepare(
+      `SELECT * FROM integrations WHERE owner_id = ? ORDER BY created_at DESC`
+    )
+    .all(ownerId) as Record<string, unknown>[];
   return rows.map(rowToIntegration);
 }
 
-export function setIntegrationStatus(
-  id: string,
-  status: IntegrationStatus
-): Integration | null {
-  ensureIntegrationTables();
-  const db = getDb();
-  const existing = db
-    .prepare("SELECT * FROM integrations WHERE id = ?")
-    .get(id) as Record<string, unknown> | undefined;
-  if (!existing) return null;
+export function getIntegration(id: string, ownerId: string): Integration | null {
+  const row = getDb()
+    .prepare(`SELECT * FROM integrations WHERE id = ? AND owner_id = ?`)
+    .get(id, ownerId) as Record<string, unknown> | undefined;
+  return row ? rowToIntegration(row) : null;
+}
 
+export function createIntegration(input: {
+  ownerId: string;
+  name: string;
+  provider: string;
+  accessMode?: IntegrationAccessMode;
+  scopes?: IntegrationScope[];
+  allowedProjectIds?: string[] | null;
+  allowedClassifications?: DataClassification[];
+}): { integration: Integration; token: string } {
   const now = nowIso();
-  db.prepare(
-    "UPDATE integrations SET status = ?, updated_at = ? WHERE id = ?"
-  ).run(status, now, id);
+  const token = generateToken(32);
+  const accessMode = input.accessMode ?? "READ_ONLY";
+  let scopes = input.scopes ?? [...DEFAULT_READ_SCOPES];
+  if (accessMode === "READ_ONLY") {
+    scopes = scopes.filter(
+      (s) => !["context:write", "memory:create", "memory:update"].includes(s)
+    );
+  }
+  const classifications = input.allowedClassifications ?? ["NORMAL"];
+  // RESTRICTED never granted to integrations
+  const allowedClassifications = classifications.filter((c) => c !== "RESTRICTED");
 
-  recordActivity({
-    kind: status === "connected" ? "connect" : "disconnect",
-    summary:
-      status === "connected"
-        ? `${existing.name} connected`
-        : `${existing.name} disconnected`,
-    detail:
-      status === "connected"
-        ? "Integration can receive allowed scopes when you share."
-        : "Integration no longer has live access.",
-  });
-
-  return rowToIntegration({ ...existing, status, updated_at: now });
-}
-
-export function listPermissions(): IntegrationPermission[] {
-  ensureIntegrationTables();
-  const rows = getDb()
-    .prepare(
-      "SELECT integration_id, scope_key, allowed FROM integration_permissions"
-    )
-    .all() as Record<string, unknown>[];
-  return rows.map((row) => ({
-    integrationId: String(row.integration_id),
-    scopeKey: String(row.scope_key),
-    allowed: Boolean(row.allowed),
-  }));
-}
-
-export function setPermission(
-  integrationId: string,
-  scopeKey: string,
-  allowed: boolean
-): IntegrationPermission {
-  ensureIntegrationTables();
-  getDb()
-    .prepare(
-      `INSERT INTO integration_permissions (integration_id, scope_key, allowed)
-       VALUES (?, ?, ?)
-       ON CONFLICT(integration_id, scope_key)
-       DO UPDATE SET allowed = excluded.allowed`
-    )
-    .run(integrationId, scopeKey, allowed ? 1 : 0);
-
-  const integration = listIntegrations().find((i) => i.id === integrationId);
-  recordActivity({
-    kind: "restrict",
-    summary: `${integration?.name ?? "Integration"} · ${scopeKey} ${allowed ? "allowed" : "restricted"}`,
-    detail: allowed
-      ? "Scope marked as shareable for this integration."
-      : "Scope blocked for this integration.",
-  });
-
-  return { integrationId, scopeKey, allowed };
-}
-
-export function listActivity(limit = 40): ActivityEvent[] {
-  ensureIntegrationTables();
-  const rows = getDb()
-    .prepare(
-      "SELECT * FROM activity_events ORDER BY created_at DESC LIMIT ?"
-    )
-    .all(limit) as Record<string, unknown>[];
-  return rows.map((row) => ({
-    id: String(row.id),
-    kind: String(row.kind) as ActivityEvent["kind"],
-    summary: String(row.summary),
-    detail: String(row.detail ?? ""),
-    createdAt: String(row.created_at),
-  }));
-}
-
-export function recordActivity(input: {
-  kind: ActivityEvent["kind"];
-  summary: string;
-  detail?: string;
-}): ActivityEvent {
-  ensureIntegrationTables();
-  const event: ActivityEvent = {
-    id: createId(),
-    kind: input.kind,
-    summary: input.summary,
-    detail: input.detail ?? "",
-    createdAt: nowIso(),
-  };
-  getDb()
-    .prepare(
-      `INSERT INTO activity_events (id, kind, summary, detail, created_at)
-       VALUES (?, ?, ?, ?, ?)`
-    )
-    .run(event.id, event.kind, event.summary, event.detail, event.createdAt);
-  return event;
-}
-
-export function getPermissionMatrix(scopes: string[]) {
-  const integrations = listIntegrations();
-  const permissions = listPermissions();
-  const lookup = new Map(
-    permissions.map((p) => [`${p.integrationId}:${p.scopeKey}`, p.allowed])
+  const secretId = storeEncryptedSecret(
+    input.ownerId,
+    `integration:${input.name}`,
+    token
   );
 
-  return {
-    integrations,
+  const integration: Integration = {
+    id: createId("int"),
+    ownerId: input.ownerId,
+    name: input.name.trim(),
+    provider: input.provider.trim() || "mcp",
+    accessMode,
     scopes,
-    cells: integrations.flatMap((integration) =>
-      scopes.map((scope) => ({
-        integrationId: integration.id,
-        integrationName: integration.name,
-        scopeKey: scope,
-        allowed: lookup.get(`${integration.id}:${scope}`) ?? false,
-        connected: integration.status === "connected",
-      }))
-    ),
+    allowedProjectIds: input.allowedProjectIds ?? null,
+    allowedClassifications,
+    tokenHint: `${token.slice(0, 4)}…${token.slice(-4)}`,
+    revokedAt: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  getDb()
+    .prepare(
+      `INSERT INTO integrations
+        (id, owner_id, name, provider, access_mode, scopes, allowed_project_ids,
+         allowed_classifications, token_hash, token_hint, secret_id, created_at, updated_at, revoked_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)`
+    )
+    .run(
+      integration.id,
+      integration.ownerId,
+      integration.name,
+      integration.provider,
+      integration.accessMode,
+      JSON.stringify(integration.scopes),
+      JSON.stringify(integration.allowedProjectIds),
+      JSON.stringify(integration.allowedClassifications),
+      hashToken(token),
+      integration.tokenHint,
+      secretId,
+      integration.createdAt,
+      integration.updatedAt
+    );
+
+  recordAudit({
+    action: "integration_connected",
+    principal: {
+      kind: "user",
+      userId: input.ownerId,
+      email: "",
+      sessionId: "",
+    },
+    metadata: {
+      integrationId: integration.id,
+      accessMode,
+      scopes,
+      projects: integration.allowedProjectIds,
+    },
+  });
+
+  return { integration, token };
+}
+
+export function updateIntegration(
+  id: string,
+  ownerId: string,
+  updates: Partial<{
+    name: string;
+    accessMode: IntegrationAccessMode;
+    scopes: IntegrationScope[];
+    allowedProjectIds: string[] | null;
+    allowedClassifications: DataClassification[];
+  }>
+): Integration | null {
+  const current = getIntegration(id, ownerId);
+  if (!current || current.revokedAt) return null;
+
+  let scopes = updates.scopes ?? current.scopes;
+  const accessMode = updates.accessMode ?? current.accessMode;
+  if (accessMode === "READ_ONLY") {
+    scopes = scopes.filter(
+      (s) => !["context:write", "memory:create", "memory:update"].includes(s)
+    );
+  }
+  const allowedClassifications = (
+    updates.allowedClassifications ?? current.allowedClassifications
+  ).filter((c) => c !== "RESTRICTED");
+
+  const next: Integration = {
+    ...current,
+    name: updates.name?.trim() ?? current.name,
+    accessMode,
+    scopes,
+    allowedProjectIds:
+      updates.allowedProjectIds !== undefined
+        ? updates.allowedProjectIds
+        : current.allowedProjectIds,
+    allowedClassifications,
+    updatedAt: nowIso(),
+  };
+
+  getDb()
+    .prepare(
+      `UPDATE integrations SET
+        name = ?, access_mode = ?, scopes = ?, allowed_project_ids = ?,
+        allowed_classifications = ?, updated_at = ?
+       WHERE id = ? AND owner_id = ?`
+    )
+    .run(
+      next.name,
+      next.accessMode,
+      JSON.stringify(next.scopes),
+      JSON.stringify(next.allowedProjectIds),
+      JSON.stringify(next.allowedClassifications),
+      next.updatedAt,
+      id,
+      ownerId
+    );
+
+  if (
+    updates.accessMode === "READ_WRITE" ||
+    (updates.scopes && updates.scopes.some((s) => s.includes("write") || s.includes("create")))
+  ) {
+    recordAudit({
+      action: "integration_permission_expanded",
+      principal: {
+        kind: "user",
+        userId: ownerId,
+        email: "",
+        sessionId: "",
+      },
+      metadata: { integrationId: id, accessMode, scopes },
+    });
+  }
+
+  return next;
+}
+
+export function revokeIntegration(id: string, ownerId: string): boolean {
+  const row = getDb()
+    .prepare(`SELECT secret_id FROM integrations WHERE id = ? AND owner_id = ?`)
+    .get(id, ownerId) as { secret_id: string | null } | undefined;
+  if (!row) return false;
+
+  getDb()
+    .prepare(
+      `UPDATE integrations
+       SET revoked_at = ?, updated_at = ?, token_hash = 'revoked'
+       WHERE id = ? AND owner_id = ?`
+    )
+    .run(nowIso(), nowIso(), id, ownerId);
+
+  if (row.secret_id) deleteSecret(row.secret_id, ownerId);
+
+  recordAudit({
+    action: "integration_revoked",
+    principal: {
+      kind: "user",
+      userId: ownerId,
+      email: "",
+      sessionId: "",
+    },
+    metadata: { integrationId: id },
+  });
+  return true;
+}
+
+export function rotateIntegrationToken(
+  id: string,
+  ownerId: string
+): { integration: Integration; token: string } | null {
+  const current = getIntegration(id, ownerId);
+  if (!current || current.revokedAt) return null;
+
+  const row = getDb()
+    .prepare(`SELECT secret_id FROM integrations WHERE id = ?`)
+    .get(id) as { secret_id: string | null };
+
+  if (row?.secret_id) deleteSecret(row.secret_id, ownerId);
+
+  const token = generateToken(32);
+  const secretId = storeEncryptedSecret(ownerId, `integration:${current.name}`, token);
+  const hint = `${token.slice(0, 4)}…${token.slice(-4)}`;
+  const updatedAt = nowIso();
+
+  getDb()
+    .prepare(
+      `UPDATE integrations
+       SET token_hash = ?, token_hint = ?, secret_id = ?, updated_at = ?
+       WHERE id = ? AND owner_id = ?`
+    )
+    .run(hashToken(token), hint, secretId, updatedAt, id, ownerId);
+
+  recordAudit({
+    action: "credential_rotated",
+    principal: {
+      kind: "user",
+      userId: ownerId,
+      email: "",
+      sessionId: "",
+    },
+    metadata: { integrationId: id },
+  });
+
+  return {
+    integration: { ...current, tokenHint: hint, updatedAt },
+    token,
+  };
+}
+
+export function resolveIntegrationToken(token: string | null | undefined): Principal | null {
+  if (!token) return null;
+  const row = getDb()
+    .prepare(
+      `SELECT * FROM integrations
+       WHERE token_hash = ? AND revoked_at IS NULL`
+    )
+    .get(hashToken(token)) as Record<string, unknown> | undefined;
+  if (!row) return null;
+
+  const integration = rowToIntegration(row);
+  return {
+    kind: "integration",
+    userId: integration.ownerId,
+    integrationId: integration.id,
+    name: integration.name,
+    provider: integration.provider,
+    accessMode: integration.accessMode,
+    scopes: integration.scopes,
+    allowedProjectIds: integration.allowedProjectIds,
+    allowedClassifications: integration.allowedClassifications,
   };
 }
