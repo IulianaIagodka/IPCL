@@ -1,7 +1,7 @@
-# Last plan refresh — 2026-09-25 ~14:20 Kyiv
+# Last plan refresh — 2026-09-25 ~14:25 Kyiv
 
-## Delta (важливо)
-PR #1 sync: MVP tip `253e56d` — **2 коміти поза #7**. COORD-5 скасовано. Потрібен **PORT-1** перед merge #7.
+## Delta / виконання
+- **PORT-1 виконано:** PR [#9](https://github.com/IulianaIagodka/IPCL/pull/9) — cherry-pick MVP fixes у ADR-004 stack; tests 10/10.
 
 ## Фокус
-Pause MVP agent → port #1 unique → #7 → merge #7.
+Merge #9 → #7 → main. Потім close #1/#6.

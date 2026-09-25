@@ -1,12 +1,12 @@
 # IPCL Backlog — 2026-09-25
 
-Оновлено: 2026-09-25 ~14:20 Europe/Kyiv  
+Оновлено: 2026-09-25 ~14:25 Europe/Kyiv  
 Див. також: `OWNERS.md`, `ACTION_REQUIRED.md`, `WAIT_STATE.md`
 
 ## Merge queue
 
-1. **PORT-1** Cherry-pick `#1` unique commits (`247218a`, `253e56d`) into `#7` (або rebase #7 onto #1 tip)
-2. Merge **#7** (tests were green @ `02b7035`; re-test after port)
+1. Merge **#9** (PORT-1) into ADR-004 branch / #7
+2. Merge **#7** (+#9) — re-tested 10/10 on port branch
 3. Close **#6** і **#1**
 4. Rebase **#5** → brand **#3** (Eidothea) → **INT-1**
 
@@ -19,7 +19,7 @@
 - [x] **COORD-3** Open control plane stopped
 - [ ] **COORD-4** Hold brand #3 (Eidothea + Fly.io `64dd15c`)
 - [ ] **COORD-5** ~~superseded~~ → **відкрито знову**: #1 має unique commits поза #7
-- [ ] **PORT-1** Перенести unique #1 → #7 перед merge
+- [x] **PORT-1** PR [#9](https://github.com/IulianaIagodka/IPCL/pull/9) — cherry-pick у ADR-004; tests 10/10 (змерджити в #7)
 
 ## P1 — в роботі (owners only)
 
