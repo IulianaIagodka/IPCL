@@ -1,11 +1,12 @@
 # IPCL Backlog — 2026-09-25
 
-Оновлено: 2026-09-25 ~12:41 UTC — privacy owner IDLE; INT-1 archived
+Оновлено: 2026-09-25 ~12:50 UTC — MCP Fly cwd bug filed
 
 ## Active
-1. **P3** Privacy / copyright — DRAFT [#13](https://github.com/IulianaIagodka/IPCL/pull/13) · owner IDLE · rebase onto `main` → human `merge #13`
-2. **P3** CI green — DRAFT [#10](https://github.com/IulianaIagodka/IPCL/pull/10)
-3. **P3** ops registry — DRAFT [#14](https://github.com/IulianaIagodka/IPCL/pull/14) (OWNERS/USER_GUIDE)
+1. **P2** MCP connect on Fly — wizard emits `cwd: /app` (container path); unusable in local Cursor. Need: ask local repo path in UI **or** remote MCP; until then UX = Preview→Copy. *(no theme owner yet — do not start without OWNERS row)*
+2. **P3** Privacy / copyright — DRAFT [#13](https://github.com/IulianaIagodka/IPCL/pull/13) · owner IDLE · rebase → `merge #13`
+3. **P3** CI green — DRAFT [#10](https://github.com/IulianaIagodka/IPCL/pull/10)
+4. **P3** ops registry — DRAFT [#14](https://github.com/IulianaIagodka/IPCL/pull/14)
 
 ## Done
 - [x] #1 · #5 · #3 · #6 · #11 · #7/#9 · #12 INT-1 · **#8 ops MERGED**
@@ -18,6 +19,9 @@
 
 ## P1
 - [x] INT-1 implementation
+
+## P2
+- [ ] Fly MCP config `cwd=/app` / local Cursor mismatch
 
 ## P3
 - [ ] #13 privacy/copyright (owner IDLE, PR open)

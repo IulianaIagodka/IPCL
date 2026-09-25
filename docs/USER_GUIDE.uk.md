@@ -63,8 +63,9 @@
 **Результат:** бачите точний текст, який піде назовні; копіюєте в AI вручну.
 
 ### UC-7. Підключити Cursor / Claude через MCP
-**Кроки:** Integrations → name/provider → READ_ONLY (за замовчуванням) → scopes/projects → Connect → скопіювати token + MCP JSON → вставити в MCP config клієнта (`IPCL_INTEGRATION_TOKEN` / приклад у README).  
-**Результат:** AI-інструмент читає лише дозволений контекст.
+**Кроки:** Integrations → Connect → Copy config JSON → вставити в **Cursor Desktop → Settings → MCP** (не mobile Plugins marketplace).  
+**Важливо (Fly/прод):** wizard може дати `"cwd": "/app"` — це шлях контейнера, **не** ваш Mac/PC. Для локального MCP потрібен clone репо і свій абсолютний `cwd` / `IPCL_DATA_DIR`. Поки це не виправлено: **UC-6 Preview → Copy** у чат Cursor.  
+**Результат:** AI-інструмент читає лише дозволений контекст (локальний SQLite).
 
 ### UC-8. AI запропонував новий memory (WRITE)
 **Передумова:** integration у режимі READ_WRITE.  

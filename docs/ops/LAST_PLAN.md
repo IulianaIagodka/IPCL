@@ -1,12 +1,12 @@
-# Last plan — 2026-09-25 ~15:41 Kyiv
+# Last plan — 2026-09-25 ~15:50 Kyiv
 
 ## Delta
-- Privacy owner `bc-01a0d881-…1547` → **IDLE** (PR [#13](https://github.com/IulianaIagodka/IPCL/pull/13) лишається DRAFT @ `d8ca290`)
-- INT-1 owner `bc-01a0d840-…4e11` → **ARCHIVED**
-- Goal **PAUSED**
+- Human: MCP JSON з Fly (`cwd: /app` + token у чаті) → зафіксовано **P2** у BACKLOG
+- Workaround: Preview→Copy; MCP лише з локальним clone + Rotate token
+- Privacy #13 IDLE; goal **PAUSED**
 
 ## Фокус
-Чекаю human: rebase+`merge #13` / `merge #14` / `resume`
+Не стартувати MCP theme owner без явного OK. Чекаю `merge` / `resume` / assign P2.
 
 ## Do-not-start
-Другий privacy/copyright агент
+Другий privacy agent; MCP/Fly fix без OWNERS + human OK
