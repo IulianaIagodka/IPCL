@@ -5,7 +5,9 @@
       "args": ["tsx", "mcp/server.ts"],
       "cwd": "${workspaceFolder}",
       "env": {
-        "IPCL_DATA_DIR": "${workspaceFolder}/data"
+        "IPCL_DATA_DIR": "${workspaceFolder}/data",
+        "IPCL_INTEGRATION_TOKEN": "paste-token-from-control-plane-integrations",
+        "IPCL_MASTER_KEY": "optional-64-hex-chars-for-stable-key"
       }
     }
   }

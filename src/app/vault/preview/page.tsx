@@ -3,13 +3,10 @@
 import { FormEvent, useEffect, useState } from "react";
 import { api } from "@/lib/client";
 import type { PreviewPayload, Project } from "@/lib/types";
-import { ContextFlow } from "@/components/ContextFlow";
-import { MemoryCard } from "@/components/MemoryCard";
-import { StateBadge } from "@/components/StateBadge";
 
 export default function PreviewPage() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [destination, setDestination] = useState("Claude");
+  const [destination, setDestination] = useState("Claude / Cursor paste");
   const [query, setQuery] = useState("");
   const [projectId, setProjectId] = useState("");
   const [includeProfile, setIncludeProfile] = useState(true);
@@ -19,6 +16,7 @@ export default function PreviewPage() {
   const [preview, setPreview] = useState<PreviewPayload | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [acknowledgeSensitive, setAcknowledgeSensitive] = useState(false);
 
   useEffect(() => {
     void api<Project[]>("/api/projects").then(setProjects);
@@ -39,6 +37,7 @@ export default function PreviewPage() {
           includePreferences,
           includeDecisions,
           includeSearchHits,
+          acknowledgeSensitive,
         }),
       });
       setPreview(payload);
@@ -48,19 +47,16 @@ export default function PreviewPage() {
   }
 
   async function copyExport() {
-    if (!preview) return;
+    if (!preview || preview.requiresSensitiveAck) return;
     await navigator.clipboard.writeText(preview.exportText);
     setCopied(true);
   }
 
-  const projectName =
-    projects.find((p) => p.id === projectId)?.name || "Global";
-
   return (
     <div className="shell section stack">
       <div>
-        <p className="eyebrow">Share preview</p>
-        <h2 className="page-title">See exactly what will be shared</h2>
+        <p className="pill">Privacy</p>
+        <h2>See exactly what will be shared</h2>
         <p className="muted">
           What AI is asking for → what context will be sent → where it is going.
         </p>
@@ -125,42 +121,69 @@ export default function PreviewPage() {
         <button className="btn btn-primary" type="submit">
           Build preview
         </button>
-        {error && <p style={{ color: "var(--danger)", margin: 0 }}>{error}</p>}
+        {error && <p style={{ color: "#8a2f2f", margin: 0 }}>{error}</p>}
       </form>
 
       {preview && (
         <div className="grid-2 fade-up">
           <div className="panel stack">
-            <p className="eyebrow">Transfer</p>
-            <ContextFlow
-              from={projectName}
-              to={preview.destination}
-              label={`${preview.fragments.length} memories · ~${preview.estimatedTokens} tokens`}
-            />
-            <div className="list-row" style={{ padding: "0.55rem 0" }}>
-              <span>Status</span>
-              <StateBadge state="shared" label="PREVIEW ONLY" />
-            </div>
-            <div className="stack" style={{ gap: "0.65rem" }}>
-              {preview.fragments.map((fragment, index) => (
-                <MemoryCard
-                  key={`${fragment.source}-${index}`}
-                  memory={{
-                    id: `${index}`,
-                    kind: String(fragment.kind),
-                    title: fragment.title,
-                    content: fragment.content,
-                    projectName,
-                    sourceLabel: fragment.source,
-                    updatedAt: new Date().toISOString(),
-                  }}
+            <h3 className="font-display" style={{ margin: 0, fontSize: "1.35rem" }}>
+              Share plan
+            </h3>
+            <p className="muted" style={{ margin: 0 }}>
+              Destination: <strong>{preview.destination}</strong>
+            </p>
+            <p className="muted" style={{ margin: 0 }}>
+              Estimated tokens: <strong>{preview.estimatedTokens}</strong>
+            </p>
+            <p className="muted" style={{ margin: 0 }}>
+              Fragments: <strong>{preview.fragments.length}</strong>
+            </p>
+            {preview.includesSensitive && (
+              <div className="stack" style={{ gap: "0.5rem" }}>
+                <p style={{ color: "#8a2f2f", margin: 0 }}>
+                  This share includes SENSITIVE context leaving the vault.
+                </p>
+                <Toggle
+                  label="I acknowledge sensitive context will be sent to an external AI"
+                  checked={acknowledgeSensitive}
+                  onChange={setAcknowledgeSensitive}
                 />
+                {preview.requiresSensitiveAck && (
+                  <button
+                    className="btn btn-ghost"
+                    type="button"
+                    onClick={() => void onPreview({ preventDefault() {} } as FormEvent)}
+                  >
+                    Rebuild export with acknowledgment
+                  </button>
+                )}
+              </div>
+            )}
+            <div>
+              {preview.fragments.map((fragment, index) => (
+                <div key={`${fragment.source}-${index}`} className="list-row">
+                  <div>
+                    <strong>
+                      {fragment.title}{" "}
+                      <span className="pill">{fragment.kind}</span>
+                      {fragment.classification !== "NORMAL" && (
+                        <span className="pill">{fragment.classification}</span>
+                      )}
+                    </strong>
+                    <p className="muted" style={{ margin: "0.35rem 0 0", whiteSpace: "pre-wrap" }}>
+                      {fragment.content}
+                    </p>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
 
           <div className="panel stack">
-            <p className="eyebrow">Copy / export fallback</p>
+            <h3 className="font-display" style={{ margin: 0, fontSize: "1.35rem" }}>
+              Copy / export fallback
+            </h3>
             <textarea
               className="field"
               rows={18}
@@ -172,6 +195,7 @@ export default function PreviewPage() {
                 className="btn btn-primary"
                 type="button"
                 onClick={() => void copyExport()}
+                disabled={Boolean(preview.requiresSensitiveAck)}
               >
                 {copied ? "Copied" : "Copy for AI"}
               </button>

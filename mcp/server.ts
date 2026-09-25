@@ -1,87 +1,142 @@
 #!/usr/bin/env node
 /**
- * IPCL Context Vault MCP server
+ * IPCL Context Vault MCP server (ADR-001 + ADR-003 + ADR-004)
  *
- * Tools (ADR-001):
- *   get_profile, get_project, search_context, get_decisions,
- *   get_preferences, save_context, save_decision
+ * Integration layer over the Context Service — not a separate source of truth.
+ * Requires IPCL_INTEGRATION_TOKEN for a connected, non-revoked integration.
+ * Default integrations are READ_ONLY; write tools create candidate memories.
  */
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { runWithPrincipal } from "../src/lib/request-context";
+import { logError } from "../src/lib/logger";
 import {
-  createDecision,
+  PolicyDeniedError,
+  resolveIntegrationToken,
   getProfile,
   getProject,
   listDecisions,
   listPreferences,
-  saveContext,
+  principalCanUseTool,
+  proposeCandidateMemory,
   searchContext,
-} from "../src/lib/vault";
+  type Principal,
+} from "../src/service";
 
 const server = new McpServer({
   name: "ipcl-context-vault",
-  version: "0.1.0",
+  version: "0.2.0",
 });
+
+function requireIntegrationPrincipal(): Principal & { kind: "integration" } {
+  const token = process.env.IPCL_INTEGRATION_TOKEN;
+  const principal = resolveIntegrationToken(token);
+  if (!principal || principal.kind !== "integration") {
+    throw new PolicyDeniedError(
+      "MCP authentication failed. Set IPCL_INTEGRATION_TOKEN from Control Plane → Integrations."
+    );
+  }
+  return principal;
+}
+
+function withIntegration<T>(fn: (principal: Principal & { kind: "integration" }) => T): T {
+  const principal = requireIntegrationPrincipal();
+  return runWithPrincipal(principal, () => fn(principal));
+}
+
+function toolResult(data: unknown, isError = false) {
+  return {
+    content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }],
+    isError,
+  };
+}
 
 server.tool(
   "get_profile",
   "Return the user's long-lived profile from the Context Vault.",
   {},
   async () => {
-    const profile = getProfile();
-    return {
-      content: [{ type: "text", text: JSON.stringify(profile, null, 2) }],
-    };
+    try {
+      return withIntegration((principal) => {
+        principalCanUseTool(principal, "get_profile");
+        return toolResult(getProfile());
+      });
+    } catch (error) {
+      return toolResult(
+        { error: error instanceof Error ? error.message : "Denied" },
+        true
+      );
+    }
   }
 );
 
 server.tool(
   "get_project",
-  "Return a project context by project_id.",
+  "Return a project context by project_id when the integration is allowed.",
   { project_id: z.string() },
   async ({ project_id }) => {
-    const project = getProject(project_id);
-    if (!project) {
-      return {
-        content: [{ type: "text", text: `Project not found: ${project_id}` }],
-        isError: true,
-      };
+    try {
+      return withIntegration((principal) => {
+        principalCanUseTool(principal, "get_project", project_id);
+        const project = getProject(project_id);
+        if (!project) {
+          return toolResult({ error: `Project not found: ${project_id}` }, true);
+        }
+        return toolResult(project);
+      });
+    } catch (error) {
+      return toolResult(
+        { error: error instanceof Error ? error.message : "Denied" },
+        true
+      );
     }
-    return {
-      content: [{ type: "text", text: JSON.stringify(project, null, 2) }],
-    };
   }
 );
 
 server.tool(
   "search_context",
-  "Retrieve only relevant context fragments for a query.",
+  "Retrieve only authorized, relevant, non-restricted context fragments.",
   {
     query: z.string(),
     project_id: z.string().optional(),
     limit: z.number().int().min(1).max(25).optional(),
   },
   async ({ query, project_id, limit }) => {
-    const hits = searchContext(query, {
-      projectId: project_id,
-      limit: limit ?? 8,
-    });
-    return {
-      content: [{ type: "text", text: JSON.stringify(hits, null, 2) }],
-    };
+    try {
+      return withIntegration((principal) => {
+        principalCanUseTool(principal, "search_context", project_id);
+        const hits = searchContext(query, {
+          projectId: project_id,
+          limit: limit ?? 8,
+        });
+        return toolResult(hits);
+      });
+    } catch (error) {
+      return toolResult(
+        { error: error instanceof Error ? error.message : "Denied" },
+        true
+      );
+    }
   }
 );
 
 server.tool(
   "get_decisions",
-  "List durable decisions, optionally filtered by project_id.",
+  "List durable decisions visible to this integration.",
   { project_id: z.string().optional() },
   async ({ project_id }) => {
-    const decisions = listDecisions(project_id);
-    return {
-      content: [{ type: "text", text: JSON.stringify(decisions, null, 2) }],
-    };
+    try {
+      return withIntegration((principal) => {
+        principalCanUseTool(principal, "get_decisions", project_id);
+        return toolResult(listDecisions(project_id));
+      });
+    } catch (error) {
+      return toolResult(
+        { error: error instanceof Error ? error.message : "Denied" },
+        true
+      );
+    }
   }
 );
 
@@ -90,60 +145,110 @@ server.tool(
   "List reusable behavioral preferences / instructions.",
   {},
   async () => {
-    const preferences = listPreferences();
-    return {
-      content: [{ type: "text", text: JSON.stringify(preferences, null, 2) }],
-    };
+    try {
+      return withIntegration((principal) => {
+        principalCanUseTool(principal, "get_preferences");
+        return toolResult(listPreferences());
+      });
+    } catch (error) {
+      return toolResult(
+        { error: error instanceof Error ? error.message : "Denied" },
+        true
+      );
+    }
   }
 );
 
 server.tool(
   "save_context",
-  "Save a reusable context fragment into the vault.",
+  "Propose a reusable context fragment (candidate memory pending user approval).",
   {
     content: z.string(),
     title: z.string().optional(),
     project_id: z.string().optional(),
     tags: z.array(z.string()).optional(),
   },
-  async ({ content, title, project_id, tags }) => {
-    const item = saveContext(content, {
-      title,
-      projectId: project_id,
-      tags,
-    });
-    return {
-      content: [{ type: "text", text: JSON.stringify(item, null, 2) }],
-    };
+  async ({ content, title, project_id }) => {
+    try {
+      return withIntegration((principal) => {
+        principalCanUseTool(principal, "save_context", project_id);
+        const candidate = proposeCandidateMemory({
+          kind: "knowledge",
+          content,
+          title,
+          projectId: project_id,
+        });
+        return toolResult({
+          status: "pending_approval",
+          message:
+            "Saved as candidate memory. It becomes canonical only after user approval.",
+          candidate,
+        });
+      });
+    } catch (error) {
+      return toolResult(
+        { error: error instanceof Error ? error.message : "Denied" },
+        true
+      );
+    }
   }
 );
 
 server.tool(
   "save_decision",
-  "Save a decision that AI clients should not reopen.",
+  "Propose a decision as candidate memory (requires write access + user approval).",
   {
     project_id: z.string().optional(),
     decision: z.string(),
     rationale: z.string().optional(),
   },
   async ({ project_id, decision, rationale }) => {
-    const saved = createDecision({
-      projectId: project_id,
-      content: decision,
-      rationale,
-    });
-    return {
-      content: [{ type: "text", text: JSON.stringify(saved, null, 2) }],
-    };
+    try {
+      return withIntegration((principal) => {
+        principalCanUseTool(principal, "save_decision", project_id);
+        const candidate = proposeCandidateMemory({
+          kind: "decision",
+          content: decision,
+          projectId: project_id,
+          rationale,
+        });
+        return toolResult({
+          status: "pending_approval",
+          message:
+            "Decision saved as candidate. Approve it in Vault → Security.",
+          candidate,
+        });
+      });
+    } catch (error) {
+      return toolResult(
+        { error: error instanceof Error ? error.message : "Denied" },
+        true
+      );
+    }
   }
 );
 
 async function main() {
+  try {
+    requireIntegrationPrincipal();
+  } catch (error) {
+    logError("mcp_auth_missing", {
+      category: error instanceof Error ? error.name : "Error",
+    });
+    console.error(
+      error instanceof Error ? error.message : "MCP authentication failed"
+    );
+    process.exit(1);
+  }
+
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
 
 main().catch((error) => {
-  console.error("IPCL MCP server failed:", error);
+  console.error(
+    "IPCL MCP server failed:",
+    error instanceof Error ? error.message : error
+  );
   process.exit(1);
 });

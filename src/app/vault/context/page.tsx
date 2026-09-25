@@ -1,177 +1,142 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import Link from "next/link";
+import { FormEvent, useEffect, useState } from "react";
 import { api, useAsyncResource } from "@/lib/client";
-import { MemoryCard } from "@/components/MemoryCard";
-import type { Project } from "@/lib/types";
-
-type MemoriesPayload = {
-  memories: Array<{
-    id: string;
-    kind: string;
-    title: string;
-    content: string;
-    projectName: string | null;
-    sourceLabel: string | null;
-    updatedAt: string;
-    projectId: string | null;
-    tags: string[];
-  }>;
-  projects: Project[];
-};
-
-type SearchHit = {
-  item: {
-    id: string;
-    kind: string;
-    title: string;
-    content: string;
-    projectId: string | null;
-    updatedAt: string;
-    tags: string[];
-  };
-  score: number;
-};
+import type { ContextItem, Project, SearchHit } from "@/lib/types";
 
 export default function ContextPage() {
-  const { data, error, loading } = useAsyncResource(
-    () => api<MemoriesPayload>("/api/memories"),
+  const memories = useAsyncResource(
+    () => api<ContextItem[]>("/api/context"),
     []
   );
-  const [scope, setScope] = useState<string>("all");
   const [query, setQuery] = useState("");
-  const [hits, setHits] = useState<SearchHit[] | null>(null);
-  const [searchError, setSearchError] = useState<string | null>(null);
+  const [projectId, setProjectId] = useState("");
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [hits, setHits] = useState<SearchHit[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [searched, setSearched] = useState(false);
 
-  const scopes = useMemo(() => {
-    const names = (data?.projects || []).map((p) => ({
-      key: p.id,
-      label: p.name,
-    }));
-    return [
-      { key: "all", label: "All" },
-      { key: "me", label: "Me" },
-      ...names,
-    ];
-  }, [data]);
-
-  const filtered = useMemo(() => {
-    const memories = data?.memories || [];
-    if (scope === "all") return memories;
-    if (scope === "me") {
-      return memories.filter(
-        (m) => !m.projectId || m.kind === "profile" || m.kind === "preference"
-      );
-    }
-    return memories.filter((m) => m.projectId === scope);
-  }, [data, scope]);
+  useEffect(() => {
+    void api<Project[]>("/api/projects").then(setProjects).catch(() => undefined);
+  }, []);
 
   async function onSearch(event: FormEvent) {
     event.preventDefault();
-    setSearchError(null);
+    setError(null);
+    setSearched(true);
     try {
       const params = new URLSearchParams({ q: query });
-      if (scope !== "all" && scope !== "me") params.set("projectId", scope);
-      const results = await api<SearchHit[]>(`/api/search?${params}`);
-      setHits(results);
+      if (projectId) params.set("projectId", projectId);
+      setHits(await api<SearchHit[]>(`/api/search?${params}`));
     } catch (err) {
-      setSearchError(err instanceof Error ? err.message : "Search failed");
+      setError(err instanceof Error ? err.message : "Search failed");
     }
   }
 
   return (
     <div className="shell section stack">
-      <div>
-        <p className="eyebrow">Context</p>
-        <h2 className="page-title">What your AI knows</h2>
-        <p className="muted">
-          Search and inspect memories by scope — not folders.
+      <div className="fade-up">
+        <p className="pill">Context</p>
+        <h2>What your AI can know</h2>
+        <p className="muted" style={{ maxWidth: "40rem", lineHeight: 1.55 }}>
+          Inspect stored memory and retrieve only the fragments that match a
+          query. Editing happens here; chat happens in your AI tools.
         </p>
+        <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
+          <Link className="btn btn-ghost" href="/vault/import">
+            Import source
+          </Link>
+          <Link className="btn btn-ghost" href="/vault/profile">
+            Edit profile
+          </Link>
+          <Link className="btn btn-ghost" href="/vault/search">
+            Classic search
+          </Link>
+        </div>
       </div>
 
-      <form className="panel stack" onSubmit={onSearch}>
+      <form className="panel stack fade-up-delay" onSubmit={onSearch}>
+        <h3 className="font-display" style={{ margin: 0, fontSize: "1.35rem" }}>
+          Retrieve relevant fragments
+        </h3>
         <label>
-          <span className="field-label">Search your context</span>
+          <span className="field-label">Query</span>
           <input
             className="field"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="pricing subscriptions architecture…"
+            placeholder="subscription billing decisions"
+            required
           />
         </label>
-        <div className="scope-tabs" role="tablist" aria-label="Context scopes">
-          {scopes.map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              className={`scope-tab${scope === item.key ? " is-active" : ""}`}
-              onClick={() => {
-                setScope(item.key);
-                setHits(null);
-              }}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-        <button className="btn btn-primary" type="submit" disabled={!query.trim()}>
-          Search
+        <label>
+          <span className="field-label">Limit to project</span>
+          <select
+            className="field"
+            value={projectId}
+            onChange={(e) => setProjectId(e.target.value)}
+          >
+            <option value="">All projects</option>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        {error && <p style={{ color: "#8a2f2f" }}>{error}</p>}
+        <button className="btn btn-primary" type="submit">
+          Search context
         </button>
-        {searchError && (
-          <p style={{ color: "var(--danger)", margin: 0 }}>{searchError}</p>
-        )}
       </form>
 
-      {hits && (
+      {searched && (
         <div className="panel stack">
-          <p className="eyebrow">Search results</p>
-          {hits.length === 0 && <p className="muted">No matching memories.</p>}
-          <div className="stack" style={{ gap: "0.65rem" }}>
-            {hits.map((hit) => (
-              <MemoryCard
-                key={hit.item.id}
-                memory={{
-                  ...hit.item,
-                  projectName:
-                    data?.projects.find((p) => p.id === hit.item.projectId)
-                      ?.name ?? null,
-                  sourceLabel: `${Math.round(hit.score * 100)}% match`,
-                }}
-              />
-            ))}
-          </div>
+          <h3 className="font-display" style={{ margin: 0, fontSize: "1.25rem" }}>
+            Retrieval results
+          </h3>
+          {hits.length === 0 && <p className="muted">No matching fragments.</p>}
+          {hits.map((hit) => (
+            <div key={hit.item.id} className="list-row" style={{ alignItems: "flex-start" }}>
+              <div>
+                <strong>
+                  {hit.item.kind}
+                  {hit.item.title ? ` · ${hit.item.title}` : ""}
+                </strong>
+                <div className="muted" style={{ whiteSpace: "pre-wrap" }}>
+                  {hit.item.content}
+                </div>
+              </div>
+              <span className="muted">{hit.score.toFixed(2)}</span>
+            </div>
+          ))}
         </div>
       )}
 
-      <div className="stack">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: "1rem",
-            alignItems: "baseline",
-          }}
-        >
-          <p className="eyebrow" style={{ margin: 0 }}>
-            Memories in scope
-          </p>
-          <span className="meta-quiet">{filtered.length} items</span>
-        </div>
-        {loading && <p className="muted">Loading memories…</p>}
-        {error && <p style={{ color: "var(--danger)" }}>{error}</p>}
-        {!loading && filtered.length === 0 && (
-          <div className="panel">
-            <p className="muted" style={{ margin: 0 }}>
-              This scope is empty. Import notes or create a decision in a
-              project.
-            </p>
-          </div>
+      <div className="panel stack">
+        <h3 className="font-display" style={{ margin: 0, fontSize: "1.25rem" }}>
+          Recent memory
+        </h3>
+        {memories.loading && <p className="muted">Loading…</p>}
+        {memories.data?.length === 0 && (
+          <p className="muted">No context items yet. Import a source or add notes.</p>
         )}
-        <div className="stack" style={{ gap: "0.65rem" }}>
-          {filtered.map((memory) => (
-            <MemoryCard key={memory.id} memory={memory} />
-          ))}
-        </div>
+        {memories.data?.slice(0, 25).map((item) => (
+          <div key={item.id} className="list-row" style={{ alignItems: "flex-start" }}>
+            <div>
+              <strong>
+                {item.kind}
+                {item.title ? ` · ${item.title}` : ""}
+              </strong>
+              <div className="muted" style={{ whiteSpace: "pre-wrap" }}>
+                {item.content.slice(0, 280)}
+                {item.content.length > 280 ? "…" : ""}
+              </div>
+            </div>
+            <span className="muted">{item.classification}</span>
+          </div>
+        ))}
       </div>
     </div>
   );

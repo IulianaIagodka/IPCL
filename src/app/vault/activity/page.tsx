@@ -1,97 +1,48 @@
 "use client";
 
 import { api, useAsyncResource } from "@/lib/client";
-import { StateBadge } from "@/components/StateBadge";
-
-type ActivityPayload = {
-  events: Array<{
-    id: string;
-    kind: string;
-    summary: string;
-    detail: string;
-    createdAt: string;
-  }>;
-};
-
-function formatTime(iso: string) {
-  try {
-    return new Intl.DateTimeFormat(undefined, {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }).format(new Date(iso));
-  } catch {
-    return iso;
-  }
-}
-
-function kindState(kind: string) {
-  if (kind === "share" || kind === "access" || kind === "connect") {
-    return "shared" as const;
-  }
-  if (kind === "restrict" || kind === "disconnect") {
-    return "restricted" as const;
-  }
-  return "active" as const;
-}
+import type { AuditEvent } from "@/lib/types";
 
 export default function ActivityPage() {
-  const { data, error, loading, reload } = useAsyncResource(
-    () => api<ActivityPayload>("/api/activity"),
+  const audit = useAsyncResource(
+    () => api<AuditEvent[]>("/api/audit?limit=50"),
     []
   );
 
   return (
     <div className="shell section stack">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          gap: "1rem",
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-        }}
-      >
-        <div>
-          <p className="eyebrow">Activity</p>
-          <h2 className="page-title">Context access log</h2>
-          <p className="muted" style={{ maxWidth: "38rem", lineHeight: 1.55 }}>
-            When an AI requests or receives context, it shows up here — not
-            behind abstract status messages.
-          </p>
-        </div>
-        <button className="btn btn-ghost" onClick={() => void reload()}>
+      <div className="fade-up">
+        <p className="pill">Activity</p>
+        <h2>What was accessed or shared</h2>
+        <p className="muted" style={{ maxWidth: "40rem", lineHeight: 1.55 }}>
+          Audit visibility for the control plane. Every search, preview, export,
+          and MCP retrieval that crosses the Context Service is recorded here.
+        </p>
+        <button className="btn btn-ghost" onClick={() => void audit.reload()}>
           Refresh
         </button>
       </div>
 
-      <div className="panel">
-        {loading && <p className="muted">Loading activity…</p>}
-        {error && <p style={{ color: "var(--danger)" }}>{error}</p>}
-        {!loading && data?.events.length === 0 && (
-          <p className="muted" style={{ margin: 0 }}>
-            No activity yet. Connect an integration or build a share preview.
-          </p>
+      <div className="panel stack fade-up-delay">
+        {audit.loading && <p className="muted">Loading activity…</p>}
+        {audit.error && <p style={{ color: "#8a2f2f" }}>{audit.error}</p>}
+        {audit.data?.length === 0 && (
+          <p className="muted">No activity yet. Connect an AI or run a search.</p>
         )}
-        {data?.events.map((event) => (
-          <article key={event.id} className="activity-item">
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: "1rem",
-                flexWrap: "wrap",
-              }}
-            >
-              <strong>{event.summary}</strong>
-              <StateBadge state={kindState(event.kind)} label={event.kind} />
+        {audit.data?.map((event) => (
+          <div key={event.id} className="list-row" style={{ alignItems: "flex-start" }}>
+            <div>
+              <strong>{event.action}</strong>
+              <div className="muted" style={{ fontSize: "0.85rem" }}>
+                {event.createdAt}
+                {event.scope ? ` · ${event.scope}` : ""}
+                {event.destination ? ` · → ${event.destination}` : ""}
+                {event.includedSensitive ? " · sensitive" : ""}
+                {event.memoryCount ? ` · ${event.memoryCount} memories` : ""}
+              </div>
             </div>
-            {event.detail && (
-              <p className="muted" style={{ margin: 0, lineHeight: 1.45 }}>
-                {event.detail}
-              </p>
-            )}
-            <span className="meta-quiet">{formatTime(event.createdAt)}</span>
-          </article>
+            <span className="muted">{event.actorType}</span>
+          </div>
         ))}
       </div>
     </div>

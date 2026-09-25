@@ -1,17 +1,26 @@
-import {
-  createProject,
-  listProjects,
-} from "@/lib/vault";
-import { jsonError, jsonOk, readJson } from "@/lib/http";
+import { createProject, listProjects } from "@/lib/vault";
+import { readJson, withAuth } from "@/lib/http";
+import { assertScope } from "@/lib/policy";
 
 export const runtime = "nodejs";
 
-export async function GET() {
-  return jsonOk(listProjects());
+export async function GET(request: Request) {
+  return withAuth(
+    request,
+    async (principal) => {
+      assertScope(principal, "projects:read");
+      return listProjects().filter((p) => {
+        if (principal.kind === "user") return true;
+        if (principal.allowedProjectIds === null) return true;
+        return principal.allowedProjectIds.includes(p.id);
+      });
+    },
+    { allowIntegration: true }
+  );
 }
 
 export async function POST(request: Request) {
-  try {
+  return withAuth(request, async () => {
     const body = await readJson<{
       name: string;
       description?: string;
@@ -20,9 +29,7 @@ export async function POST(request: Request) {
       architecture?: string;
       constraints?: string;
     }>(request);
-    if (!body.name?.trim()) return jsonError("name is required");
-    return jsonOk(createProject(body), { status: 201 });
-  } catch (error) {
-    return jsonError(error instanceof Error ? error.message : "Invalid request");
-  }
+    if (!body.name?.trim()) throw new Error("name is required");
+    return createProject(body);
+  });
 }
