@@ -2,6 +2,8 @@
 
 Оновлено: 2026-09-25 ~11:00 UTC
 
+Повний канон правил: **[RULES.md](./RULES.md)**.
+
 ## Потрібно від людини (P0)
 1. **Review + merge [#11](https://github.com/IulianaIagodka/IPCL/pull/11)** — ADR-004 control plane на main (після #6). Tests 17/17.
 2. Після merge: **close #7 і #9** (obsolete).

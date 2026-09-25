@@ -3,7 +3,8 @@
 Оновлено: 2026-09-25 ~11:00 UTC
 
 ## Режим: ОРКЕСТРАТОР
-Goal ACTIVE для daily plan + backlog. Product-код з цього агента — **стоп**, крім `docs/ops/`.
+Goal ACTIVE для daily plan + backlog. Product-код з цього агента — **стоп**, крім `docs/ops/`.  
+Канон правил: **[RULES.md](./RULES.md)**.
 
 ## Wake → дія
 | Подія | Дія |
