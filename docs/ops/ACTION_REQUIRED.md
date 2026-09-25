@@ -1,18 +1,22 @@
 # ACTION REQUIRED (orchestrator board)
 
-Оновлено: 2026-09-25 ~11:00 UTC
+Оновлено: 2026-09-25 ~11:05 UTC
 
 Повний канон правил: **[RULES.md](./RULES.md)**.
 
-## Потрібно від людини (P0)
-1. **Review + merge [#11](https://github.com/IulianaIagodka/IPCL/pull/11)** — ADR-004 control plane на main (після #6). Tests 17/17.
-2. Після merge: **close #7 і #9** (obsolete).
+## DONE
+- **#11 MERGED** into `main` @ `bbd3eba` (human OK «Мердж 11»; tests 17/17 before push)
+- ADR-003 (#6) + ADR-004 (#11) both on main
 
-## Призначити пізніше (не стартувати зараз)
-- **INT-1** — wire `packages/context-store` → vault/Context Service · owner: TBD після #11
-- Pause/archive IDLE product-агентів на закритих темах (003, brand, 005, MVP)
+## Потрібно від людини (P0)
+1. **`close #7 #9`** — obsolete ADR-004 / port PRs (оркестратор не закриває без команди)
+2. Pause/archive IDLE agents на 003/004/brand/MVP
+
+## Далі (P1)
+- Призначити **одного** owner на **INT-1** (BACKLOG + OWNERS перед стартом)
+- Не стартувати brand/UI паралельно з INT-1
 
 ## Оркестратор зараз
-- Anti-dup clear для нової product-роботи: **немає** (чекаємо merge #11)
-- RUNNING product agents: **немає** (лише цей ops)
-- Наступний публічний сигнал: daily 08:00 або подія по #11
+- Anti-dup: RUNNING product agents — немає
+- Gate відкритий для INT-1 assignment
+- Наступний публічний сигнал: daily 08:00 або `close #7 #9` / assign INT-1

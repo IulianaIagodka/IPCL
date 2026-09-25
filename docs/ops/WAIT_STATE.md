@@ -1,22 +1,20 @@
 # WAIT STATE — orchestrator gates
 
-Оновлено: 2026-09-25 ~11:00 UTC
+Оновлено: 2026-09-25 ~11:05 UTC
 
 ## Режим: ОРКЕСТРАТОР
-Goal ACTIVE для daily plan + backlog. Product-код з цього агента — **стоп**, крім `docs/ops/`.  
-Канон правил: **[RULES.md](./RULES.md)**.
+Канон: **[RULES.md](./RULES.md)**. Product-код — стоп (крім docs/ops).
 
 ## Wake → дія
 | Подія | Дія |
 |-------|-----|
-| 08:00 timer | План користувачу; sync docs лише при delta |
-| PR merge/close/sync (чужий) | Оновити BACKLOG/OWNERS; коротко якщо пріоритет змінився |
-| Власний sync #8/#11 | Ігнор |
+| 08:00 timer | План; sync docs лише при delta |
+| PR delta | BACKLOG/OWNERS |
 | Goal continue, tips ті самі | Тиша, 0 commits |
-| User `merge #11` | Тоді можна координувати merge path (не імплементувати нове) |
-| User нова задача | P0–P3 → BACKLOG → призначити/знайти owner |
+| User `close #7 #9` | Закрити obsolete (коли буде tool/OK) |
+| User assign INT-1 / нова задача | P0–P3 → BACKLOG → OWNERS → owner |
 
-## Зовнішні gates
-- **P0:** human merge [#11](https://github.com/IulianaIagodka/IPCL/pull/11)
-- Після #11: close #7/#9 → призначити owner на INT-1
-- Не стартувати INT-1 / brand / ADR-003 заново
+## Gates
+- ~~Merge #11~~ **DONE** (`bbd3eba`)
+- P0: human `close #7 #9`
+- P1: assign one INT-1 owner (не стартувати без OWNERS)

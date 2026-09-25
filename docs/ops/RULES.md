@@ -26,9 +26,9 @@
 1. ADR-002 / store stable на `main`
 2. MVP vault stable на `main`
 3. **ADR-003** → merge
-4. **ADR-004** → merge (зараз: PR #11)
-5. **INT-1** (wire `packages/context-store`) — лише після #11
-6. ADR-005 / brand / polish — лише якщо **не** перетинає open P0 paths, інакше **після** gate
+4. **ADR-004** → merge (**DONE** #11 → `bbd3eba`)
+5. **INT-1** (wire `packages/context-store`) — **ready to assign** (після close #7/#9 бажано)
+6. ADR-005 / brand / polish — лише якщо **не** перетинає open P0 paths, інакше **після** INT-1
 
 **Заборонено:** стартувати ADR-N+1 у код, поки залежний ADR-N не в `main`.
 
