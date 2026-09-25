@@ -23,10 +23,10 @@ Native memory systems are vendor-specific and generally cannot be reliably read,
 
 The product goal is:
 
-> Stop explaining yourself.  
-> Your context follows you across AI.
+> **Eidothea**  
+> Stop explaining yourself.
 
-Short form: **One memory. Every AI.**
+Supporting lines: *One memory. Every AI.* / Your context follows you across AI.
 
 The product should let users maintain their context once and make the relevant parts available to whichever AI they are using.
 
@@ -37,7 +37,7 @@ We will build an independent context layer rather than attempting to synchronize
 The system will maintain its own canonical user context.
 
 ```
-                 Context Vault
+                 Eidothea
               ┌───────────────┐
               │ User profile  │
               │ Preferences   │
@@ -181,7 +181,7 @@ The product owns the context, not the conversation.
 
 AI providers remain responsible for generating responses.
 
-This product acts as the portable knowledge layer between the user and their AI tools.
+This product (**Eidothea**) acts as the portable knowledge layer between the user and their AI tools.
 
 ## Consequences
 

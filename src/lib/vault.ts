@@ -1186,7 +1186,7 @@ export function buildExportText(options?: {
       `### ${f.title} (${f.kind}${f.classification !== "NORMAL" ? `, ${f.classification}` : ""})\n${f.content}`
   );
   const text = [
-    "# Context Vault export",
+    "# Eidothea export",
     "Only the fragments below are intended for sharing with an AI provider.",
     "Secrets and RESTRICTED memories are never included.",
     "",

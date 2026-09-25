@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * IPCL Context Vault MCP server (ADR-001 + ADR-003 + ADR-004)
+ * Eidothea MCP server (ADR-001 + ADR-003 + ADR-004)
  *
  * Integration layer over the Context Service — not a separate source of truth.
  * Requires IPCL_INTEGRATION_TOKEN for a connected, non-revoked integration.
@@ -25,7 +25,7 @@ import {
 } from "../src/service";
 
 const server = new McpServer({
-  name: "ipcl-context-vault",
+  name: "eidothea",
   version: "0.2.0",
 });
 
@@ -54,7 +54,7 @@ function toolResult(data: unknown, isError = false) {
 
 server.tool(
   "get_profile",
-  "Return the user's long-lived profile from the Context Vault.",
+  "Return the user's long-lived profile from Eidothea.",
   {},
   async () => {
     try {
@@ -247,7 +247,7 @@ async function main() {
 
 main().catch((error) => {
   console.error(
-    "IPCL MCP server failed:",
+    "Eidothea MCP server failed:",
     error instanceof Error ? error.message : error
   );
   process.exit(1);

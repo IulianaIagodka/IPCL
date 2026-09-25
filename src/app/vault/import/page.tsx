@@ -65,7 +65,7 @@ export default function ImportPage() {
         <p className="eyebrow">Import</p>
         <h2 className="page-title">Bring notes and conversations in</h2>
         <p className="muted">
-          Paste text once. IPCL extracts reusable profile updates, preferences,
+          Paste text once. Eidothea extracts reusable profile updates, preferences,
           decisions, and knowledge fragments.
         </p>
       </div>

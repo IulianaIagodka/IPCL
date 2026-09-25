@@ -56,9 +56,9 @@ export default function VaultHomePage() {
   return (
     <div className="shell section stack">
       <div className="fade-up">
-        <p className="pill">Control plane</p>
-        <h2>Manage context. Use AI elsewhere.</h2>
-        <p className="muted" style={{ maxWidth: "40rem", lineHeight: 1.55 }}>
+        <p className="eyebrow">Eidothea</p>
+        <h2 className="page-title">Manage context. Use AI elsewhere.</h2>
+        <p className="lede" style={{ maxWidth: "40rem" }}>
           This web app is the management surface for your portable context
           layer—not a chat product. Configure memory and permissions here;
           experience the value inside Cursor, Claude, ChatGPT, and friends.

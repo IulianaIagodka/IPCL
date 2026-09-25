@@ -29,9 +29,11 @@ import {
 } from "../src/lib/vault";
 import { cosineSimilarity, semanticScore, tokenize } from "../src/lib/search";
 
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ipcl-test-"));
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "eidothea-test-"));
+process.env.EIDOTHEA_DATA_DIR = tempDir;
 process.env.IPCL_DATA_DIR = tempDir;
-process.env.IPCL_MASTER_KEY = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+process.env.IPCL_MASTER_KEY =
+  "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 resetMasterKeyCache();
 resetDbForTests(path.join(tempDir, "test.sqlite"));
 const { user } = ensureTestOwner();
@@ -141,7 +143,7 @@ test("preview shows exactly which fragments would be shared", () => {
   assert.equal(preview.destination, "Claude");
   assert.ok(preview.fragments.length > 0);
   assert.ok(preview.estimatedTokens > 0);
-  assert.ok(preview.exportText.includes("Context Vault export"));
+  assert.ok(preview.exportText.includes("Eidothea export"));
   assert.equal(preview.includesSensitive, false);
 });
 

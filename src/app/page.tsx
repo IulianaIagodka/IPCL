@@ -7,10 +7,9 @@ export default function HomePage() {
       <section className="hero-plane">
         <div className="hero-visual" aria-hidden="true" />
         <div className="shell hero-copy">
-          <p className="fade-up brand-mark">IPCL</p>
-          <h1 className="fade-up-delay">Stop explaining yourself.</h1>
-          <p className="fade-up-delay-2">
-            Your context follows you across AI.
+          <h1 className="fade-up brand-hero">Eidothea</h1>
+          <p className="fade-up-delay hero-slogan">
+            Stop explaining yourself.
           </p>
           <div className="hero-actions fade-up-delay-2">
             <Link href="/vault" className="btn btn-primary">
@@ -37,9 +36,9 @@ export default function HomePage() {
             <p className="eyebrow">Product principle</p>
             <h2>One memory. Every AI.</h2>
             <p className="muted" style={{ maxWidth: "40rem", lineHeight: 1.6 }}>
-              Everything AI knows about you should be visible and under your
-              control. IPCL is the calm control plane for personal context —
-              inspectable memories, scoped access, and explicit share.
+              Your context follows you across AI. Eidothea is the calm control
+              plane for personal context — inspectable memories, scoped access,
+              and explicit share with whichever AI you open next.
             </p>
           </div>
 
